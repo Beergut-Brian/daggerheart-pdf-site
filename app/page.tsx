@@ -10,8 +10,11 @@ export default function Home() {
     if (!viewer.current) return;
 
     const viewerElement = viewer.current;
-    const licenseKey = 'DldYx9TsXF9ee83fwl9p';
-    const pdfUrl = `${window.location.origin}/pdfs/Daggerheart-optimized.pdf`;
+    // PDF.js Express keys are public, domain-locked client keys; the env value wins when set.
+    const licenseKey = process.env.NEXT_PUBLIC_PDFJS_EXPRESS_KEY || 'DldYx9TsXF9ee83fwl9p';
+    // The PDFs live in Cloudflare R2 (too large for git); NEXT_PUBLIC_PDF_BASE is that public bucket address.
+    const pdfBase = (process.env.NEXT_PUBLIC_PDF_BASE || `${window.location.origin}/pdfs`).replace(/\/$/, '');
+    const pdfUrl = `${pdfBase}/Daggerheart-optimized.pdf`;
 
     // Dynamically import WebViewer (required for Next.js client-side rendering)
     import('@pdftron/pdfjs-express-viewer').then((WebViewerModule) => {
