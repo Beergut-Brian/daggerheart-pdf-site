@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // direct port of the approved board's salt engine (untyped by design; its public API is typed)
+    "app/lib/salt-engine.ts",
   ]),
 ]);
 
