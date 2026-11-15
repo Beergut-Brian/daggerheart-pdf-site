@@ -1,0 +1,5 @@
+# Reference shots are third-party screenshots (Refero Content and the sites' own material).
+# Refero's terms allow internal design research and client presentations, not redistribution:
+# keep them out of every git repo and off public pages. Only this file is tracked.
+*
+!.gitignore

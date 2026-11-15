@@ -1,0 +1,30 @@
+# design/config.yml — one per job. Copied by design-init.sh; edit per project.
+project: hsg-daggerheart
+site_url: https://daggerheart.highsodiumgaming.com
+builder: nextjs  # Next.js 16 App Router on Vercel (Kaden, DH5 b)
+css_framework: none  # Tailwind 4 already in the app; boards use plain CSS custom properties
+staging: vercel-preview  # Stage 6 target; never production
+
+# Pipeline version. 2 = reference research (1b) + direction memos (1c, hard gate) before boards.
+# A project without this line is a v1 run and is left alone.
+workflow_version: 3
+reference_count: [15, 25]     # min, max references in references/references.md (Stage 1b)
+memo_count: 3                 # 2 or 3 direction memos (Stage 1c)
+
+# THE SWITCH. "stitch" = I write six explicit prompts (prompts/) and run them
+# through the Stitch MCP. "hermes" = six HTML boards built with Impeccable.
+# v2: both modes build from the approved memo. Change per project to compare (log/summary.md).
+direction_source: hermes      # stitch | hermes
+
+direction_count: 6
+board_scope: hero + one content section   # keep boards small and fast
+preview_port: 4800            # served on the Tailscale address only
+preview_host: 100.76.36.113
+
+brand:
+  keep_logo: false
+  keep_colors: false
+  fonts: open                 # open | locked
+
+project_label: High Sodium Gaming (Daggerheart resources)
+preview_status: design Gate 1
