@@ -1,13 +1,16 @@
 {
  "shown": [
-  "landing-a-monument",
-  "landing-b-split",
-  "picker-a-shelf",
-  "picker-b-covers",
-  "viewer-desktop",
-  "viewer-phone-a-sheet",
-  "viewer-phone-b-filmstrip"
+  "a1-grimoire-cover",
+  "a2-grimoire-crystals",
+  "b1-circle-hero",
+  "b2-circle-gate",
+  "c1-lamp-pool",
+  "c2-lamp-dline"
  ],
- "memos": [],
- "note": "Gate 1: grey layouts. Pick on Docket DH6/DH7."
+ "memos": [
+  "A",
+  "B",
+  "C"
+ ],
+ "note": "Gate 2: pick a board on Docket DH11."
 }

@@ -14,13 +14,13 @@
 - Logo: none exists; the wordmark is the identity (config `keep_logo: false`).
 - Colors: open (`keep_colors: false`). Today's app has only Next's default white/#171717.
 - Fonts: open, but free for web use only (SIL OFL or equivalent). Loaded through `next/font` (self-hosted at build), no paid foundry files.
-- Imagery: the landing hero is drawn entirely in code (inline SVG, CSS gradients/masks, or a canvas). No raster images, no photos, no AI-generated images (Kaden: "no images").
+- Imagery (Kaden 2026-11-14 23:05, replaces the code-only rule): the art carries the page. Illustrated and AI-generated art welcome (scene, characters, a world); no stock photos. An original salt-monster mascot is the brand character. Interactive salt (a live grain simulation) on the landing. Never Daggerheart's art, characters, logo, lettering or card/nav frames.
 - Voice: short and playful is fine; the site is mostly a door.
 
 ## Platform constraints
 - Existing Next.js 16.4.3 App Router app, React 19.3, Tailwind 4, on Vercel. Design hands the builder tokens that map to Tailwind 4 `@theme` variables; no raw colours, sizes or spacing in page code.
 - Three routes only:
-  1. `/` landing: wordmark, code-drawn hero, one RESOURCES button. Nothing else required.
+  1. `/` landing: wordmark, art-led hero (salt monster + interactive salt), one RESOURCES button. Nothing else required.
   2. `/resources`: book picker, data-driven (a config entry + a PDF in R2 adds a book). Must hold 1, 2 and ~6 books.
   3. `/resources/<book>`: our own viewer on Mozilla PDF.js (DH4 a): page-thumbnail preview pane, chapter list from the PDF outline (15 entries in the Core Rulebook), instant search with snippets + page previews, fast first page. Mobile: the pane collapses to a sheet.
 - The PDF is ~97 MB, 397 pages, served from Cloudflare R2. The viewer design must show something useful before the whole file arrives (first page, then thumbnails as they render).
@@ -57,11 +57,12 @@
 
 ## Open questions (v0)
 1. Second book: "Daggerheart: Hope & Fear", expansion, 204 pages, no text layer yet (RobBot, 2026-11-14).
-2. Book covers on the picker: no raster images on the landing is stated; for the picker, do we render the PDF's own first page as the cover (it is Darrington Press art) or draw a code cover per book? Answered: code-drawn cover per book in the site's style.
+2. Book covers on the picker: no raster images on the landing is stated; for the picker, do we render the PDF's own first page as the cover (it is Darrington Press art) or draw a code cover per book? Answered: our own cover per book in the site's style (DH8 a); since 23:05 the covers may be generated art, never Darrington Press art.
 3. Should the viewer keep the landing's dark/gilded skin, or go to a lighter reading skin with the brand only in the top bar? Answered: dark gilded chrome, kept quiet so the page is the brightest thing on screen.
 4. Footer: none. Kaden 2026-11-14 22:40: no "unofficial", fan, trademark or copyright text anywhere; the site is for local use.
 
 ## Never
-- The Daggerheart logo, wordmark lettering, card frames, or art; raster images or AI art on the hero; paid fonts.
+- The Daggerheart logo, wordmark lettering, card frames, or art; stock photos; paid fonts.
+- The round-1 family (design/exclude.md): abstract code-drawn ornament with no character or scene.
 - Generic hero-with-blob, purple-to-pink gradients, centered three-column icon rows, nested cards, bounce easing.
 - Motion without a reduced-motion end state; motion that delays reaching RESOURCES or the page.

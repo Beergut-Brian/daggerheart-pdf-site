@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>salt-engine test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #1b1438; --ink: #fff3d6; --gold: #ffc94a; --s: 16px; --wm: clamp(64px, 17vw, 220px); }
+html,body { margin:0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+.hero { position: relative; min-height: 100svh; display: grid; place-items: center; text-align: center; overflow: hidden; touch-action: pan-y; }
+.stack { display: grid; gap: calc(var(--s) * 1.5); justify-items: center; padding: calc(var(--s) * 9) var(--s) calc(var(--s) * 3); }
+.shaker { position: absolute; top: 24px; left: 50%; width: 120px; height: 120px; transform: translateX(-50%); border: 2px dashed #8a7fc0; border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: #b9b0e6; }
+h1 { margin: 0; font-family: 'Bungee', system-ui; font-weight: 400; font-size: var(--wm); line-height: .92; letter-spacing: .01em; }
+h1 span.l { display: block; }
+.btn { display: inline-block; padding: 18px 40px; background: var(--gold); color: #1b1438; font: 700 20px/1 system-ui; letter-spacing: .12em; text-decoration: none; border-radius: 12px; box-shadow: 0 6px 0 #b9811a; }
+p { margin: 0; }
+canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hud { position: absolute; right: 8px; bottom: 8px; font: 11px monospace; color: #b9b0e6; }
+</style></head><body>
+<main class="hero" id="hero">
+  <div class="shaker" id="shaker">monster / shaker slot</div>
+  <div class="stack">
+    <h1 class="wm"><span class="l">HIGH</span> <span class="l">SODIUM</span> <span class="l">GAMING</span></h1>
+    <p>Rules, close at hand. Salt to taste.</p>
+    <a class="btn" href="#">RESOURCES</a>
+  </div>
+  <canvas class="salt" id="salt" aria-hidden="true"></canvas>
+  <div class="hud" id="hud"></div>
+</main>
+<script src="../salt-engine.js"></script>
+<script>
+const phone = matchMedia('(max-width: 600px)').matches;
+window.salt = SaltEngine.mount(document.getElementById('salt'), {
+  cell: phone ? 3 : 3, maxGrains: phone ? 6000 : 14000,
+  emitters: [{ anchor: '#shaker', ox: 0.5, oy: 1, rate: phone ? 90 : 160, spread: 14, seconds: 3 }],
+  solids: [{ selector: '.wm', mode: 'glyphs' }, { selector: '.btn', mode: 'rect' }],
+  prefill: phone ? 3500 : 9000, pointer: { radius: 30, force: 3 }, tap: { grains: 600 },
+  eventTarget: document.getElementById('hero'),
+});
+setInterval(() => { const s = salt.stats(); document.getElementById('hud').textContent = `grains ${s.grains} · ${s.running ? 'running' : 'asleep'}${s.reduce ? ' · reduced' : ''}`; }, 250);
+</script>
+</body></html>

@@ -1,0 +1,3 @@
+390: frame ms median 16.7, p95 16.7, {"grains":1159,"flyers":0,"cells":36660,"running":true,"reduce":false}
+1440: frame ms median 16.7, p95 16.7, {"grains":7313,"flyers":0,"cells":147840,"running":true,"reduce":false}
+reduced: {"grains":1868,"flyers":0,"cells":36660,"running":false,"reduce":true}
