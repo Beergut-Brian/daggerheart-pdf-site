@@ -42,6 +42,8 @@ Portfolio/brochure (small resource site). Next.js 16.4.3 App Router, React 19.3,
 | 2026-11-15 | Leader wrote the grey-box boards directly instead of a designer sub-agent. | Grey-box is structure only and the run is a fast start; designer takes Gate 2 boards. |
 | 2026-11-15 | Detect findings left as-is on grey-box boards. | All of them flag scaffolding (uppercase board labels, striped placeholder slots, phone frames), not page design. |
 | 2026-11-15 | Footer fan-content line drafted ("Unofficial fan resource… trademark of Darrington Press"). | Not in the brief; proposed as DH9 with a default. |
+| 2026-11-15 | Project-manager agent not run this run. | Fast-start instruction to reach Gate 1 ASAP; PM health check should run at Gate 2 start. |
+| 2026-11-15 | Handoff packet id written as `robbot/daggerheart-site-2026-10-23 v1`. | The run prompt gave no packet id; the owner should correct it on ingest if it differs. |
 
 ## Spend
 Estimate so far: ~$2 of cap $30 (design-1d run).
