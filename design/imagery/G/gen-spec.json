@@ -1,0 +1,25 @@
+{
+ "spots": [
+  {
+   "id": "g-art-salt-cellar",
+   "prompt": "STYLE: luxurious painterly fantasy illustration, rich digital oil painting, ornate gilded detail, dramatic warm golden-yellow rim light and glow, isolated object on a pure black #000000 background filling the whole image edge to edge so it can be screen-blended onto a dark indigo page. An ornate antique fantasy salt cellar: a small gilded gold bowl on clawed feet with engraved filigree, overflowing with glowing white salt crystals, a few cubic salt crystals tumbling off the rim, warm golden-yellow glow radiating from inside the salt, sparkling grains floating upward. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no humans, no faces, no creatures, no dragons, no animals.",
+   "width": 1024,
+   "height": 1024,
+   "stamp": false
+  },
+  {
+   "id": "g-art-crystal-cluster",
+   "prompt": "STYLE: luxurious painterly fantasy illustration, rich digital oil painting, ornate gilded detail, dramatic warm golden-yellow rim light and glow, isolated object on a pure black #000000 background filling the whole image edge to edge so it can be screen-blended onto a dark indigo page. A floating cluster of large translucent cubic halite salt crystals with stepped hopper faces, bound together by a band of ornate engraved gold filigree and a small glowing golden-yellow gem at its centre, sparkling salt grains drifting around it, warm golden-yellow light glowing through the crystals. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no humans, no faces, no creatures, no dragons, no animals.",
+   "width": 1024,
+   "height": 1024,
+   "stamp": false
+  },
+  {
+   "id": "g-art-hourglass",
+   "prompt": "STYLE: luxurious painterly fantasy illustration, rich digital oil painting, ornate gilded detail, dramatic warm golden-yellow rim light and glow, isolated object on a pure black #000000 background filling the whole image edge to edge so it can be screen-blended onto a dark indigo page. An ornate fantasy hourglass with a gilded gold frame engraved with filigree and two small twisted pillars, the glass bulbs filled with glowing white salt instead of sand, salt streaming through the waist, warm golden-yellow glow from the falling salt, tiny sparkling grains floating around it. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no humans, no faces, no creatures, no dragons, no animals.",
+   "width": 1024,
+   "height": 1024,
+   "stamp": false
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 {
   "project": "hsg-daggerheart",
   "workflow_version": 3,
-  "stage": "2-redo-phase2",
+  "stage": "3-steer-1",
   "memo_id": [
     "D-painted-epic",
     "E-toy-world",
@@ -314,12 +314,25 @@
         "viewer-390.png": "f1-wyrm-eclipse/viewer-390.png",
         "salt-1.png": "f1-wyrm-eclipse/salt-1.png",
         "salt-2.png": "f1-wyrm-eclipse/salt-2.png",
-        "salt-3.png": "f1-wyrm-eclipse/salt-3.png"
+        "salt-3.png": "f1-wyrm-eclipse/salt-3.png",
+        "resources-390-first.png": "f1-wyrm-eclipse/resources-390-first.png",
+        "resources-alt-hourglass-1440-first.png": "f1-wyrm-eclipse/resources-alt-hourglass-1440-first.png",
+        "resources-alt-crystal-1440-first.png": "f1-wyrm-eclipse/resources-alt-crystal-1440-first.png",
+        "salt-1-1440.png": "f1-wyrm-eclipse/salt-1-1440.png",
+        "salt-2-1440.png": "f1-wyrm-eclipse/salt-2-1440.png",
+        "salt-3-1440.png": "f1-wyrm-eclipse/salt-3-1440.png",
+        "salt-reduced-390.png": "f1-wyrm-eclipse/salt-reduced-390.png",
+        "salt.webm": "f1-wyrm-eclipse/salt.webm",
+        "gate/steer-1/home-vs-v1.png": "f1-wyrm-eclipse/gate/steer-1/home-vs-v1.png",
+        "gate/steer-1/resources-vs-v1.png": "f1-wyrm-eclipse/gate/steer-1/resources-vs-v1.png"
       },
       "detect": "f1-wyrm-eclipse/detect.json",
       "gate_note": "f1-wyrm-eclipse/gate-note.md",
-      "images": "../imagery/F/",
-      "salt_engine": "_shared/salt-engine.js"
+      "images": "../imagery/G/ (resources art); no F wyrm images",
+      "salt_engine": "_shared/salt-engine.js v2 (field mode)",
+      "version": 2,
+      "steer": "steer-1 (DH13, 2026-11-14 23:58)",
+      "frozen_v1": "f1-wyrm-eclipse-v1-frozen/"
     },
     {
       "id": "f2-hatchling-pour",
@@ -372,5 +385,10 @@
     }
   },
   "recommended": "f1-wyrm-eclipse",
-  "runner_up": "e1-salt-mine-diorama"
+  "runner_up": "e1-salt-mine-diorama",
+  "picked": {
+    "board": "f1-wyrm-eclipse",
+    "decision": "DH13",
+    "with_changes": true
+  }
 }

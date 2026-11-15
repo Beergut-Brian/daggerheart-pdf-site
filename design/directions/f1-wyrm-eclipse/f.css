@@ -1,4 +1,4 @@
-/* Direction F — Glow (the Salt Wyrm). Tokens + shared components for the three pages.
+/* Direction F — Glow. v2 (steer 1, DH13): the Wyrm is gone; salt field home, salt-cellar art on resources. Tokens + shared components for the three pages.
    Every colour, size, space and radius is a custom property; rules use var(). */
 :root {
   /* colour roles */
@@ -17,6 +17,8 @@
   --parch-head: #8C8370;     /* heading bar on the page */
   --match: #FFC861;          /* match highlight on the page */
   --salt-1: #FFF7DF; --salt-2: #FFE29A; --salt-3: #BDF3EC; --salt-4: #FFFFFF;
+  /* v2 field grains: bright white salt with a faint warm cast; the glint is the heart gold */
+  --grain-1: #FFFFFF; --grain-2: #FBF8F1; --grain-3: #F2EEE6; --grain-4: #FFF6DE; --grain-glint: #FFC861;
 
   /* type */
   --font-display: 'Cinzel', 'Cinzel Fallback', serif;
@@ -78,8 +80,8 @@ a { color: inherit; text-underline-offset: .2em; }
 .frame { position: absolute; left: 50%; top: 50%; width: max(100%, calc(var(--hero-h) * var(--ar))); aspect-ratio: var(--ar); translate: -50% -50%; z-index: -2; }
 .frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .pour { position: absolute; left: var(--pour-x); top: var(--pour-y); width: 2px; height: 2px; }
-canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3;
-  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--salt-2) 90%, transparent)) drop-shadow(0 0 7px color-mix(in srgb, var(--gold) 45%, transparent)); }
+canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+/* v2: no CSS filter on the canvas (it repainted every frame); the grain sprites carry their own soft glow */
 .stack { position: absolute; left: 0; right: 0; z-index: 2; display: grid; justify-items: center; gap: var(--s5); padding: 0 var(--s4); }
 .stack .pill { margin-top: var(--s3); }
 

@@ -1,0 +1,26 @@
+{
+  "project": "hsg-daggerheart",
+  "memo_id": "F",
+  "file": "direction-memos/F-glow.md",
+  "name": "F \u2014 Glow: the Salt Wyrm",
+  "recommended": "A",
+  "was_recommended": false,
+  "memos": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+  ],
+  "status": "approved",
+  "chosen_at": "2026-11-15T07:08:20-06:00",
+  "chosen_by": "kaden-chat",
+  "notes_at_choose": 0,
+  "open_notes_at_choose": 0,
+  "approved_at": "2026-11-15T07:08:20-06:00",
+  "approved_by": "kaden-chat",
+  "sha256": "448b1371b044387fa304b83b10148cc360215f1a88eccf66869cd21e936a6241",
+  "version": 1,
+  "kaden_edits": 0
+}

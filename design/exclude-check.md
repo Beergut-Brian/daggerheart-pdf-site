@@ -10,3 +10,6 @@ Excluded family (exclude.md): abstract code-drawn ornament with no character or 
 | e2-sal-on-colour | A 3D vinyl character jumping out of a bold colour panel (ref 03); the art is a character, not ornament. |
 | f1-wyrm-eclipse | A huge crystal Wyrm and its glowing heart carry the hero; live glowing salt pours from its mouth. |
 | f2-hatchling-pour | A small character (hatchling) pours live luminous salt the visitor plays with; the interaction is the point. |
+
+## Steer 1 (DH13)
+| f1-wyrm-eclipse v2 | The creature is gone at Kaden's request; the page is carried by a live salt simulation (a sky of grains that fall and pile when touched) and, on /resources, a painted gilded salt cellar. No frames, rules, rings or crusts. Watch item: at rest the home reads as a starfield; the salt interaction is what lifts it out of plain ornament. |

@@ -1,1 +1,3 @@
 {"ts": "2026-11-14T22:33:35-06:00", "project": "hsg-daggerheart", "stage": "1b", "event": "finish", "references": 22, "refero_calls": 56, "minutes": 6}
+{"ts": "2026-11-15T07:08:20-06:00", "project": "hsg-daggerheart", "stage": "gate", "event": "choose", "kind": "memo", "memo": "F", "recommended": "A", "version": 1, "by": "kaden-chat"}
+{"ts": "2026-11-15T07:08:20-06:00", "project": "hsg-daggerheart", "stage": "gate", "event": "approve", "kind": "memo", "memo": "F", "recommended": "A", "version": 1, "by": "kaden-chat"}

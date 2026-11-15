@@ -1,0 +1,13 @@
+390 rest: {"grains":0,"field":2798,"flyers":0,"cells":36660,"running":true,"reduce":false}
+390 after 1 sweep: {"grains":216,"field":2578,"flyers":183,"cells":36660,"running":true,"reduce":false}
+390 frame ms while falling: median 16.7, p95 16.7
+390 after 7 sweeps + settle: {"grains":1510,"field":1269,"flyers":0,"cells":36660,"running":true,"reduce":false}
+390 frame ms idle drift: median 16.7, p95 16.7
+1440 rest: {"grains":0,"field":10000,"flyers":0,"cells":144000,"running":true,"reduce":false}
+1440 after 1 sweep: {"grains":676,"field":9324,"flyers":676,"cells":144000,"running":true,"reduce":false}
+1440 frame ms while falling: median 16.7, p95 16.8
+1440 after 7 sweeps + settle: {"grains":4521,"field":5479,"flyers":0,"cells":144000,"running":true,"reduce":false}
+1440 frame ms idle drift: median 16.7, p95 16.8
+video: salt.webm
+touch tap knocked loose 108 grains
+reduced: {"grains":271,"field":2798,"flyers":0,"cells":36660,"running":false,"reduce":true}

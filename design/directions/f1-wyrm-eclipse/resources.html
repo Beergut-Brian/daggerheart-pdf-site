@@ -3,16 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Resources — High Sodium Gaming</title>
+<title>Daggerheart Resources — High Sodium Gaming</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="f.css">
 <style>
-/* F1: the big Wyrm leans in over the shelf, once, top right. Night glow pools behind the covers. */
-.peek { position: absolute; top: calc(var(--s7) * -1); right: calc(var(--s5) * -1); width: 46vw; max-width: 340px; aspect-ratio: 280 / 330; overflow: hidden; mix-blend-mode: screen; z-index: 0;
-  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 96%), linear-gradient(90deg, transparent 4%, #000 34%, #000 88%, transparent);
-  -webkit-mask-composite: source-in; mask-image: linear-gradient(180deg, #000 55%, transparent 96%), linear-gradient(90deg, transparent 4%, #000 34%, #000 88%, transparent); mask-composite: intersect; }
-.peek img { position: absolute; width: 365.7%; left: -128.6%; top: -30.3%; max-width: none; }
+/* F1 v2 (steer 1): a fancy art piece top right with a glow of the heart gold behind it.
+   The art sits on pure black; the whole piece is screen-blended onto the page so the black
+   disappears, and a radial mask removes any edge. Swap the art with ?art=hourglass|crystal. */
+.art { position: absolute; top: calc(var(--s3) * -1); right: 0; width: 40vw; max-width: 420px; aspect-ratio: 1; mix-blend-mode: screen; z-index: 0; pointer-events: none; }
+.art::before { content: ""; position: absolute; inset: 4%; border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 46%, transparent), color-mix(in srgb, var(--gold) 16%, transparent) 55%, transparent); }
+.art img { position: relative; width: 100%; height: 100%; object-fit: cover; display: block;
+  -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); }
+.res-head, .books, .alt { position: relative; z-index: 1; }
 .book.main .cover { max-width: 300px; }
 .book.side { grid-template-columns: 112px 1fr; align-items: end; }
 .shelf { margin-top: var(--s8); position: relative; z-index: 1; border-top: 1px solid var(--line); padding-top: var(--s6); }
@@ -26,7 +30,8 @@
 .crop .ct { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--s6) var(--s3) var(--s3); font: 900 var(--fs-sm)/1.15 var(--font-display); color: var(--star); text-wrap: balance;
   background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--night) 88%, transparent) 55%); }
 @media (min-width: 900px) {
-  .peek { top: calc(var(--s5) * -1); right: var(--s7); }
+  .art { top: calc(var(--s7) * -1); right: var(--s7); width: 34vw; max-width: 460px; }
+  .res-head h1 { max-width: 58%; } /* two lines beside the art, never under it */
   .book.main .cover { max-width: none; }
   .book.side { grid-template-columns: 200px 1fr; }
   .shelf ol { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--s5); }
@@ -36,10 +41,15 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="res-page">
-  <div class="peek" aria-hidden="true"><img src="../../imagery/F/f2-hatchling.jpg" alt=""></div>
+  <div class="art" aria-hidden="true"><img id="art" src="../../imagery/G/g-art-salt-cellar.jpg" alt=""></div>
+  <script>
+  // one-word swap for Kaden: resources.html?art=hourglass | crystal (default: salt cellar)
+  (function () { const a = new URLSearchParams(location.search).get('art'); const m = { hourglass: 'g-art-hourglass', crystal: 'g-art-crystal-cluster' };
+    if (m[a]) document.getElementById('art').src = '../../imagery/G/' + m[a] + '.jpg'; })();
+  </script>
   <header class="res-head">
     <a class="back" href="index.html"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>High Sodium Gaming</a>
-    <h1>Resources</h1>
+    <h1>Daggerheart Resources</h1>
     <p>Pick a book. Search starts the moment it opens.</p>
   </header>
   <main id="main">
@@ -77,10 +87,10 @@
       <ol>
         <li><a href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages"><div class="crop"><img class="real" src="../../references/steer-1/06-cover-core-rulebook.jpg" alt=""></div><span class="t">Daggerheart Core Rulebook</span><span class="m">397 pages · 5 chapters</span></a></li>
         <li><a href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages"><div class="crop"><img class="real" src="../../references/steer-1/05-cover-hope-and-fear.jpg" alt=""></div><span class="t">Daggerheart: Hope &amp; Fear</span><span class="m">204 pages · Expansion</span></a></li>
-        <li><a href="viewer.html" aria-label="Open Table Quick Reference, 12 pages"><div class="crop" style="--iw:1536;--cw:244;--cx:1160;--ch:316;--cy:480"><img src="../../imagery/F/f-character-sheet.jpg" alt=""><span class="ct">Table Quick Reference</span></div><span class="t">Table Quick Reference</span><span class="m">12 pages · 3 sections</span></a></li>
-        <li><a href="viewer.html" aria-label="Open House Rules, 8 pages"><div class="crop" style="--iw:1536;--cw:330;--cx:600;--ch:427;--cy:250"><img src="../../imagery/F/f1-wyrm-wide.jpg" alt=""><span class="ct">House Rules</span></div><span class="t">House Rules</span><span class="m">8 pages · 1 chapter</span></a></li>
-        <li><a href="viewer.html" aria-label="Open Session Zero Pack, 16 pages"><div class="crop" style="--iw:1536;--cw:440;--cx:570;--ch:569;--cy:150"><img src="../../imagery/F/f-character-sheet.jpg" alt=""><span class="ct">Session Zero Pack</span></div><span class="t">Session Zero Pack</span><span class="m">16 pages · 4 sections</span></a></li>
-        <li><a href="viewer.html" aria-label="Open Adversary Deck: The Long Title That Wraps Onto Two Lines, 64 pages"><div class="crop" style="--iw:1536;--cw:300;--cx:880;--ch:388;--cy:170"><img src="../../imagery/F/f1-wyrm-wide.jpg" alt=""><span class="ct">Adversary Deck</span></div><span class="t">Adversary Deck: The Long Title That Wraps Onto Two Lines</span><span class="m">64 pages · 2 chapters</span></a></li>
+        <li><a href="viewer.html" aria-label="Open Table Quick Reference, 12 pages"><div class="crop"><img class="real" src="../../imagery/G/g-art-hourglass.jpg" alt=""><span class="ct">Table Quick Reference</span></div><span class="t">Table Quick Reference</span><span class="m">12 pages · 3 sections</span></a></li>
+        <li><a href="viewer.html" aria-label="Open House Rules, 8 pages"><div class="crop"><img class="real" src="../../imagery/F/f-cover-core.jpg" alt=""><span class="ct">House Rules</span></div><span class="t">House Rules</span><span class="m">8 pages · 1 chapter</span></a></li>
+        <li><a href="viewer.html" aria-label="Open Session Zero Pack, 16 pages"><div class="crop"><img class="real" src="../../imagery/G/g-art-crystal-cluster.jpg" alt=""><span class="ct">Session Zero Pack</span></div><span class="t">Session Zero Pack</span><span class="m">16 pages · 4 sections</span></a></li>
+        <li><a href="viewer.html" aria-label="Open Adversary Deck: The Long Title That Wraps Onto Two Lines, 64 pages"><div class="crop"><img class="real" src="../../imagery/F/f-cover-hope-fear.jpg" alt=""><span class="ct">Adversary Deck</span></div><span class="t">Adversary Deck: The Long Title That Wraps Onto Two Lines</span><span class="m">64 pages · 2 chapters</span></a></li>
       </ol>
     </section>
   </main>

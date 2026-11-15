@@ -9,51 +9,58 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="f.css">
 <style>
-/* F1 wyrm-eclipse: the Wyrm is the whole sky; its heart rises behind the name. */
-.hero { --ar: 768 / 1075; --pour-x: 49.9%; --pour-y: 33%; --orb-x: 50%; --orb-y: 50.3%; --stack-top: 55%; }
+/* F1 v2 (steer 1, DH13): no creature. The whole sky is suspended salt; hover knocks
+   grains loose and they pile along the bottom. A warm gold glow sits behind the name. */
+.hero { touch-action: none; background: var(--night); }
+.glow { position: absolute; left: 50%; top: var(--glow-y); width: var(--glow-w); aspect-ratio: 1.35; translate: -50% -50%; z-index: -1; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 30%, transparent), color-mix(in srgb, var(--gold) 12%, transparent) 45%, color-mix(in srgb, var(--raised-hi) 30%, transparent) 70%, transparent);
+  animation: glow-on 1.6s var(--ease-out) both; }
+@keyframes glow-on { from { opacity: 0; scale: .7; } to { opacity: 1; scale: 1; } }
+.hero { --glow-y: 44%; --glow-w: 150%; }
+.stack { top: 50%; translate: 0 -50%; }
+.stack .pill { max-width: calc(100vw - var(--s6)); padding: var(--s3) var(--s6); text-align: center; line-height: 1.3; text-wrap: balance; }
 @media (min-width: 700px) {
-  .hero { --ar: 1536 / 864; --pour-x: 70.2%; --pour-y: 52.4%; --orb-x: 49.8%; --orb-y: 47.5%; --stack-top: 55%; }
+  .hero { --glow-y: 46%; --glow-w: 72%; }
   .wm .l { display: inline; } .wm .l3 { display: block; }
+  .stack .pill { padding: 0 var(--s7); }
 }
-.frame img { animation: lights-on 1.6s var(--ease-out) both; }
-.orb { position: absolute; left: var(--orb-x); top: var(--orb-y); width: 70%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 34%, transparent), color-mix(in srgb, var(--gold) 10%, transparent) 55%, transparent);
-  mix-blend-mode: screen; animation: orb-on 1.6s var(--ease-out) both; }
-@media (min-width: 700px) { .orb { width: 34%; } }
-@keyframes lights-on { from { filter: brightness(.45) saturate(.7); } to { filter: none; } }
-@keyframes orb-on { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
-/* scrim only where the type sits: the lower band */
-.scrim { position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(180deg, transparent 50%, color-mix(in srgb, var(--night) 62%, transparent) 64%, color-mix(in srgb, var(--night) 80%, transparent) 100%); }
-@media (min-width: 700px) {
-  .scrim { background: radial-gradient(ellipse 52% 30% at 50% 72%, color-mix(in srgb, var(--night) 72%, transparent), transparent 100%); }
-}
-.stack { top: var(--stack-top); }
+.hint { margin: 0; font-size: var(--fs-xs); letter-spacing: .14em; text-transform: uppercase; color: var(--haze); opacity: 0; animation: hint 1s 2.4s var(--ease-out) forwards; pointer-events: none; transition: opacity .8s var(--ease-out); }
+@keyframes hint { to { opacity: .9; } }
+.hint.gone { animation: none; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .hint { display: none; } }
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <main id="main" class="hero">
-  <div class="frame" aria-hidden="true">
-    <picture>
-      <source media="(min-width: 700px)" srcset="../../imagery/F/f1-wyrm-wide.jpg">
-      <img src="../../imagery/F/f1-wyrm-tall.jpg" alt="" width="768" height="1075">
-    </picture>
-    <span class="orb"></span>
-    <span class="pour" id="pour"></span>
-  </div>
-  <div class="scrim" aria-hidden="true"></div>
+  <span class="glow" aria-hidden="true"></span>
   <div class="stack">
     <h1 class="wm" aria-label="High Sodium Gaming"><span class="l l1">HIGH</span> <span class="l l2">SODIUM</span> <span class="l l3">GAMING</span></h1>
     <p class="tag">Rules, close at hand. Salt to taste.</p>
-    <a class="pill" href="resources.html" aria-label="Resources — open the book shelf">Resources</a>
+    <a class="pill" href="resources.html">Daggerheart Resources</a>
+    <p class="hint" aria-hidden="true">Touch the salt</p>
   </div>
   <canvas class="salt" id="salt" aria-hidden="true"></canvas>
 </main>
 <script src="../_shared/salt-engine.js"></script>
-<script src="salt-glow.js"></script>
 <script>
-SaltGlow({ phone: { rate: 150, spread: 12, seconds: 2.8, prefill: 450, drift: 45, driftSpread: 56, driftOy: -1.1 }, wide: { rate: 170, spread: 18, seconds: 2.8, prefill: 450, drift: 60, driftSpread: 62, driftOy: -0.85 } });
+(function () {
+  const css = getComputedStyle(document.documentElement);
+  const tok = v => css.getPropertyValue(v).trim();
+  const phone = matchMedia('(max-width: 699px)').matches;
+  // grain budget by screen size: ~2.5k on a phone, up to 9k on a big desktop
+  window.salt = SaltEngine.mount(document.getElementById('salt'), {
+    cell: 3, maxGrains: phone ? 3400 : 14000,
+    colors: ['--grain-1', '--grain-2', '--grain-3', '--grain-4'].map(tok), glint: tok('--grain-glint'),
+    field: { density: phone ? 0.0085 : 0.0085, max: phone ? 2800 : 10000, rMin: 0.5, rMax: phone ? 1.45 : 1.6, drift: 3, hover: phone ? 30 : 34, tapRadius: 64,
+             avoid: ['.wm', '.tag', '.stack .pill', '.hint'], avoidPad: 8, avoidAlpha: 0.1, twinkle: phone ? 18 : 34, restPile: 0.1 },
+    floor: true,
+    solids: [{ selector: '.stack .pill', mode: 'rect', inset: 14 }],
+    pointer: { radius: 0 },
+    eventTarget: document.getElementById('main'),
+    onKnock: () => document.querySelector('.hint').classList.add('gone'), // the hint leaves once the salt has been touched
+  });
+})();
 </script>
 </body>
 </html>

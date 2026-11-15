@@ -1,16 +1,14 @@
 # Status: High Sodium Gaming (Daggerheart resources site)
 
-**Now:** Gate 2 (round 2) ready: 6 boards for Kaden
+**Now:** Steer 1 ready: F1 v2 for Kaden
 
 **Blocked:**
-- Gate 2 round 2 (Kaden): pick one board (mixes allowed). Each board has a landing with the art and live salt, /resources with the REAL covers and our generated pair as an "Alt covers (ours)" strip (DH12 works either way), and the viewer (desktop + phone). Open `design/directions/<id>/board-1440-first.png`, `board-390-first.png` and `salt-1/2/3.png` (pour, pile, swipe at 390). Details per board in `<id>/gate-note.md`.
-  - **d1-colossus-vista**: the painted Brine Colossus fills the scene; live salt pours from its raised hand through the name onto the button. Signature test: pass. Strongest: the desktop first screen, where painting and page are one scene. Risk: the golem still reads blocky ("Minecraft") next to Kaden's real covers. The Cinzel Decorative H makes "HIGH" hard to read at 390, and on phone the salt pile can cover the tagline by ~4.5 s.
-  - **d2-colossus-perched**: a quiet painted salt-flat; a small cut-out Colossus sits on HIGH and pours salt down the letters onto the button. Signature test: pass. Strongest: one clear vertical line from creature to button on phone. Risk: less epic than the covers; the cut-out leaves a faint haze box (needs a clean re-key); same hard-to-read H.
-  - **e1-salt-mine-diorama**: a 3D toy tabletop world; Sal the salt-shaker pours from its cap onto a chunky wordmark and a keycap RESOURCES button. Signature test: pass. Strongest: the phone first screen (Sal, stream, pile, keycap all in view); the most fun and the best mascot. Risk: busy scene behind the type needs a heavy scrim; Sal's look varies between images (glass body vs yellow face), so a model sheet is needed before build.
-  - **e2-sal-on-colour**: Sal jumps out of a sunflower panel (colour sampled from the image so it melts in), salting the wordmark; bold colour panels on /resources. Signature test: pass. Strongest: the painted stream and live grains join up; Sal wiggles on tap. Risk: without the world it is closer to a generic mascot page and the least Daggerheart.
-  - **f1-wyrm-eclipse**: a huge crystal Salt Wyrm coils around a glowing gold heart-orb behind a giant luminous wordmark; glowing salt pours from its mouth onto the name and the pill button. Signature test: pass. Strongest: the most polished art and the closest to "Daggerheart-inspired" (fantasy creature, gold/teal/purple) plus ref 02's giant glowing type. Risk: the pile under the mouth may read as "spitting"; the wordmark sits below the orb rather than over it.
-  - **f2-hatchling-pour**: a starry sky; a small hatchling Wyrm hugs a crystal above HIGH and pours luminous salt that piles on the letters and button. Signature test: pass. Strongest: the phone screen (pour, pile, scatter right under the character). Risk: the hatchling is a small crop and a little soft at 1440; the tall sky image reads as an anatomical heart (hidden under a scrim; regenerate before build).
-  - **Recommended: f1-wyrm-eclipse.** Best art quality of the six, reads as Daggerheart-inspired fantasy without copying, giant glowing name, and the salt glows. **Runner-up: e1-salt-mine-diorama**, the most fun, with the strongest mascot and phone screen, but further from "Daggerheart-like". A mix worth offering: F1's Wyrm and glow with F2's small hatchling as the /resources and viewer mascot.
+- Steer 1 review (Kaden): F1 v2 in `design/directions/f1-wyrm-eclipse/` (v1 frozen beside it). Start with `gate/steer-1/home-vs-v1.png` and `gate/steer-1/resources-vs-v1.png`, then `salt.webm` and `salt-1/2/3.png` (390) / `salt-*-1440.png`. Details in `gate-note.md`.
+  - **Home:** same Cinzel gold wordmark and colours; the wyrm and orb are gone; the whole sky is suspended salt grains (round, soft, faint gold glint, slow drift, a few twinkles). Hover or drag a finger and the grains you touch fall and pile along the bottom and on the pill; a tap knocks loose a burst. Button reads DAGGERHEART RESOURCES (one line at 390). A gold glow stays behind the name. Reduced motion: static field + settled pile. 60 fps median and p95 at 390 and 1440 in headless Chromium.
+  - **/resources:** unchanged except the top-right art: a gilded salt cellar of glowing salt with a heart-gold glow behind it, no edge; h1 "Daggerheart Resources". Swap with one word: `?art=hourglass` or `?art=crystal` (renders beside it). Wyrm crops on the sample shelf replaced.
+  - **Viewer:** back link "Daggerheart Resources"; nothing else changed.
+  - Two small calls for Kaden: keep or drop the "Touch the salt" hint under the button (default: keep); salt cellar vs hourglass vs crystal (default: salt cellar).
+  - Real risk: with the creature gone, a still screenshot of home reads close to a plain starfield; the live interaction carries the brand.
 
 ## Profile and stack
 Portfolio/brochure (small resource site). Next.js 16.4.3 App Router, React 19.3, Tailwind 4, Vercel. Design pipeline v3 (hermes boards).
@@ -28,7 +26,9 @@ Portfolio/brochure (small resource site). Next.js 16.4.3 App Router, React 19.3,
 | 8 | Stage 2 redo, phase 1 | Leader | done | exclude.md, 3 memos (D/E/F), salt engine + test renders, image specs | this run |
 | 9 | Image generation | RobBot | done | 24 images per spec in design/imagery/ | LICENSES.md |
 | 10 | Stage 2 redo, phase 2 | designer ×3 (D, E, F) | done | 6 boards with images + salt engine, renders + salt stills, detect, gate notes | 6 boards |
-| 11 | Gate 2 round 2 | Kaden | waiting | one board (or mix) picked | |
+| 11 | Gate 2 round 2 | Kaden | done | one board (or mix) picked | DH13: F1 with changes |
+| 12 | Steer 1 (F1 v2) | Leader | done | DH13 changes; renders, salt proof (390+1440, video), side-by-sides, detect, gate note | f1-wyrm-eclipse v2 |
+| 13 | Steer 1 review | Kaden | waiting | approve v2 or more steer | |
 
 ## Decisions
 | Date | Decision | Reason |
@@ -59,6 +59,12 @@ Portfolio/brochure (small resource site). Next.js 16.4.3 App Router, React 19.3,
 | 2026-11-14 | Boards reference images in place (`../../imagery/…`, `../../references/steer-1/…`); nothing copied. | One source of truth for the images. |
 | 2026-11-14 | Shared salt engine left unchanged; F adds a small board-local wrapper (`salt-glow.js`) for glow colours and the button drift. | Keep one engine; differences live in board settings. |
 | 2026-11-14 | Known image defects carried to the gate notes, not hidden: D golem blocky; d2 cut-out haze; E Sal inconsistent across images; f2-sky-tall reads as a heart. | LICENSES.md and Kaden's "honest note" rule. |
+| 2026-11-14 | Steer 1 edits made by the Leader directly (no sub-agent). | Small, surgical edit set plus an engine change that every later board depends on. |
+| 2026-11-14 | Shared salt engine v2: field mode (suspended grains, hover/tap knock loose), floor, round sprite grains with gold glint, cached field and pile layers, pile redraw ≤ 20/s. v1 API kept. | Kaden's "screen full of salt particles that when hovered fall … and collect"; RobBot: never square pixels, smooth on a phone. |
+| 2026-11-14 | Home: `touch-action: none` on the one-screen hero so a finger drag knocks salt loose instead of scrolling. | The landing fits one screen; the drag is the interaction. |
+| 2026-11-14 | Added a 3-word hint "Touch the salt" under the button that leaves on first touch. | Phone users can't hover; without a cue the field reads as a still starfield. Easy to drop. |
+| 2026-11-14 | /resources h1 capped at 58% width on desktop so "Daggerheart Resources" wraps beside the art. | The longer title ran under the art in the first v2 render. |
+| 2026-11-14 | Removed v1's CSS drop-shadow filter on the salt canvas. | It repainted the full screen every frame; the sprites carry their own glow. |
 
 ## Spend
-Design-1d run: ~$2.20. Stage 2 run: ~$10.5 of the $30 run cap. Stage 2 redo phase 1: ~$2. Phase 2: ~$10.2 of $30.
+Design-1d run: ~$2.20. Stage 2 run: ~$10.5 of the $30 run cap. Stage 2 redo phase 1: ~$2. Phase 2: ~$10.2 of $30. Steer 1: ~$5.5 of $30.
