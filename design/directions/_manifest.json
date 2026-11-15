@@ -1,8 +1,12 @@
 {
   "project": "hsg-daggerheart",
   "workflow_version": 3,
-  "stage": "1d",
-  "memo_id": null,
+  "stage": "2",
+  "memo_id": [
+    "A-grimoire",
+    "B-salt-circle",
+    "C-sodium-lamp"
+  ],
   "rendered_with": "playwright-core + /ms-playwright/chromium-1248 (design-preview tooling not readable in container)",
   "boards": [
     {
@@ -23,7 +27,8 @@
         "file": "landing-a-monument/detect.json",
         "findings": 3,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
     },
     {
       "id": "landing-b-split",
@@ -43,7 +48,8 @@
         "file": "landing-b-split/detect.json",
         "findings": 2,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
     },
     {
       "id": "picker-a-shelf",
@@ -63,7 +69,8 @@
         "file": "picker-a-shelf/detect.json",
         "findings": 3,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
     },
     {
       "id": "picker-b-covers",
@@ -83,7 +90,8 @@
         "file": "picker-b-covers/detect.json",
         "findings": 2,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
     },
     {
       "id": "viewer-desktop",
@@ -103,7 +111,8 @@
         "file": "viewer-desktop/detect.json",
         "findings": 3,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
     },
     {
       "id": "viewer-phone-a-sheet",
@@ -123,7 +132,8 @@
         "file": "viewer-phone-a-sheet/detect.json",
         "findings": 4,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
     },
     {
       "id": "viewer-phone-b-filmstrip",
@@ -143,7 +153,200 @@
         "file": "viewer-phone-b-filmstrip/detect.json",
         "findings": 3,
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
-      }
+      },
+      "stage": "1d"
+    },
+    {
+      "id": "a1-grimoire-cover",
+      "stage": "2",
+      "kind": "page",
+      "memo_id": "A-grimoire",
+      "memo": "../direction-memos/A-grimoire.md",
+      "variation_axes": {
+        "axis": "signature placement: frame around the hero vs inside the letterforms",
+        "value": "frame: salt crust over a leather book-cover frame around the hero"
+      },
+      "pages": {
+        "/": "a1-grimoire-cover/index.html",
+        "/resources": "a1-grimoire-cover/resources.html",
+        "/resources/core-rulebook": "a1-grimoire-cover/viewer.html"
+      },
+      "six_book_state": true,
+      "renders": {
+        "board-1440.png": "a1-grimoire-cover/board-1440.png",
+        "board-1440-first.png": "a1-grimoire-cover/board-1440-first.png",
+        "board-390.png": "a1-grimoire-cover/board-390.png",
+        "board-390-first.png": "a1-grimoire-cover/board-390-first.png",
+        "resources-1440-first.png": "a1-grimoire-cover/resources-1440-first.png",
+        "viewer-1440-first.png": "a1-grimoire-cover/viewer-1440-first.png",
+        "viewer-390.png": "a1-grimoire-cover/viewer-390.png"
+      },
+      "detect": {
+        "file": "a1-grimoire-cover/detect.json",
+        "remaining_findings": 10,
+        "notes": "a1-grimoire-cover/gate-note.md"
+      },
+      "gate_note": "a1-grimoire-cover/gate-note.md"
+    },
+    {
+      "id": "a2-grimoire-crystals",
+      "stage": "2",
+      "kind": "page",
+      "memo_id": "A-grimoire",
+      "memo": "../direction-memos/A-grimoire.md",
+      "variation_axes": {
+        "axis": "signature placement: frame around the hero vs inside the letterforms",
+        "value": "letterforms: cubic crystals grow through the wordmark, no frame"
+      },
+      "pages": {
+        "/": "a2-grimoire-crystals/index.html",
+        "/resources": "a2-grimoire-crystals/resources.html",
+        "/resources/core-rulebook": "a2-grimoire-crystals/viewer.html"
+      },
+      "six_book_state": false,
+      "renders": {
+        "board-1440.png": "a2-grimoire-crystals/board-1440.png",
+        "board-1440-first.png": "a2-grimoire-crystals/board-1440-first.png",
+        "board-390.png": "a2-grimoire-crystals/board-390.png",
+        "board-390-first.png": "a2-grimoire-crystals/board-390-first.png",
+        "resources-1440-first.png": "a2-grimoire-crystals/resources-1440-first.png",
+        "viewer-1440-first.png": "a2-grimoire-crystals/viewer-1440-first.png",
+        "viewer-390.png": "a2-grimoire-crystals/viewer-390.png"
+      },
+      "detect": {
+        "file": "a2-grimoire-crystals/detect.json",
+        "remaining_findings": 15,
+        "notes": "a2-grimoire-crystals/gate-note.md"
+      },
+      "gate_note": "a2-grimoire-crystals/gate-note.md"
+    },
+    {
+      "id": "b1-circle-hero",
+      "stage": "2",
+      "kind": "page",
+      "memo_id": "B-salt-circle",
+      "memo": "../direction-memos/B-salt-circle.md",
+      "variation_axes": {
+        "axis": "ring scale and role: whole-hero enclosure vs gate around the button",
+        "value": "ring encloses the whole hero; RESOURCES at the ring's gate"
+      },
+      "pages": {
+        "/": "b1-circle-hero/index.html",
+        "/resources": "b1-circle-hero/resources.html",
+        "/resources/core-rulebook": "b1-circle-hero/viewer.html"
+      },
+      "six_book_state": true,
+      "renders": {
+        "board-1440.png": "b1-circle-hero/board-1440.png",
+        "board-1440-first.png": "b1-circle-hero/board-1440-first.png",
+        "board-390.png": "b1-circle-hero/board-390.png",
+        "board-390-first.png": "b1-circle-hero/board-390-first.png",
+        "resources-1440-first.png": "b1-circle-hero/resources-1440-first.png",
+        "viewer-1440-first.png": "b1-circle-hero/viewer-1440-first.png",
+        "viewer-390.png": "b1-circle-hero/viewer-390.png"
+      },
+      "detect": {
+        "file": "b1-circle-hero/detect.json",
+        "remaining_findings": 3,
+        "notes": "b1-circle-hero/gate-note.md"
+      },
+      "gate_note": "b1-circle-hero/gate-note.md"
+    },
+    {
+      "id": "b2-circle-gate",
+      "stage": "2",
+      "kind": "page",
+      "memo_id": "B-salt-circle",
+      "memo": "../direction-memos/B-salt-circle.md",
+      "variation_axes": {
+        "axis": "ring scale and role: whole-hero enclosure vs gate around the button",
+        "value": "ring is a small gate drawn around RESOURCES; wordmark free above"
+      },
+      "pages": {
+        "/": "b2-circle-gate/index.html",
+        "/resources": "b2-circle-gate/resources.html",
+        "/resources/core-rulebook": "b2-circle-gate/viewer.html"
+      },
+      "six_book_state": false,
+      "renders": {
+        "board-1440.png": "b2-circle-gate/board-1440.png",
+        "board-1440-first.png": "b2-circle-gate/board-1440-first.png",
+        "board-390.png": "b2-circle-gate/board-390.png",
+        "board-390-first.png": "b2-circle-gate/board-390-first.png",
+        "resources-1440-first.png": "b2-circle-gate/resources-1440-first.png",
+        "viewer-1440-first.png": "b2-circle-gate/viewer-1440-first.png",
+        "viewer-390.png": "b2-circle-gate/viewer-390.png"
+      },
+      "detect": {
+        "file": "b2-circle-gate/detect.json",
+        "remaining_findings": 3,
+        "notes": "b2-circle-gate/gate-note.md"
+      },
+      "gate_note": "b2-circle-gate/gate-note.md"
+    },
+    {
+      "id": "c1-lamp-pool",
+      "stage": "2",
+      "kind": "page",
+      "memo_id": "C-sodium-lamp",
+      "memo": "../direction-memos/C-sodium-lamp.md",
+      "variation_axes": {
+        "axis": "light expressed as a scene vs as a diagram",
+        "value": "light as a scene: one sodium lamp pool on the wordmark"
+      },
+      "pages": {
+        "/": "c1-lamp-pool/index.html",
+        "/resources": "c1-lamp-pool/resources.html",
+        "/resources/core-rulebook": "c1-lamp-pool/viewer.html"
+      },
+      "six_book_state": true,
+      "renders": {
+        "board-1440.png": "c1-lamp-pool/board-1440.png",
+        "board-1440-first.png": "c1-lamp-pool/board-1440-first.png",
+        "board-390.png": "c1-lamp-pool/board-390.png",
+        "board-390-first.png": "c1-lamp-pool/board-390-first.png",
+        "resources-1440-first.png": "c1-lamp-pool/resources-1440-first.png",
+        "viewer-1440-first.png": "c1-lamp-pool/viewer-1440-first.png",
+        "viewer-390.png": "c1-lamp-pool/viewer-390.png"
+      },
+      "detect": {
+        "file": "c1-lamp-pool/detect.json",
+        "remaining_findings": 2,
+        "notes": "c1-lamp-pool/gate-note.md"
+      },
+      "gate_note": "c1-lamp-pool/gate-note.md"
+    },
+    {
+      "id": "c2-lamp-dline",
+      "stage": "2",
+      "kind": "page",
+      "memo_id": "C-sodium-lamp",
+      "memo": "../direction-memos/C-sodium-lamp.md",
+      "variation_axes": {
+        "axis": "light expressed as a scene vs as a diagram",
+        "value": "light as a diagram: sodium D-line doublet bands cut the wordmark"
+      },
+      "pages": {
+        "/": "c2-lamp-dline/index.html",
+        "/resources": "c2-lamp-dline/resources.html",
+        "/resources/core-rulebook": "c2-lamp-dline/viewer.html"
+      },
+      "six_book_state": false,
+      "renders": {
+        "board-1440.png": "c2-lamp-dline/board-1440.png",
+        "board-1440-first.png": "c2-lamp-dline/board-1440-first.png",
+        "board-390.png": "c2-lamp-dline/board-390.png",
+        "board-390-first.png": "c2-lamp-dline/board-390-first.png",
+        "resources-1440-first.png": "c2-lamp-dline/resources-1440-first.png",
+        "viewer-1440-first.png": "c2-lamp-dline/viewer-1440-first.png",
+        "viewer-390.png": "c2-lamp-dline/viewer-390.png"
+      },
+      "detect": {
+        "file": "c2-lamp-dline/detect.json",
+        "remaining_findings": 2,
+        "notes": "c2-lamp-dline/gate-note.md"
+      },
+      "gate_note": "c2-lamp-dline/gate-note.md"
     }
   ]
 }

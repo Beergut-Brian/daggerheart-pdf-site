@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@500;700&display=swap">
+<link rel="stylesheet" href="salt.css">
+<style>
+/* gilt metallic fill (R21, re-tinted gold) */
+.gilt-fill {
+  background: linear-gradient(180deg, var(--c-gilt-hi) 0 38%, var(--c-gilt) 38% 70%, var(--c-gilt-lo) 70% 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Board 1 — enclosure: the ward is the whole hero. Board-level tokens. */
+:root {
+  --ring-d: min(90svh, 92vw);
+  --ring-cy: 47svh;
+  --wm: calc(var(--ring-d) * .14);
+  --wm-mid: .42em;
+  --tag: var(--fs-xl);
+  --inside-gap: var(--s4);
+  --btn-w: 19rem;
+}
+@media (max-width: 699px) {
+  :root { --ring-d: 154vw; --ring-cy: 48svh; --wm: 18.6vw; --tag: var(--fs-lg); --btn-w: 17.5rem; }
+}
+.hero { position: relative; min-height: 100svh; overflow: hidden; background: radial-gradient(circle at 50% var(--ring-cy), var(--c-brine) 0, var(--c-night) calc(var(--ring-d) * .56)); }
+.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(130% 100% at 50% var(--ring-cy), transparent 45%, var(--c-night) 100%); }
+.ward { position: absolute; left: 50%; top: var(--ring-cy); width: var(--ring-d); aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 1; }
+.ward > svg.ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.inside { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: var(--inside-gap); text-align: center; padding-top: var(--s5); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 900; font-size: var(--wm); line-height: var(--lh-tight); letter-spacing: .015em; }
+h1 > span { display: block; filter: drop-shadow(0 var(--s1) var(--s3) var(--c-night)); }
+h1 .mid { display: flex; align-items: center; justify-content: center; gap: .5em; font-family: var(--f-caps); font-weight: 700; font-size: var(--wm-mid); letter-spacing: var(--tr-wide); padding: .38em 0 .3em .32em; color: var(--c-salt); }
+h1 .mid::before, h1 .mid::after { content: ""; width: 1.6em; height: var(--bw-hair); background: var(--c-gilt); }
+.tag { margin: var(--s2) 0 0; font-style: italic; font-size: var(--tag); color: var(--c-salt-2); }
+.gate { position: absolute; left: 50%; bottom: 0; transform: translate(-50%, 50%); width: var(--btn-w); display: flex; }
+.gate .gate-btn { flex: 1; }
+
+/* ward motion: pour, glyphs wake, slow breath */
+.hero .pour { stroke-dasharray: 100 100; animation: pour var(--t-pour) var(--ease-pour) .1s backwards; }
+@keyframes pour { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.hero .glyph { animation: wake var(--t-glyph) var(--ease-out) calc(var(--d-glyph) + var(--i) * 25ms) backwards; }
+@keyframes wake { from { opacity: 0; } }
+.hero .breath { transform-box: view-box; transform-origin: center; animation: breath var(--t-breath) ease-in-out 2s infinite alternate; }
+@keyframes breath { to { transform: scale(1.012); } }
+.inside > * { animation: wake .6s var(--ease-out) .35s backwards; }
+.gate { animation: wake .5s var(--ease-out) .9s backwards; }
+</style>
+</head>
+<body>
+<a class="skip" href="#enter">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="defs"></svg>
+<main class="hero">
+  <div class="ward">
+    <svg class="ring" id="ring" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false" role="presentation"></svg>
+    <div class="inside">
+      <h1><span class="gilt-fill">HIGH</span><span class="mid">SODIUM</span><span class="gilt-fill">GAMING</span></h1>
+      <p class="tag">Rules, close at hand. Salt to taste.</p>
+    </div>
+    <div class="gate">
+      <a class="gate-btn" id="enter" href="resources.html" aria-label="Resources — open the book shelf"><span class="br" aria-hidden="true">{</span><span class="lbl">RESOURCES</span><span class="br" aria-hidden="true">}</span></a>
+    </div>
+  </div>
+</main>
+<svg class="grain" aria-hidden="true"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 1.4 -.3"/></filter><rect width="100%" height="100%" filter="url(#noise)"/></svg>
+<script src="salt.js"></script>
+<script>
+document.getElementById('defs').innerHTML = SALT.defs();
+document.getElementById('ring').innerHTML = SALT.ring({ size: 1000, r: 432, band: 30, count: 2600, seed: 11, gates: [[90, 30]], glyphs: 12, glyphSize: 44, glyphR: 0, glyphPhase: .2, hair: true, grain: [2.6, 7.5], scatter: .09, giltShare: .04, id: 'pour-hero' });
+</script>
+</body>
+</html>

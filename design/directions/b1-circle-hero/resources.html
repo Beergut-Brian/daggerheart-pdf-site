@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@500;700&display=swap">
+<link rel="stylesheet" href="salt.css">
+</head>
+<body class="shelf-page">
+<a class="skip" href="#shelf">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="defs"></svg>
+<header class="shelf-head">
+  <a class="back" href="index.html">← High Sodium Gaming</a>
+  <h1>Resources</h1>
+  <p>Pick a book. Search starts the moment it opens.</p>
+  <div class="shelf-rule" aria-hidden="true"><svg viewBox="0 0 24 24" class="ico"><use href="#gl-cube"/></svg></div>
+</header>
+<main class="shelf" id="shelf">
+  <div class="pair">
+    <a class="book main selected" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <div class="cover" data-cover="core"></div>
+      <div class="info">
+        <p class="t">Daggerheart Core Rulebook</p>
+        <p class="sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="meta">397 pages · 5 chapters</p>
+        <span class="open" aria-hidden="true"><span class="br">{</span>Open<span class="br">}</span></span>
+      </div>
+    </a>
+    <a class="book side" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <div class="cover" data-cover="hf"></div>
+      <div class="info">
+        <p class="t">Daggerheart: Hope &amp; Fear</p>
+        <p class="sub">The expansion</p>
+        <p class="meta">204 pages · Expansion</p>
+      </div>
+    </a>
+  </div>
+
+  <section class="scale" aria-labelledby="cap6">
+    <h2 class="cap" id="cap6">Sample shelf: future titles</h2>
+    <div class="grid6" id="grid6"></div>
+  </section>
+</main>
+<svg class="grain" aria-hidden="true"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 1.4 -.3"/></filter><rect width="100%" height="100%" filter="url(#noise)"/></svg>
+<script src="salt.js"></script>
+<script>
+document.getElementById('defs').innerHTML = SALT.defs();
+const TEAL = ['var(--c-cover-teal)', 'var(--c-cover-teal-2)'], EMBER = ['var(--c-cover-ember)', 'var(--c-cover-ember-2)'], INK = ['var(--c-night-2)', 'var(--c-night)'];
+const COVERS = {
+  core: { seed: 21, c: TEAL, kind: 'ward', lines: [['DAGGERHEART', 62], ['CORE', 202, 1], ['RULEBOOK', 362]] },
+  hf:   { seed: 33, c: EMBER, kind: 'split', lines: [['DAGGERHEART', 62], ['HOPE', 186, 1], ['& FEAR', 226, 1], ['EXPANSION', 362]] },
+  qr:   { seed: 45, c: INK, kind: 'ward', small: 1, lines: [['TABLE', 62], ['QUICK', 196, 1], ['REFERENCE', 226]] },
+  hr:   { seed: 57, c: EMBER, kind: 'ward', small: 1, lines: [['OUR TABLE', 62], ['HOUSE', 196, 1], ['RULES', 226]] },
+  sz:   { seed: 69, c: TEAL, kind: 'ward', small: 1, lines: [['SESSION', 62], ['ZERO', 202, 1], ['PACK', 362]] },
+  ad:   { seed: 81, c: INK, kind: 'split', small: 1, lines: [['ADVERSARY', 62], ['DECK', 202, 1], ['LONG TITLE', 362]] }
+};
+const SIX = [
+  ['core', 'Daggerheart Core Rulebook', 'Everything: characters, play, GM tools, adversaries, campaign frames', 397, '397 pages · 5 chapters'],
+  ['hf', 'Daggerheart: Hope &amp; Fear', 'The expansion', 204, '204 pages · Expansion'],
+  ['qr', 'Table Quick Reference', 'Moves, ranges, conditions on one page', 12, '12 pages · 3 sections'],
+  ['hr', 'House Rules', 'How our table bends the rules', 8, '8 pages · 1 chapter'],
+  ['sz', 'Session Zero Pack', 'Safety tools and table expectations', 16, '16 pages · 4 sections'],
+  ['ad', 'Adversary Deck: The Long Title That Wraps Onto Two Lines', 'Stress-test for title wrapping', 64, '64 pages · 2 chapters']
+];
+const g6 = document.getElementById('grid6');
+if (g6) g6.innerHTML = SIX.map(([k, t, s, p, m], i) => `<a class="book" href="viewer.html" aria-label="Open ${t.replace('&amp;', 'and')}, ${p} pages"><div class="cover" data-cover="${k}" data-n="${i}"></div><div class="info"><p class="t">${t}</p>${i === 0 ? `<p class="sub">${s}</p>` : ''}<p class="meta">${m}</p></div></a>`).join('');
+let n = 0;
+document.querySelectorAll('[data-cover]').forEach((el) => {
+  const o = Object.assign({}, COVERS[el.dataset.cover]); o.seed += 100 * n++;
+  el.innerHTML = SALT.cover(o) + SALT.wardOutline();
+});
+</script>
+</body>
+</html>

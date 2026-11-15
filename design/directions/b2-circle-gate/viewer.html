@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daggerheart Core Rulebook — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@500;700&display=swap">
+<link rel="stylesheet" href="salt.css">
+</head>
+<body class="vw">
+<a class="skip" href="#page">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4M8 12h8"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-pages" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="8" rx="1"/><rect x="13.5" y="4" width="6.5" height="8" rx="1"/><path d="M4 16h16M4 20h10"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+</svg>
+
+<!-- ≥900px: desktop viewer -->
+<div class="desk">
+  <header class="vtop">
+    <a class="mark-hsg" href="index.html" aria-label="High Sodium Gaming home"><span data-mini="hsg"></span><b>HSG</b></a>
+    <a class="back" href="resources.html">← Resources</a>
+    <span class="tt">Daggerheart Core Rulebook</span>
+    <span class="grow"></span>
+    <label class="pg">Page <input value="19" inputmode="numeric" aria-label="Go to page"> of 397</label>
+    <span class="zoom">
+      <button class="icon-btn" aria-label="Zoom out"><svg class="ico"><use href="#i-minus"/></svg></button>
+      <button class="icon-btn" aria-label="Zoom in"><svg class="ico"><use href="#i-plus"/></svg></button>
+      <button class="icon-btn" aria-label="Fit width"><svg class="ico"><use href="#i-fit"/></svg></button>
+    </span>
+    <div class="field" role="search"><svg class="ico"><use href="#i-search"/></svg><input type="search" value="Hope" aria-label="Search Daggerheart Core Rulebook" placeholder="Search the rulebook — try &quot;Hope&quot;"><button class="icon-btn" aria-label="Clear search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+  </header>
+  <div class="vbody">
+    <aside class="rail" aria-label="Pages and chapters">
+      <div class="tabs" role="tablist"><button role="tab" aria-selected="true">Pages</button><button role="tab" aria-selected="false">Chapters</button></div>
+      <nav class="thumbs" id="thumbs" aria-label="Page thumbnails"></nav>
+    </aside>
+    <main class="stage" id="page">
+      <div class="pagebox" id="pagebox"></div>
+      <p class="onpage"><button class="icon-btn" aria-label="Previous match"><svg class="ico"><use href="#i-up"/></svg></button><b>1 of 2 on this page</b><button class="icon-btn" aria-label="Next match"><svg class="ico"><use href="#i-down"/></svg></button></p>
+    </main>
+    <aside class="res" aria-label="Search results">
+      <div class="head"><h2><b>148</b> results for "Hope"</h2><button class="icon-btn" aria-label="Close search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+      <ul class="hits" id="hits"></ul>
+      <p class="kbd"><kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open</p>
+    </aside>
+  </div>
+</div>
+
+<!-- <900px: two phone screens, each 844px tall -->
+<div class="phones">
+  <p class="ph-label">1 · Reading</p>
+  <section class="phone" aria-label="Reading">
+    <header class="pbar">
+      <a class="icon-btn" href="resources.html" aria-label="Back to Resources"><svg class="ico"><use href="#i-back"/></svg></a>
+      <span class="tt">Daggerheart Core Rulebook</span>
+      <a class="mark-hsg" href="index.html" aria-label="High Sodium Gaming home"><span data-mini="hsg2"></span><b>HSG</b></a>
+    </header>
+    <div class="pscroll" id="ppages"></div>
+    <nav class="dock" aria-label="Book controls">
+      <a class="pill" href="#sheet" aria-label="Pages and chapters"><svg class="ico"><use href="#i-pages"/></svg>Pages</a>
+      <span class="pill pgn"><b>19</b>&nbsp;/ 397</span>
+      <a class="pill" href="#search" aria-label="Search the book"><svg class="ico"><use href="#i-search"/></svg>Search</a>
+    </nav>
+  </section>
+  <p class="ph-label">2 · Search</p>
+  <section class="phone" aria-label="Search">
+    <div class="sheet">
+      <div class="sfield">
+        <div class="field" role="search"><svg class="ico"><use href="#i-search"/></svg><input type="search" value="Hope" aria-label="Search Daggerheart Core Rulebook"><button class="icon-btn" aria-label="Clear search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+        <button class="close-txt">Close</button>
+      </div>
+      <p class="count"><b>148</b> results for "Hope"</p>
+      <ul class="hits" id="hits2"></ul>
+    </div>
+  </section>
+</div>
+<script src="salt.js"></script>
+<script>
+document.getElementById('thumbs').innerHTML = SALT.thumbs(15, 12, 19, 23);
+document.getElementById('pagebox').innerHTML = SALT.page(19, true);
+document.getElementById('hits').innerHTML = SALT.hits();
+document.getElementById('hits2').innerHTML = SALT.hits().replace(' focus', '');
+document.getElementById('ppages').innerHTML = SALT.page(19, true) + SALT.page(20, false);
+document.querySelectorAll('[data-mini]').forEach((el, i) => { el.outerHTML = SALT.miniRing(300 + i, 110, 60, 2, 40); });
+</script>
+</body>
+</html>

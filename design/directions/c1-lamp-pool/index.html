@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;800&family=Marcellus+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lamp.css">
+<style>
+.hero { position: relative; min-height: 100svh; display: grid; place-items: center; overflow: hidden; isolation: isolate; padding: var(--s9) var(--s4) var(--s8); }
+
+/* the scene: every layer is aria-hidden decoration */
+.scene { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.pool { position: absolute; inset: 0; background:
+  radial-gradient(ellipse 46% 34% at 50% 50%, color-mix(in srgb, var(--amber-800) 70%, var(--clear)) 0%, color-mix(in srgb, var(--amber-800) 22%, var(--clear)) 55%, var(--clear) 100%),
+  radial-gradient(ellipse 70% 18% at 50% 100%, color-mix(in srgb, var(--amber-800) 40%, var(--clear)) 0%, var(--clear) 100%),
+  radial-gradient(ellipse 120% 90% at 50% 40%, var(--clear) 40%, var(--ink-950) 100%); }
+.cone { position: absolute; left: 50%; top: 150px; width: min(120vw, 1500px); height: 78%; transform: translateX(-50%);
+  clip-path: polygon(48.8% 0, 51.2% 0, 86% 100%, 14% 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--amber-400) 34%, var(--clear)), color-mix(in srgb, var(--amber-400) 10%, var(--clear)) 55%, var(--clear));
+  filter: blur(18px); }
+.halo { position: absolute; left: 50%; top: 152px; width: 340px; height: 340px; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--amber-200) 55%, var(--clear)) 0%, color-mix(in srgb, var(--amber-400) 22%, var(--clear)) 30%, var(--clear) 70%); }
+.lantern { position: absolute; left: 50%; top: 0; width: 120px; height: 200px; transform: translateX(-50%); overflow: visible; }
+.lf { fill: none; stroke: var(--amber-600); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.lf-solid { fill: var(--ink-950); stroke: var(--amber-600); stroke-width: 1.6; stroke-linejoin: round; }
+.lbar { stroke: var(--ink-950); stroke-width: 2.4; }
+.cube-t { fill: var(--amber-50); } .cube-l { fill: var(--amber-200); } .cube-r { fill: var(--amber-400); }
+.cube-step { fill: none; stroke: var(--amber-400); stroke-width: 1; }
+.fog { position: absolute; left: -30%; width: 160%; height: 40%; border-radius: 50%; filter: blur(40px); }
+.fog.a { top: 36%; background: radial-gradient(ellipse at 40% 50%, color-mix(in srgb, var(--ink-300) 9%, var(--clear)), var(--clear) 60%); }
+.fog.b { top: 52%; background: radial-gradient(ellipse at 65% 50%, color-mix(in srgb, var(--amber-200) 7%, var(--clear)), var(--clear) 55%); }
+
+/* monument stack */
+.stack { position: relative; display: grid; justify-items: center; text-align: center; gap: var(--s5); width: 100%; }
+.word-wrap { position: relative; }
+.word { margin: 0; font-family: var(--font-display); font-weight: var(--w-display); line-height: var(--lh-tight); letter-spacing: var(--track-word);
+  color: var(--amber-200); font-size: var(--fs-word-stack); text-wrap: balance; }
+.word span { display: block; }
+.word .mid { font-size: var(--fs-word-mid); letter-spacing: var(--track-word-mid); padding: var(--s1) 0 var(--s2); }
+/* the letters fall out of the light: unlit copy below, lit copy masked to the pool */
+.word { color: var(--amber-600); }
+.word.lit { position: absolute; inset: 0; color: var(--amber-50); pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 34% 58% at 50% 42%, var(--ink-950) 0%, var(--ink-950) 30%, var(--clear) 100%);
+  mask-image: radial-gradient(ellipse 34% 58% at 50% 42%, var(--ink-950) 0%, var(--ink-950) 30%, var(--clear) 100%); }
+.word.mid-lit { position: absolute; inset: 0; color: var(--amber-200); pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 62% 80% at 50% 42%, var(--ink-950) 0%, var(--clear) 100%);
+  mask-image: radial-gradient(ellipse 62% 80% at 50% 42%, var(--ink-950) 0%, var(--clear) 100%); }
+.rule { width: min(var(--s9) * 2.6, 70vw); }
+.tag { margin: 0; font-family: var(--font-title); font-size: var(--fs-tagline); letter-spacing: var(--track-mid); color: var(--amber-50); }
+.cta { margin-top: var(--s3); }
+
+@media (min-width: 900px) {
+  .hero { padding: var(--s9) var(--s6) var(--s8); }
+  .word { font-size: var(--fs-word-line); white-space: nowrap; }
+  .word span { display: inline; }
+  .word .mid { font-size: 1em; letter-spacing: var(--track-word); padding: 0; }
+  .lantern { width: 150px; height: 250px; }
+  .halo { top: 190px; width: 520px; height: 520px; }
+  .cone { top: 190px; }
+  .stack { padding-top: var(--s8); gap: var(--s5); }
+}
+
+/* lamp strike: low-pressure sodium starts dull red, then warms to amber */
+@keyframes strike { 0% { opacity: .12 } 10% { opacity: .55 } 14% { opacity: .18 } 28% { opacity: .75 } 33% { opacity: .5 } 100% { opacity: 1 } }
+@keyframes warm { 0% { fill: var(--amber-800) } 60% { fill: var(--amber-600) } }
+@keyframes driftA { from { transform: translateX(-6%) } to { transform: translateX(6%) } }
+@keyframes driftB { from { transform: translateX(7%) } to { transform: translateX(-7%) } }
+.halo, .cone, .pool, .word.lit, .word.mid-lit { animation: strike var(--dur-strike) var(--ease-out) both; }
+.cube-t, .cube-l, .cube-r { animation: warm var(--dur-strike) var(--ease-out) both; }
+.fog.a { animation: driftA 22s ease-in-out infinite alternate; }
+.fog.b { animation: driftB 37s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) {
+  .halo, .cone, .pool, .word.lit, .word.mid-lit, .cube-t, .cube-l, .cube-r, .fog { animation: none; }
+  .btn-lamp, .btn-lamp::before { transition: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="hero">
+  <div class="scene" aria-hidden="true" role="presentation">
+    <div class="pool"></div>
+    <div class="cone"></div>
+    <div class="fog a"></div>
+    <div class="fog b"></div>
+    <div class="halo"></div>
+    <svg class="lantern" viewBox="0 0 120 200" focusable="false">
+      <g class="lf">
+        <ellipse cx="60" cy="7" rx="3" ry="6.5"/><ellipse cx="60" cy="20" rx="3" ry="6.5"/><ellipse cx="60" cy="33" rx="3" ry="6.5"/>
+        <circle cx="60" cy="46" r="5.5"/>
+      </g>
+      <path class="lf-solid" d="M60 52 L86 78 H34 Z"/>
+      <path class="lf" d="M60 58 L60 66"/>
+      <rect class="lf-solid" x="28" y="78" width="64" height="7" rx="1"/>
+      <path class="cube-t" d="M60 98 L78 108 L60 118 L42 108 Z"/>
+      <path class="cube-l" d="M42 108 L60 118 L60 139 L42 129 Z"/>
+      <path class="cube-r" d="M78 108 L60 118 L60 139 L78 129 Z"/>
+      <path class="cube-step" d="M60 102 L71 108 L60 114 L49 108 Z M60 106 L64 108 L60 110 L56 108 Z"/>
+      <path class="lf" d="M33 85 L27 150 H93 L87 85"/>
+      <path class="lf lbar" d="M47 86 L44 149 M73 86 L76 149"/>
+      <path class="lf" d="M47 86 L44 149 M73 86 L76 149"/>
+      <rect class="lf-solid" x="24" y="150" width="72" height="7" rx="1"/>
+      <path class="lf-solid" d="M46 157 L60 178 L74 157 Z"/>
+      <circle class="lf" cx="60" cy="184" r="3"/>
+    </svg>
+  </div>
+
+  <div class="stack">
+    <div class="word-wrap">
+      <h1 class="word"><span>HIGH</span> <span class="mid">SODIUM</span> <span>GAMING</span></h1>
+      <p class="word mid-lit" aria-hidden="true"><span>HIGH</span> <span class="mid">SODIUM</span> <span>GAMING</span></p>
+      <p class="word lit" aria-hidden="true"><span>HIGH</span> <span class="mid">SODIUM</span> <span>GAMING</span></p>
+    </div>
+    <span class="doublet rule" aria-hidden="true"></span>
+    <p class="tag">Rules, close at hand. Salt to taste.</p>
+    <a class="btn-lamp cta" href="resources.html" aria-label="Resources — open the book shelf">Resources
+      <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8 H13 M9 4 L13 8 L9 12"/></svg></a>
+  </div>
+</main>
+<svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;800&family=Marcellus+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lamp.css">
+<style>
+.pick::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: 
+              radial-gradient(ellipse 120% 80% at 50% 30%, var(--clear) 50%, var(--ink-950) 100%); }
+.cover.day::before, .cover.day::after { border-color: var(--amber-950); }
+.cover.day .cover-t { color: var(--amber-950); }
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="glowx" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--amber-400);stop-opacity:0"/><stop offset=".5" style="stop-color:var(--amber-400);stop-opacity:.55"/><stop offset="1" style="stop-color:var(--amber-400);stop-opacity:0"/></linearGradient>
+    <linearGradient id="cont" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--amber-600)"/><stop offset=".5" style="stop-color:var(--amber-200)"/><stop offset="1" style="stop-color:var(--amber-400)"/></linearGradient>
+    <linearGradient id="nightv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--ink-900)"/><stop offset="1" style="stop-color:var(--ink-950)"/></linearGradient>
+  </defs>
+</svg>
+
+<main id="main" class="pick">
+  <header class="pick-head">
+    <a class="back" href="index.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8 H3 M7 4 L3 8 L7 12"/></svg>High Sodium Gaming</a>
+    <h1>Resources</h1>
+    <span class="doublet" aria-hidden="true"></span>
+    <p>Pick a book. Search starts the moment it opens.</p>
+  </header>
+
+  <section class="shelf" aria-label="Books">
+    <a class="book" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <div class="cover" data-tone="night" data-x="196" data-title="Daggerheart Core Rulebook"></div>
+      <div class="book-info">
+        <h2 class="book-title">Daggerheart Core Rulebook</h2>
+        <p class="book-sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="book-meta">397 pages · 5 chapters</p>
+        <span class="book-open">Open</span>
+      </div>
+    </a>
+    <a class="book" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <div class="cover day" data-tone="day" data-x="232" data-title="Daggerheart: Hope &amp; Fear"></div>
+      <div class="book-info">
+        <h2 class="book-title">Daggerheart: Hope &amp; Fear</h2>
+        <p class="book-sub">The expansion</p>
+        <p class="book-meta">204 pages · Expansion</p>
+        <span class="book-open">Open</span>
+      </div>
+    </a>
+  </section>
+
+</main>
+<svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<script>
+function ticks(color) {
+  let t = '';
+  for (let i = 0; i <= 30; i++) { const x = 30 + i * 8, h = i % 10 === 0 ? 14 : i % 5 === 0 ? 9 : 5; t += `<line x1="${x}" y1="28" x2="${x}" y2="${28 + h}" style="stroke:${color};stroke-width:1"/>`; }
+  return t + `<line x1="30" y1="28" x2="270" y2="28" style="stroke:${color};stroke-width:1"/>`;
+}
+function coverSVG(tone, x) {
+  // emission (night): two bright D lines on dark · absorption (day): two dark D lines on an amber continuum
+  if (tone === 'day') {
+    return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <rect width="300" height="400" fill="url(#cont)"/>
+      <rect x="${x - 16}" width="7" height="400" style="fill:var(--ink-950)"/>
+      <rect x="${x + 9}" width="7" height="400" style="fill:var(--ink-950)"/>
+      ${ticks('var(--amber-950)')}
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <rect width="300" height="400" fill="url(#nightv)"/>
+    <rect x="${x - 70}" width="140" height="400" fill="url(#glowx)"/>
+    <rect x="${x - 15}" width="5" height="400" style="fill:var(--amber-50)"/>
+    <rect x="${x + 10}" width="5" height="400" style="fill:var(--amber-200)"/>
+    ${ticks('var(--amber-600)')}
+  </svg>`;
+}
+document.querySelectorAll('.cover[data-tone]').forEach(c => {
+  c.innerHTML = coverSVG(c.dataset.tone, +c.dataset.x) + `<p class="cover-t" aria-hidden="true">${c.dataset.title}</p>`;
+});
+</script>
+</body>
+</html>

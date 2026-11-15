@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daggerheart Core Rulebook — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;800&family=Marcellus+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lamp.css">
+<style>
+/* board c1: the page sits in the lamp's pool; nothing moves */
+.stage::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 58% 62% at 50% 34%, color-mix(in srgb, var(--amber-800) 34%, var(--clear)), var(--clear) 72%); }
+.ph-read::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 90% 50% at 50% 26%, color-mix(in srgb, var(--amber-800) 34%, var(--clear)), var(--clear) 75%); }
+.ph-read .page { position: relative; }
+.lampmark { width: var(--s4); height: calc(var(--s5) + var(--s1)); }
+.brand { display: inline-flex; align-items: center; gap: var(--s2); text-decoration: none; }
+</style>
+</head>
+<body class="viewer">
+<a class="skip" href="#page">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></symbol>
+  <symbol id="i-pages" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="7" rx="1"/><rect x="13.5" y="4" width="6.5" height="7" rx="1"/><rect x="4" y="13" width="6.5" height="7" rx="1"/><rect x="13.5" y="13" width="6.5" height="7" rx="1"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-rail" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M9 4.5v15"/></symbol>
+  <symbol id="lampmark" viewBox="0 0 16 28"><path style="fill:none;stroke:var(--amber-600);stroke-width:1.4" d="M8 0v5M3 8h10l-2 14H5z"/><path style="fill:var(--amber-400)" d="M8 11l3.5 2-3.5 2-3.5-2z M4.5 13L8 15v4l-3.5-2z"/><path style="fill:var(--amber-200)" d="M11.5 13L8 15v4l3.5-2z"/></symbol>
+</defs></svg>
+
+<!-- ≥900px: desktop viewer -->
+<div class="vapp">
+  <header class="vtop">
+    <a class="brand" href="index.html" aria-label="High Sodium Gaming home"><svg class="lampmark" aria-hidden="true"><use href="#lampmark"/></svg><span class="hsg">HSG</span></a>
+    <button class="ibtn" aria-label="Hide pages"><svg class="ico"><use href="#i-rail"/></svg></button>
+    <a class="back" href="resources.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8 H3 M7 4 L3 8 L7 12"/></svg>Resources</a>
+    <span class="title">Daggerheart Core Rulebook</span>
+    <span class="grow"></span>
+    <label class="pgbox">Page <input value="19" aria-label="Go to page" inputmode="numeric"> of 397</label>
+    <div class="zoom">
+      <button class="ibtn" aria-label="Zoom out"><svg class="ico"><use href="#i-minus"/></svg></button>
+      <span class="pct">100%</span>
+      <button class="ibtn" aria-label="Zoom in"><svg class="ico"><use href="#i-plus"/></svg></button>
+      <button class="ibtn" aria-label="Fit width"><svg class="ico"><use href="#i-fit"/></svg></button>
+    </div>
+    <div class="field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input value="Hope" aria-label="Search Daggerheart Core Rulebook" placeholder="Search the rulebook — try &quot;Hope&quot;"><button class="ibtn" aria-label="Clear search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+  </header>
+  <div class="vbody">
+    <aside class="rail" aria-label="Pages and chapters">
+      <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">Pages</button><button class="tab" role="tab" aria-selected="false">Chapters</button></div>
+      <div class="thumbs" id="thumbs"></div>
+    </aside>
+    <main class="stage" id="page">
+      <div class="page" data-page aria-label="Page 19"></div>
+      <div class="onpage" role="group" aria-label="Matches on this page">
+        <button class="ibtn" aria-label="Previous match"><svg class="ico"><use href="#i-up"/></svg></button>
+        <span>1 of 2 on this page</span>
+        <button class="ibtn" aria-label="Next match"><svg class="ico"><use href="#i-down"/></svg></button>
+      </div>
+    </main>
+    <aside class="res" aria-label="Search results">
+      <div class="res-head"><h2><b>148</b> results for "Hope"</h2><button class="ibtn" aria-label="Close search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+      <ul class="hits" data-hits></ul>
+      <p class="kbd"><kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open</p>
+    </aside>
+  </div>
+</div>
+
+<!-- <900px: the two phone screens, stacked -->
+<div class="phones">
+  <section aria-label="Phone: reading">
+    <p class="ph-label">Reading</p>
+    <div class="ph">
+      <header class="ph-bar">
+        <a class="ibtn" href="resources.html" aria-label="Resources"><svg class="ico"><use href="#i-back"/></svg></a>
+        <span class="title">Daggerheart Core Rulebook</span>
+        <a class="brand" href="index.html" aria-label="High Sodium Gaming home"><svg class="lampmark" aria-hidden="true"><use href="#lampmark"/></svg><span class="hsg">HSG</span></a>
+      </header>
+      <div class="ph-read">
+        <div class="page" data-page aria-label="Page 19"></div>
+        <div class="page" data-page="blank" aria-label="Page 20"></div>
+      </div>
+      <nav class="dock" aria-label="Book">
+        <button class="ibtn" aria-label="Pages and chapters"><svg class="ico"><use href="#i-pages"/></svg>Pages</button>
+        <span class="pgn"><b>19</b> / 397</span>
+        <button class="ibtn" aria-label="Search the book"><svg class="ico"><use href="#i-search"/></svg>Search</button>
+      </nav>
+    </div>
+  </section>
+  <section aria-label="Phone: search">
+    <p class="ph-label">Search</p>
+    <div class="ph">
+      <div class="ph-sheet">
+        <div class="ph-search">
+          <div class="field"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input value="Hope" aria-label="Search Daggerheart Core Rulebook"><button class="ibtn" aria-label="Clear search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+          <button class="ibtn close">Close</button>
+        </div>
+        <p class="count"><b>148</b> results for "Hope"</p>
+        <ul class="hits" data-hits></ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<script>
+// placeholder page: heading bar, grey lines, two match highlights on page 19 (never real art)
+function lines(n, hits = {}, short = []) {
+  let h = '';
+  for (let i = 0; i < n; i++) {
+    const w = short.includes(i) ? 58 : 100 - ((i * 37) % 9);
+    const hit = hits[i];
+    h += `<i class="ln${hit ? ' mk' + (hit.on ? ' on' : '') : ''}" style="width:${w}%${hit ? `;--hl:${hit.l}%;--hw:${hit.w}%` : ''}"></i>`;
+  }
+  return h;
+}
+function pageHTML(blank) {
+  if (blank) return `<i class="p-run"></i><i class="p-head" style="width:44%"></i>
+    <div class="p-cols"><div class="p-col">${lines(15, {}, [6, 14])}</div><div class="p-col">${lines(11, {}, [10])}<div class="p-box">${lines(4, {}, [3])}</div></div></div><i class="p-foot"></i>`;
+  return `<i class="p-run"></i><i class="p-head"></i>
+    <div class="p-cols">
+      <div class="p-col">${lines(4, {}, [3])}<i class="ln sub"></i>${lines(9, { 1: { l: 0, w: 22, on: true } }, [8])}<i class="ln sub"></i>${lines(5, {}, [4])}</div>
+      <div class="p-col">${lines(7, { 4: { l: 46, w: 20 } }, [6])}<div class="p-box">${lines(5, {}, [4])}</div>${lines(4, {}, [3])}</div>
+    </div><i class="p-foot"></i>`;
+}
+document.querySelectorAll('[data-page]').forEach(p => p.innerHTML = pageHTML(p.dataset.page === 'blank'));
+
+const th = [];
+for (let n = 13; n <= 26; n++) {
+  const blank = n >= 25;
+  th.push(`<a class="thumb${n === 19 ? ' cur' : ''}${blank ? ' blank' : ''}" href="#" aria-label="Page ${n}"${n === 19 ? ' aria-current="page"' : ''}><span class="tp">${'<i></i>'.repeat(7)}</span>${n}</a>`);
+}
+document.getElementById('thumbs').innerHTML = th.join('');
+
+const HITS = [
+  ['Ch 1 · Character Creation', 19, '…HOPE AND FEAR <mark>Hope</mark> and Fear are currencies used by the players and the GM to represent the way fate turns…'],
+  ['Ch 1 · Character Creation', 21, '…Before you make an action or reaction roll, you can spend a <mark>Hope</mark> to add the Experience\'s modifier to the roll\'s result…'],
+  ['Ch 1 · Class', 28, '…Class <mark>Hope</mark> Feature: Each class has a special move they can make by spending 3 <mark>Hope</mark>…'],
+  ['Ch 1 · Class (Bard)', 29, '…Make a Scene: Spend 3 <mark>Hope</mark> to temporarily Distract a target within Close range…'],
+  ['Ch 1 · Class (Druid)', 31, '…Evolution: Spend 3 <mark>Hope</mark> to transform into a Beastform without marking a Stress…'],
+];
+const rows = HITS.map(([c, p, s], i) => `<li><a class="hit${i === 0 ? ' focus' : ''}" href="#" aria-label="Page ${p}, ${c.replace('Ch 1 · ', 'Chapter One, ')}: ${s.replace(/<[^>]+>/g, '')}">
+  <div><div class="hit-top"><b>${c}</b><span class="hit-pg">p. ${p}</span></div><p class="hit-snip">${s}</p></div>
+  <span class="hit-thumb" aria-hidden="true"><i></i><i></i><i class="m"></i><i></i><i></i><i></i></span></a></li>`).join('');
+document.querySelectorAll('[data-hits]').forEach(u => u.innerHTML = rows);
+</script>
+</body>
+</html>

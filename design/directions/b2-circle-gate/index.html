@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@500;700&display=swap">
+<link rel="stylesheet" href="salt.css">
+<style>
+/* gilt metallic fill (R21, re-tinted gold) */
+.gilt-fill {
+  background: linear-gradient(180deg, var(--c-gilt-hi) 0 38%, var(--c-gilt) 38% 70%, var(--c-gilt-lo) 70% 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Board 2 — threshold: the wordmark is free; the ward is drawn tight round the button. Board-level tokens. */
+:root {
+  --edge: var(--s7);
+  --gate-d: min(38svh, 22rem);
+  --btn-w: calc(var(--gate-d) * 1.32);
+  --tag: var(--fs-xl);
+  --wm-gap: var(--s5);
+}
+@media (max-width: 699px) {
+  :root { --edge: var(--s4); --gate-d: 15.5rem; --btn-w: 20rem; --tag: var(--fs-lg); --wm-gap: var(--s4); }
+}
+.hero { position: relative; min-height: 100svh; overflow: hidden; display: grid; grid-template-rows: auto auto 1fr; justify-items: center; gap: var(--wm-gap); padding: var(--s7) var(--edge) var(--s6);
+  background: radial-gradient(60% 55% at 50% 72%, var(--c-brine), var(--c-night) 100%); }
+.saltfield { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+h1 { position: relative; z-index: 1; margin: 0; width: 100%; font-family: var(--f-display); font-weight: 900; line-height: var(--lh-tight); text-align: center; letter-spacing: .01em; white-space: nowrap; }
+h1 > span { display: inline-block; filter: drop-shadow(0 var(--s1) var(--s3) var(--c-night)); }
+h1 .sp { display: inline-block; width: .32em; }
+.tag { position: relative; z-index: 1; margin: 0; font-style: italic; font-size: var(--tag); color: var(--c-salt-2); }
+.gatewrap { position: relative; z-index: 1; align-self: center; width: var(--gate-d); aspect-ratio: 1; display: grid; place-items: center; }
+.gatewrap > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.gatewrap .gate-btn { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: var(--btn-w); }
+@media (max-width: 699px) {
+  h1 { white-space: normal; display: grid; justify-items: center; }
+  h1 .sp { display: none; }
+  h1 .mid { font-family: var(--f-caps); font-weight: 700; color: var(--c-salt); letter-spacing: var(--tr-wide); background: none; padding: .12em 0 .16em; }
+  .hero { padding-top: var(--s6); }
+}
+@media (min-width: 700px) { h1 .mid { font-family: var(--f-caps); font-weight: 700; letter-spacing: .1em; background: none; color: var(--c-salt); } }
+
+/* motion: salt settles, ward pours round the button, glyphs wake, slow breath */
+.saltfield path { animation: wake .6s var(--ease-out) backwards; }
+.hero .pour { stroke-dasharray: 100 100; animation: pour 1.2s var(--ease-pour) .35s backwards; }
+@keyframes pour { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.hero .glyph { animation: wake var(--t-glyph) var(--ease-out) calc(var(--d-glyph) + var(--i) * 30ms) backwards; }
+@keyframes wake { from { opacity: 0; } }
+.hero .breath { transform-box: view-box; transform-origin: center; animation: breath var(--t-breath) ease-in-out 2s infinite alternate; }
+@keyframes breath { to { transform: scale(1.02); } }
+h1, .tag { animation: wake .7s var(--ease-out) .1s backwards; }
+</style>
+</head>
+<body>
+<a class="skip" href="#enter">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="defs"></svg>
+<main class="hero">
+  <svg class="saltfield" id="field" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"></svg>
+  <h1 id="wm"><span class="gilt-fill" data-fit>HIGH</span><span class="sp"> </span><span class="gilt-fill mid" data-fit>SODIUM</span><span class="sp"> </span><span class="gilt-fill" data-fit>GAMING</span></h1>
+  <p class="tag">Rules, close at hand. Salt to taste.</p>
+  <div class="gatewrap">
+    <svg id="ward" viewBox="0 0 400 400" aria-hidden="true" focusable="false" role="presentation"></svg>
+    <a class="gate-btn" id="enter" href="resources.html" aria-label="Resources — open the book shelf"><span class="br" aria-hidden="true">{</span><span class="lbl">RESOURCES</span><span class="br" aria-hidden="true">}</span></a>
+  </div>
+</main>
+<svg class="grain" aria-hidden="true"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 1.4 -.3"/></filter><rect width="100%" height="100%" filter="url(#noise)"/></svg>
+<script src="salt.js"></script>
+<script>
+document.getElementById('defs').innerHTML = SALT.defs();
+document.getElementById('ward').innerHTML = SALT.ring({ size: 400, r: 158, band: 13, count: 1500, seed: 5, gates: [[0, 30], [180, 30]], glyphs: 8, glyphSize: 24, glyphR: 40, glyphPhase: .35, hair: true, grain: [1.8, 4.6], scatter: .07, giltShare: .05, id: 'pour-gate' });
+const phone = matchMedia('(max-width: 699px)').matches;
+document.getElementById('field').innerHTML = SALT.field({ w: 1440, h: 900, count: phone ? 520 : 900, fx: 720, fy: phone ? 640 : 620, spread: 260, pull: .5, seed: 9 });
+/* Fit the wordmark to the width (R19). Desktop: one line spans the width. Phone: each line spans it. Builder: same measure-once fit. */
+function fit() {
+  const h1 = document.getElementById('wm'), W = h1.clientWidth, spans = h1.querySelectorAll('[data-fit]');
+  if (matchMedia('(max-width: 699px)').matches) {
+    spans.forEach((s) => { s.style.fontSize = '100px'; s.style.fontSize = (100 * W / s.offsetWidth * (s.classList.contains('mid') ? .78 : 1)) + 'px'; });
+  } else {
+    h1.style.fontSize = '100px'; spans.forEach((s) => { s.style.fontSize = ''; });
+    let w = 0; h1.querySelectorAll('span').forEach((s) => { w += s.offsetWidth; });
+    h1.style.fontSize = Math.min(100 * W / w, 260) + 'px';
+  }
+}
+document.fonts.ready.then(fit); addEventListener('resize', fit);
+</script>
+</body>
+</html>

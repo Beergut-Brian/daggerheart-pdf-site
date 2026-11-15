@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=IM+Fell+English:ital@1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* a1 — covers carry the salt crust at their corners (the frame, in its quiet form) */
+body { background: radial-gradient(ellipse 80% 50% at 30% 0%, var(--c-night-3), var(--c-night) 70%); min-height: 100svh; }
+.sample { margin-top: var(--s9); padding-top: var(--s6); border-top: var(--hair) solid var(--c-gilt-lo); display: grid; gap: var(--s5); }
+.sample h2 { margin: 0; font: 400 var(--t-sm)/1.2 var(--f-ui); letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--c-text-2); }
+.six { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6) var(--s4); }
+.six .book { gap: var(--s3); align-content: start; }
+.six .b-title { font-size: var(--t-lg); }
+.six .b-meta { font-size: var(--t-xs); }
+@media (min-width: 600px) { .six { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .six { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--s6) var(--s5); } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="res-wrap">
+  <header class="res-head">
+    <a class="back" href="index.html">← High Sodium Gaming</a>
+    <h1>Resources</h1>
+    <p>Pick a book. Search starts the moment it opens.</p>
+  </header>
+
+  <section class="shelf" aria-label="Books">
+    <a class="book book--main" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <div class="cover cover--ox" data-crust="11" aria-hidden="true">
+        <div class="cv-leather"></div><div class="cv-spine"></div><div class="cv-tool"></div>
+        <div class="cv-title"><span class="cv-kicker">Daggerheart</span><span class="cv-rule"></span><span class="cv-name gilt">Core Rulebo&zwnj;ok</span><svg class="cv-sigil" viewBox="0 0 64 64"><use href="#sigil"/></svg></div>
+        <svg class="cv-crust"></svg>
+      </div>
+      <div class="b-info">
+        <p class="b-title">Daggerheart Core Rulebook</p>
+        <p class="b-sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="b-meta">397 pages · 5 chapters</p>
+        <span class="b-open">Open</span>
+      </div>
+    </a>
+    <a class="book book--side" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <div class="cover cover--blue" data-crust="29" aria-hidden="true">
+        <div class="cv-leather"></div><div class="cv-spine"></div><div class="cv-tool"></div>
+        <div class="cv-title"><span class="cv-kicker">Daggerheart</span><span class="cv-rule"></span><span class="cv-name gilt">Hope &amp; Fear</span><svg class="cv-sigil" viewBox="0 0 64 64"><use href="#sigil"/></svg></div>
+        <svg class="cv-crust"></svg>
+      </div>
+      <div class="b-info">
+        <p class="b-title">Daggerheart: Hope &amp; Fear</p>
+        <p class="b-sub">The expansion</p>
+        <p class="b-meta">204 pages · Expansion</p>
+        <span class="b-open">Open</span>
+      </div>
+    </a>
+  </section>
+
+  <section class="sample" aria-labelledby="sample-h">
+    <h2 id="sample-h">Sample shelf: future titles</h2>
+    <div class="six" id="six"></div>
+  </section>
+</main>
+<div class="grain" aria-hidden="true"></div>
+<script src="crystals.js"></script>
+<script>
+HSGX.mountDefs();
+const SIX = [
+  ['Daggerheart Core Rulebook', 'Core Rulebo&zwnj;ok', '397 pages · 5 chapters', 'ox', 397],
+  ['Daggerheart: Hope &amp; Fear', 'Hope &amp; Fear', '204 pages · Expansion', 'blue', 204],
+  ['Table Quick Reference', 'Quick Reference', '12 pages · 3 sections', 'moss', 12],
+  ['House Rules', 'House Rules', '8 pages · 1 chapter', 'umber', 8],
+  ['Session Zero Pack', 'Session Zero', '16 pages · 4 sections', 'ox', 16],
+  ['Adversary Deck: The Long Title That Wraps Onto Two Lines', 'Adversary Deck', '64 pages · 2 chapters', 'moss', 64],
+];
+document.getElementById('six').innerHTML = SIX.map(([t, c, m, v, p], i) => `<a class="book" href="viewer.html" aria-label="Open ${t}, ${p} pages">
+  <div class="cover cover--${v}" data-crust="${100 + i * 7}" aria-hidden="true"><div class="cv-leather"></div><div class="cv-spine"></div><div class="cv-tool"></div>
+  <div class="cv-title"><span class="cv-kicker">HSG</span><span class="cv-small gilt">${c}</span></div><svg class="cv-crust"></svg></div>
+  <div class="b-info"><p class="b-title">${t}</p><p class="b-meta">${m}</p></div></a>`).join('');
+function build() { document.querySelectorAll('.cover[data-crust]').forEach((c) => HSGX.coverCorners(c, +c.dataset.crust)); }
+HSGX.ready(build);
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+</script>
+</body>
+</html>

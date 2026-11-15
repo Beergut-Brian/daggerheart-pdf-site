@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;800&family=Marcellus+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lamp.css">
+<style>
+.pick::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 50% at 30% 62%, color-mix(in srgb, var(--amber-800) 30%, var(--clear)), var(--clear) 70%),
+              radial-gradient(ellipse 120% 80% at 50% 30%, var(--clear) 50%, var(--ink-950) 100%); }
+.cover.day::before, .cover.day::after { border-color: var(--amber-950); }
+.cover.day .cover-t { color: var(--amber-950); bottom: var(--s7); }
+
+.sample { position: relative; margin-top: var(--s9); padding-top: var(--s6); }
+.sample::before { content: ""; position: absolute; left: 0; right: 0; top: 0; border-top: var(--line) solid var(--ink-700); }
+.sample-cap { margin: 0 0 var(--s5); font-size: var(--fs-xs); letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--ink-300); }
+.six { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6) var(--s4); }
+.mini { display: grid; gap: var(--s3); align-content: start; text-decoration: none; color: inherit; }
+.mini .cover-t { font-size: var(--fs-sm); left: var(--s3); right: var(--s3); bottom: var(--s4); }
+.mini .t { margin: 0; font-family: var(--font-title); font-size: var(--fs-md); line-height: var(--lh-snug); color: var(--amber-50); text-wrap: balance; }
+.mini .m { margin: 0; font-size: var(--fs-xs); color: var(--ink-300); letter-spacing: var(--track-mid); }
+.mini:hover .cover { transform: translateY(calc(var(--s1) * -1)); }
+@media (min-width: 900px) { .six { grid-template-columns: repeat(6, 1fr); gap: var(--s6) var(--s5); } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="cpool" cx="50%" cy="50%" r="50%"><stop offset="0" style="stop-color:var(--amber-800);stop-opacity:.95"/><stop offset="1" style="stop-color:var(--amber-800);stop-opacity:0"/></radialGradient>
+    <linearGradient id="ccone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--amber-400);stop-opacity:.42"/><stop offset="1" style="stop-color:var(--amber-400);stop-opacity:0"/></linearGradient>
+    <radialGradient id="chalo"><stop offset="0" style="stop-color:var(--amber-200);stop-opacity:.8"/><stop offset=".4" style="stop-color:var(--amber-400);stop-opacity:.25"/><stop offset="1" style="stop-color:var(--amber-400);stop-opacity:0"/></radialGradient>
+    <linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--amber-200)"/><stop offset=".55" style="stop-color:var(--amber-400)"/><stop offset="1" style="stop-color:var(--amber-600)"/></linearGradient>
+    <radialGradient id="dshade" cx="50%" cy="100%" r="70%"><stop offset="0" style="stop-color:var(--ink-950)"/><stop offset=".55" style="stop-color:var(--ink-950);stop-opacity:.92"/><stop offset="1" style="stop-color:var(--ink-950);stop-opacity:0"/></radialGradient>
+    <filter id="cblur"><feGaussianBlur stdDeviation="7"/></filter>
+    <symbol id="lant" viewBox="0 0 120 200">
+      <path style="fill:none;stroke:var(--lc);stroke-width:3" d="M60 0 V46"/>
+      <path style="fill:var(--lb);stroke:var(--lc);stroke-width:3;stroke-linejoin:round" d="M60 46 L86 76 H34 Z M28 76 H92 V84 H28 Z"/>
+      <path style="fill:var(--amber-50)" d="M60 98 L78 108 L60 118 L42 108 Z"/>
+      <path style="fill:var(--amber-200)" d="M42 108 L60 118 L60 139 L42 129 Z"/>
+      <path style="fill:var(--amber-400)" d="M78 108 L60 118 L60 139 L78 129 Z"/>
+      <path style="fill:none;stroke:var(--lc);stroke-width:3;stroke-linejoin:round" d="M33 84 L27 150 H93 L87 84 M47 85 L44 149 M73 85 L76 149"/>
+      <path style="fill:var(--lb);stroke:var(--lc);stroke-width:3;stroke-linejoin:round" d="M24 150 H96 V158 H24 Z M46 158 L60 178 L74 158 Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main id="main" class="pick">
+  <header class="pick-head">
+    <a class="back" href="index.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8 H3 M7 4 L3 8 L7 12"/></svg>High Sodium Gaming</a>
+    <h1>Resources</h1>
+    <span class="doublet" aria-hidden="true"></span>
+    <p>Pick a book. Search starts the moment it opens.</p>
+  </header>
+
+  <section class="shelf" aria-label="Books">
+    <a class="book" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <div class="cover" data-tone="night" data-x="150" data-title="Daggerheart Core Rulebook"></div>
+      <div class="book-info">
+        <h2 class="book-title">Daggerheart Core Rulebook</h2>
+        <p class="book-sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="book-meta">397 pages · 5 chapters</p>
+        <span class="book-open">Open</span>
+      </div>
+    </a>
+    <a class="book" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <div class="cover day" data-tone="day" data-x="150" data-title="Daggerheart: Hope &amp; Fear"></div>
+      <div class="book-info">
+        <h2 class="book-title">Daggerheart: Hope &amp; Fear</h2>
+        <p class="book-sub">The expansion</p>
+        <p class="book-meta">204 pages · Expansion</p>
+        <span class="book-open">Open</span>
+      </div>
+    </a>
+  </section>
+
+  <section class="sample" aria-label="Sample shelf: future titles">
+    <p class="sample-cap">Sample shelf: future titles</p>
+    <div class="six" id="six"></div>
+  </section>
+</main>
+<svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<script>
+function coverSVG(tone, x) {
+  if (tone === 'day') {
+    return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <rect width="300" height="400" fill="url(#dsky)"/>
+      <ellipse cx="${x}" cy="404" rx="190" ry="34" fill="url(#dshade)"/>
+      <use href="#lant" x="${x - 30}" y="0" width="60" height="100" style="--lc:var(--ink-950);--lb:var(--amber-400)"/>
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <rect width="300" height="400" style="fill:var(--ink-900)"/>
+    <ellipse cx="${x}" cy="270" rx="190" ry="140" fill="url(#cpool)"/>
+    <polygon points="${x - 6},88 ${x + 6},88 ${x + 120},400 ${x - 120},400" fill="url(#ccone)" filter="url(#cblur)"/>
+    <circle cx="${x}" cy="60" r="56" fill="url(#chalo)"/>
+    <use href="#lant" x="${x - 30}" y="0" width="60" height="100" style="--lc:var(--amber-600);--lb:var(--ink-950)"/>
+  </svg>`;
+}
+document.querySelectorAll('.cover[data-tone]').forEach(c => {
+  c.innerHTML = coverSVG(c.dataset.tone, +c.dataset.x) + `<p class="cover-t" aria-hidden="true">${c.dataset.title}</p>`;
+});
+const SIX = [
+  ['Daggerheart Core Rulebook', '397 pages · 5 chapters', 'night', 150],
+  ['Daggerheart: Hope &amp; Fear', '204 pages · Expansion', 'day', 150],
+  ['Table Quick Reference', '12 pages · 3 sections', 'night', 96],
+  ['House Rules', '8 pages · 1 chapter', 'day', 204],
+  ['Session Zero Pack', '16 pages · 4 sections', 'night', 204],
+  ['Adversary Deck: The Long Title That Wraps Onto Two Lines', '64 pages · 2 chapters', 'night', 120],
+];
+document.getElementById('six').innerHTML = SIX.map(([t, m, tone, x]) => `<a class="mini" href="viewer.html" aria-label="Open ${t}, ${m.split(' ·')[0]}">
+  <div class="cover${tone === 'day' ? ' day' : ''}">${coverSVG(tone, x)}<p class="cover-t" aria-hidden="true">${t}</p></div>
+  <div><p class="t">${t}</p><p class="m">${m}</p></div></a>`).join('');
+</script>
+</body>
+</html>

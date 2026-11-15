@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;800&family=Marcellus+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lamp.css">
+<style>
+.hero { position: relative; min-height: 100svh; display: grid; place-items: center; overflow: hidden; isolation: isolate; padding: var(--s8) var(--s4); }
+.field-bg { position: absolute; inset: 0; z-index: -3; background:
+  radial-gradient(ellipse 30% 70% at 50% 50%, color-mix(in srgb, var(--amber-800) 30%, var(--clear)), var(--clear) 100%),
+  radial-gradient(ellipse 110% 90% at 50% 50%, var(--ink-900) 0%, var(--ink-950) 70%); }
+
+/* spectroscope scale: wavelength runs 584.3 → 594.3 nm across the width */
+.scale { position: absolute; left: 0; right: 0; height: var(--s8); z-index: -1; pointer-events: none; }
+.scale.top { top: 0; border-bottom: var(--line) solid var(--ink-700); }
+.scale.bot { bottom: 0; border-top: var(--line) solid var(--ink-700); }
+.tk { position: absolute; width: var(--line); background: var(--ink-500); height: var(--s2); }
+.tk.half { height: var(--s3); background: var(--ink-300); }
+.tk.maj { height: var(--s5); background: var(--amber-600); }
+.top .tk { bottom: 0; } .bot .tk { top: 0; }
+.tl { position: absolute; transform: translateX(-50%); font-size: var(--fs-2xs); letter-spacing: var(--track-mid); color: var(--ink-300); }
+.top .tl { top: var(--s3); } .bot .tl { bottom: var(--s3); }
+.tl.d { color: var(--amber-200); }
+
+/* the doublet: D2 589.0 nm and D1 589.6 nm */
+.dl { position: absolute; top: 0; bottom: 0; z-index: -2; width: var(--band-core); transform: translateX(-50%); }
+.dl.d2 { left: 47%; } .dl.d1 { left: 53%; }
+.dl::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: var(--band-glow); transform: translateX(-50%);
+  background: linear-gradient(to right, var(--clear), color-mix(in srgb, var(--amber-400) 26%, var(--clear)) 42%, color-mix(in srgb, var(--amber-200) 55%, var(--clear)) 50%, color-mix(in srgb, var(--amber-400) 26%, var(--clear)) 58%, var(--clear)); }
+.core { position: absolute; top: 0; bottom: 0; z-index: 2; width: var(--band-core); transform: translateX(-50%); mix-blend-mode: screen; pointer-events: none;
+  background: linear-gradient(to right, var(--amber-600), var(--amber-50) 50%, var(--amber-600)); }
+.core.d2 { left: 47%; } .core.d1 { left: 53%; }
+.cross { position: absolute; left: 0; right: 0; top: 50%; height: var(--line); background: var(--ink-700); z-index: -2; }
+.scan { position: absolute; top: 0; bottom: 0; width: var(--line); left: 50.3%; background: var(--amber-200); z-index: 1; opacity: 0; }
+
+.stack { position: relative; display: grid; justify-items: center; text-align: center; gap: var(--s5); }
+.word { margin: 0; font-family: var(--font-display); font-weight: var(--w-display); line-height: var(--lh-tight); letter-spacing: var(--track-word);
+  color: var(--amber-200); font-size: var(--fs-word-stack); }
+.word span { display: block; }
+.word .mid { font-size: var(--fs-word-mid); letter-spacing: var(--track-word-mid); padding: var(--s2) 0 var(--s3); color: var(--amber-50); }
+.rule { width: min(var(--s9) * 2.4, 70vw); }
+.tag { margin: 0; font-family: var(--font-title); font-size: var(--fs-tagline); letter-spacing: var(--track-mid); color: var(--amber-50);
+  background: color-mix(in srgb, var(--ink-950) 88%, var(--clear)); padding: var(--s1) var(--s2); position: relative; z-index: 3; }
+@media (max-width: 899px) { .tag { letter-spacing: var(--track-word); } }
+.cta { margin-top: var(--s2); position: relative; z-index: 3; }
+
+:root { --band-core: 5px; --band-glow: 90px; }
+@media (min-width: 900px) {
+  :root { --band-core: 9px; --band-glow: 260px; }
+  .word { font-size: clamp(6rem, 17vh, 10rem); }
+  .hero { padding: var(--s8) var(--s6); }
+}
+
+@keyframes ignite { 0%, 40% { opacity: .08 } 52% { opacity: 1 } 58% { opacity: .7 } 100% { opacity: 1 } }
+@keyframes sweep { 0% { left: 0; opacity: 1 } 70% { left: 50.3%; opacity: 1 } 100% { left: 50.3%; opacity: 0 } }
+@keyframes shimmer { 0%, 100% { opacity: 1 } 50% { opacity: .88 } }
+.dl, .core { animation: ignite 1.2s var(--ease-out) both, shimmer 7s ease-in-out 1.2s infinite; }
+.scan { animation: sweep 1.2s var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) {
+  .dl, .core { animation: none; }
+  .scan { animation: none; opacity: 0; }
+  .btn-lamp, .btn-lamp::before { transition: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="hero">
+  <div class="field-bg" aria-hidden="true"></div>
+  <div class="scale top" aria-hidden="true" data-scale></div>
+  <div class="scale bot" aria-hidden="true" data-scale></div>
+  <div class="cross" aria-hidden="true"></div>
+  <div class="dl d2" aria-hidden="true"></div>
+  <div class="dl d1" aria-hidden="true"></div>
+  <div class="core d2" aria-hidden="true"></div>
+  <div class="core d1" aria-hidden="true"></div>
+  <div class="scan" aria-hidden="true"></div>
+
+  <div class="stack">
+    <h1 class="word"><span>HIGH</span> <span class="mid">SODIUM</span> <span>GAMING</span></h1>
+    <span class="doublet rule" aria-hidden="true"></span>
+    <p class="tag">Rules, close at hand. Salt to taste.</p>
+    <a class="btn-lamp cta" href="resources.html" aria-label="Resources — open the book shelf">Resources
+      <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8 H13 M9 4 L13 8 L9 12"/></svg></a>
+  </div>
+</main>
+<svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<script>
+// wavelength 584.3 → 594.3 nm maps to 0 → 100%
+const narrow = matchMedia('(max-width: 899px)').matches;
+document.querySelectorAll('[data-scale]').forEach((s, si) => {
+  let h = '';
+  for (let t = 0; t <= 100; t++) {
+    const nm = 584.3 + t / 10, x = t;
+    const maj = Math.abs(nm - Math.round(nm)) < 1e-6, half = Math.abs(nm * 2 - Math.round(nm * 2)) < 1e-6;
+    h += `<span class="tk${maj ? ' maj' : half ? ' half' : ''}" style="left:${x}%"></span>`;
+    if (maj && Math.round(nm) !== 589 && Math.round(nm) !== 590 && (!narrow || Math.round(nm) % 2 === 1)) h += `<span class="tl" style="left:${x}%">${Math.round(nm)}</span>`;
+  }
+  if (si === 0) h += `<span class="tl d" style="left:47%;top:auto;bottom:calc(var(--s5) + var(--s1))">D₂</span><span class="tl d" style="left:53%;top:auto;bottom:calc(var(--s5) + var(--s1))">D₁</span>`;
+  else h += `<span class="tl d" style="left:41%">589.0</span><span class="tl d" style="left:59%">589.6</span>`;
+  s.innerHTML = h;
+});
+</script>
+</body>
+</html>

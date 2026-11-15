@@ -10,10 +10,10 @@ Anything marked **Sample** is placeholder data for design only and never ships a
 | Slot | Copy |
 | --- | --- |
 | Site title (`<title>`, `/`) | High Sodium Gaming — Daggerheart table resources |
-| Meta description | The High Sodium Gaming table's Daggerheart books, searchable on your phone. |
+| Meta description | Our table's Daggerheart books, searchable on your phone. |
 | Wordmark | HIGH SODIUM GAMING |
 | Wordmark short (viewer top bar, ≤ 390) | HSG |
-| Fan-content line (footer, all pages) | Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press. |
+| Footer | None. Kaden, 2026-11-14 22:40: no "unofficial", fan, trademark or copyright text anywhere (local use only). |
 | Skip link | Skip to content |
 
 ---
@@ -29,9 +29,8 @@ Anything marked **Sample** is placeholder data for design only and never ships a
 | Button accessible name | Resources — open the book shelf |
 | Hero art (aria-hidden, decorative) | (none spoken; `role="presentation"`) |
 | Reduced-motion note | (none: static end state is the same composition) |
-| Footer | Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press. |
 
-Recommendation: ship the first line ("Rules, close at hand. Salt to taste."). One line, one joke, gets out of the way of the button.
+Approved (DH10 a): "Rules, close at hand. Salt to taste."
 
 ---
 
@@ -60,23 +59,25 @@ Recommendation: ship the first line ("Rules, close at hand. Salt to taste."). On
 
 Card meta as shown: **397 pages · 5 chapters**
 
-**State B — 2 books (1 real + Sample)**
+**State B — 2 books (both real; the default shelf)**
 
-| Title | Subtitle | Pages | Meta |
-| --- | --- | --- | --- |
-| Daggerheart Core Rulebook | Everything: characters, play, GM tools, adversaries, campaign frames | 397 | 397 pages · 5 chapters |
-| **Sample:** The Second Book | Title coming from Kaden (DH6) | 120 | 120 pages · 6 chapters |
+| Title | Subtitle | Pages | Meta | Slug |
+| --- | --- | --- | --- | --- |
+| Daggerheart Core Rulebook | Everything: characters, play, GM tools, adversaries, campaign frames | 397 | 397 pages · 5 chapters | `core-rulebook` |
+| Daggerheart: Hope & Fear | The expansion | 204 | 204 pages · Expansion | `hope-and-fear` |
 
-**State C — 6 books (Sample shelf; tests the layout, not real titles)**
+Hope & Fear has no text layer yet (OCR in build); no special design state for it.
+
+**State C — 6 books (scale test; caption on this state only: "Sample shelf: future titles")**
 
 | # | Title | Subtitle | Pages | Meta |
 | --- | --- | --- | --- | --- |
 | 1 | Daggerheart Core Rulebook | Everything: characters, play, GM tools, adversaries, campaign frames | 397 | 397 pages · 5 chapters |
-| 2 | Sample: Campaign Book | A second rulebook-sized volume | 240 | 240 pages · 8 chapters |
-| 3 | Sample: Table Quick Reference | Moves, ranges, conditions on one page | 12 | 12 pages · 3 sections |
-| 4 | Sample: House Rules | How our table bends the rules | 8 | 8 pages · 1 chapter |
-| 5 | Sample: Session Zero Pack | Safety tools and table expectations | 16 | 16 pages · 4 sections |
-| 6 | Sample: Adversary Cards, Long Title That Wraps Onto Two Lines | Stress-test for title wrapping | 64 | 64 pages · 2 chapters |
+| 2 | Daggerheart: Hope & Fear | The expansion | 204 | 204 pages · Expansion |
+| 3 | Table Quick Reference | Moves, ranges, conditions on one page | 12 | 12 pages · 3 sections |
+| 4 | House Rules | How our table bends the rules | 8 | 8 pages · 1 chapter |
+| 5 | Session Zero Pack | Safety tools and table expectations | 16 | 16 pages · 4 sections |
+| 6 | Adversary Deck: The Long Title That Wraps Onto Two Lines | Stress-test for title wrapping | 64 | 64 pages · 2 chapters |
 
 ---
 

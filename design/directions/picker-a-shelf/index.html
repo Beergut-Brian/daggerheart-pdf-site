@@ -54,7 +54,6 @@ section.state { padding: var(--s4); border-top: 1px solid var(--g3); }
   <div class="shelf" id="six"></div><div class="ledge"></div>
   <p class="note" style="margin-top:var(--s4)">Desktop: spine heights vary with page count (scaled, min/max clamped). Focus or hover pulls a spine forward and shows subtitle in a caption under the shelf.</p>
 </section>
-<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
 <script>
 document.getElementById('six').innerHTML = BOOKS.map((b,i)=>`<a class="spine${i===0?' pulled':''}" href="#" aria-label="Open ${b.t}, ${b.p} pages">
 <span><span class="t">${b.t}</span><br><span class="m">${b.p} pages · ${b.c}</span></span><span class="open">Open</span></a>`).join('');

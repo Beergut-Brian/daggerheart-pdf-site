@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=IM+Fell+English:ital@1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* a2 — the salt grows out of the cover lettering (the crystals-in-type idea, quiet form) */
+body { background: radial-gradient(ellipse 80% 50% at 30% 0%, var(--c-night-3), var(--c-night) 70%); min-height: 100svh; }
+.xl { background-image: linear-gradient(0deg, var(--c-gilt-hi) 0%, var(--c-gilt) 30%, transparent 58%), conic-gradient(from 30deg, var(--c-salt), var(--c-salt) 22%, var(--c-salt-mid) 30%, var(--c-salt-mid) 55%, var(--c-salt-shade) 62%, var(--c-salt-mid) 80%, var(--c-salt));
+  background-size: 100% 100%, .38em .38em; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="res-wrap">
+  <header class="res-head">
+    <a class="back" href="index.html">← High Sodium Gaming</a>
+    <h1>Resources</h1>
+    <p>Pick a book. Search starts the moment it opens.</p>
+  </header>
+
+  <section class="shelf" aria-label="Books">
+    <a class="book book--main" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <div class="cover cover--ox" data-crust="11" aria-hidden="true">
+        <div class="cv-leather"></div><div class="cv-spine"></div><div class="cv-tool"></div>
+        <div class="cv-title"><span class="cv-kicker">Daggerheart</span><span class="cv-rule"></span><span class="cv-name gilt"><span class="xl">C</span>ore Rulebo&zwnj;ok</span><svg class="cv-sigil" viewBox="0 0 64 64"><use href="#sigil"/></svg></div>
+        <svg class="cv-crust"></svg>
+      </div>
+      <div class="b-info">
+        <p class="b-title">Daggerheart Core Rulebook</p>
+        <p class="b-sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="b-meta">397 pages · 5 chapters</p>
+        <span class="b-open">Open</span>
+      </div>
+    </a>
+    <a class="book book--side" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <div class="cover cover--blue" data-crust="29" aria-hidden="true">
+        <div class="cv-leather"></div><div class="cv-spine"></div><div class="cv-tool"></div>
+        <div class="cv-title"><span class="cv-kicker">Daggerheart</span><span class="cv-rule"></span><span class="cv-name gilt"><span class="xl">H</span>ope &amp; Fear</span><svg class="cv-sigil" viewBox="0 0 64 64"><use href="#sigil"/></svg></div>
+        <svg class="cv-crust"></svg>
+      </div>
+      <div class="b-info">
+        <p class="b-title">Daggerheart: Hope &amp; Fear</p>
+        <p class="b-sub">The expansion</p>
+        <p class="b-meta">204 pages · Expansion</p>
+        <span class="b-open">Open</span>
+      </div>
+    </a>
+  </section>
+
+</main>
+<div class="grain" aria-hidden="true"></div>
+<script src="crystals.js"></script>
+<script>
+HSGX.mountDefs();
+function build() {
+  document.querySelectorAll('.cover[data-crust]').forEach((c) => {
+    const svg = c.querySelector('.cv-crust'), x = c.querySelector('.xl'); svg.setAttribute('viewBox', `0 0 ${c.offsetWidth} ${c.offsetHeight}`); svg.innerHTML = '';
+    const seed = +c.dataset.crust;
+    HSGX.letterBurst(x, c, svg, { at: [.2, .6], spread: [-3.1, -1.9], seed, R: 1.7, n: 32, smax: .3, d0: .2, pow: 1.2 });
+    HSGX.letterBurst(x, c, svg, { at: [.4, .3], seed: seed + 5, R: .5, n: 10, smax: .18, d0: .3, pow: 1.4 });
+  });
+}
+HSGX.ready(build);
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=IM+Fell+English:ital@1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* a1 — the landing is the front cover of the grimoire */
+@media (min-width: 900px) { :root { --spine: 56px; --fitting: 92px; } }
+body.land { min-height: 100svh; background: radial-gradient(ellipse at 50% 0%, var(--c-night-3), var(--c-night) 70%); }
+.stage { min-height: 100svh; padding: var(--s3); display: grid; }
+.tome { position: relative; overflow: hidden; isolation: isolate; display: grid; place-items: center; grid-template-columns: minmax(0, 1fr);
+  padding: var(--s9) var(--s5) var(--s9) calc(var(--spine) + var(--s5));
+  background: var(--c-leather); border-radius: var(--r-2) var(--r-3) var(--r-3) var(--r-2); box-shadow: var(--sh-page); }
+.tome-leather { position: absolute; inset: 0; filter: url(#f-leather); background: var(--c-night); mix-blend-mode: soft-light; z-index: 0; }
+.tome-light { position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 60% 48% at 52% 44%, var(--c-glow), var(--c-glow-0) 70%), radial-gradient(ellipse at 50% 50%, transparent 45%, var(--c-shadow) 100%); }
+.tome-spine { position: absolute; left: 0; top: 0; bottom: 0; width: var(--spine); z-index: 1;
+  background: linear-gradient(90deg, var(--c-shadow) 0%, var(--c-blind-hi) 55%, var(--c-blind) 88%, var(--c-shadow) 100%);
+  display: grid; grid-template-rows: repeat(5, 1fr); }
+.tome-spine i { align-self: center; height: var(--s4); border-block: var(--hair) solid var(--c-gilt-lo);
+  background: linear-gradient(180deg, var(--c-blind-hi), var(--c-blind)); box-shadow: 0 var(--s1) var(--s2) var(--c-shadow); }
+.tome-spine i:first-child { visibility: hidden; }
+.tome-tool { position: absolute; z-index: 1; inset: var(--s5) var(--s5) var(--s5) calc(var(--spine) + var(--s5)); border: var(--hair) solid var(--c-gilt); }
+.tome-tool::before { content: ""; position: absolute; inset: 6px; border: var(--hair) solid var(--c-gilt-lo); }
+.tome-tool::after { content: ""; position: absolute; inset: var(--s6); border: var(--hair) solid var(--c-blind); box-shadow: 0 1px 0 var(--c-blind-hi), inset 0 1px 0 var(--c-blind-hi); }
+.fitting { position: absolute; z-index: 2; width: var(--fitting); height: var(--fitting); }
+.fitting.tl { left: var(--spine); top: 0; }
+.fitting.tr { right: 0; top: 0; transform: scaleX(-1); }
+.fitting.bl { left: var(--spine); bottom: 0; transform: scaleY(-1); }
+.fitting.br { right: 0; bottom: 0; transform: scale(-1, -1); }
+.fit-plate { fill: url(#g-gilt); stroke: var(--c-gilt-lo); stroke-width: 1; }
+.fit-step { fill: none; stroke: var(--c-leather-deep); stroke-width: 1; opacity: .55; }
+.fit-rivet { fill: var(--c-gilt-hi); stroke: var(--c-gilt-lo); stroke-width: 1; }
+.tome-crust { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
+.tome .lockup { gap: var(--s5); }
+.tome .wm { margin-block: var(--s2); }
+.plate { margin-top: var(--s3); }
+@media (min-width: 900px) {
+  .stage { padding: var(--s5); }
+  .tome { padding: var(--s8) var(--s9) var(--s8) calc(var(--spine) + var(--s9)); }
+}
+@media (max-width: 599px) { .tome-tool::after { inset: var(--s4); } .tome .lockup { gap: var(--s4); } }
+</style>
+</head>
+<body class="land">
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="stage">
+  <div class="tome" id="tome">
+    <div class="tome-leather" aria-hidden="true"></div>
+    <div class="tome-light" aria-hidden="true"></div>
+    <div class="tome-spine" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="tome-tool" aria-hidden="true"></div>
+    <svg class="fitting tl" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><use href="#fit"/></svg>
+    <svg class="fitting tr" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><use href="#fit"/></svg>
+    <svg class="fitting bl" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><use href="#fit"/></svg>
+    <svg class="fitting br" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><use href="#fit"/></svg>
+    <svg class="tome-crust" id="crust" aria-hidden="true" focusable="false"></svg>
+    <div class="lockup" id="lockup">
+      <svg class="sigil" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="#sigil"/></svg>
+      <h1 class="wm" id="wm"><span class="row r1"><span class="ln gilt">HIGH</span> <span class="ln gilt">SODIUM</span></span><span class="row r2"><span class="ln gilt">GAMING</span></span></h1>
+      <p class="tag">Rules, close at hand. Salt to taste.</p>
+      <a class="plate" href="resources.html" aria-label="Resources — open the book shelf"><span class="plate-crust" aria-hidden="true"></span>RESOURCES</a>
+    </div>
+  </div>
+</main>
+<div class="grain" aria-hidden="true"></div>
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <symbol id="fit" viewBox="0 0 96 96">
+    <path class="fit-plate" d="M0 0H96V20H72V36H56V56H36V72H20V96H0Z"/>
+    <path class="fit-step" d="M8 8H84M8 8V84M72 20V36M56 36V56M36 56V72"/>
+    <circle class="fit-rivet" cx="12" cy="12" r="4"/><circle class="fit-rivet" cx="62" cy="10" r="2.6"/><circle class="fit-rivet" cx="10" cy="62" r="2.6"/>
+  </symbol>
+</defs></svg>
+<script src="crystals.js"></script>
+<script>
+HSGX.mountDefs();
+const tome = document.getElementById('tome'), crustEl = document.getElementById('crust');
+function crust() {
+  const w = tome.clientWidth, h = tome.clientHeight, m = Math.min(w, h), sp = parseFloat(getComputedStyle(tome).getPropertyValue('--spine'));
+  const L = HSGX.relBox(document.getElementById('lockup'), tome);
+  const avoid = { x: L.x - 8, y: L.y - 10, w: L.w + 16, h: L.h + 20 };
+  crustEl.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const phone = w < 600, k = phone ? 1.25 : 1;
+  const specs = [
+    { seed: 11, cx: sp + 4, cy: h - 4, R: m * .46 * k, n: 80, smax: m * .062 * k, pow: 1.15, spread: [-1.72, .1] },
+    { seed: 23, cx: w - 2, cy: 6, R: m * .36 * k, n: 60, smax: m * .055 * k, pow: 1.15, spread: [1.5, 3.25] },
+    { seed: 37, cx: sp + 2, cy: 8, R: m * .17 * k, n: 12, smax: m * .04 * k, spread: [0, 1.6] },
+    { seed: 41, cx: w - 4, cy: h - 2, R: m * .22 * k, n: 16, smax: m * .048 * k, spread: [3.15, 4.7] },
+    { seed: 53, cx: sp + m * .2, cy: h - 2, R: w * .55, n: 34, smax: m * .03 * k, spread: [-.16, 0], squash: .5, pow: 1.4, d0: .5 },
+    { seed: 67, cx: w - m * .2, cy: 4, R: w * .5, n: 30, smax: m * .028 * k, spread: [3.141, 3.3], squash: .5, pow: 1.4, d0: .5 },
+    { seed: 71, cx: w - 2, cy: h * .3, R: h * .5, n: 14, smax: m * .026 * k, spread: [1.5, 1.66], pow: 1.3, d0: .6 },
+  ];
+  let svg = HSGX.glow(sp, h, m * .5) + HSGX.glow(w, 0, m * .4);
+  specs.forEach((o) => { svg += HSGX.draw(HSGX.cluster(o).filter((c) => !HSGX.hits(c, avoid, 6) && c.y > -c.s && c.y < h + c.s * 2)); });
+  crustEl.innerHTML = svg;
+}
+function build() { HSGX.fit(document.getElementById('wm')); crust(); HSGX.plateCrust(document.querySelector('.plate'), 5); }
+HSGX.ready(build);
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+</script>
+</body>
+</html>

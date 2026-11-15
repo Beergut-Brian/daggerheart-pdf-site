@@ -56,10 +56,10 @@
 | (v1) | | `app/globals.css` `@theme` |
 
 ## Open questions (v0)
-1. Second book's title, cover treatment and page count ([CONFIRM] with Kaden; designed with a labelled "Sample" book until then). → `QUESTIONS.md` DH6.
-2. Book covers on the picker: no raster images on the landing is stated; for the picker, do we render the PDF's own first page as the cover (it is Darrington Press art) or draw a code cover per book? Default: code-drawn cover per book, no PDF art reproduced as decoration. → DH7.
-3. Should the viewer keep the landing's dark/gilded skin, or go to a lighter reading skin with the brand only in the top bar? Default: dark chrome, the PDF page itself stays as printed. → DH8.
-4. Does the landing need anything below the fold (footer, credit line "Daggerheart is a trademark of Darrington Press", small "fan site" note)? Default: one-line footer with an unofficial-fan-content note. → DH9.
+1. Second book: "Daggerheart: Hope & Fear", expansion, 204 pages, no text layer yet (RobBot, 2026-11-14).
+2. Book covers on the picker: no raster images on the landing is stated; for the picker, do we render the PDF's own first page as the cover (it is Darrington Press art) or draw a code cover per book? Answered: code-drawn cover per book in the site's style.
+3. Should the viewer keep the landing's dark/gilded skin, or go to a lighter reading skin with the brand only in the top bar? Answered: dark gilded chrome, kept quiet so the page is the brightest thing on screen.
+4. Footer: none. Kaden 2026-11-14 22:40: no "unofficial", fan, trademark or copyright text anywhere; the site is for local use.
 
 ## Never
 - The Daggerheart logo, wordmark lettering, card frames, or art; raster images or AI art on the hero; paid fonts.

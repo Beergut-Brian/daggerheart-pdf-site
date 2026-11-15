@@ -41,7 +41,6 @@ section.state { padding: var(--s4); border-top: 1px solid var(--g3); }
 <section class="state"><span class="state-tag">State 2 · six books (Sample shelf)</span>
   <div class="grid" id="six"></div>
 </section>
-<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
 <script>
 document.getElementById('six').innerHTML = BOOKS.map(b=>`<a class="card" href="#" aria-label="Open ${b.t}, ${b.p} pages">
 <div class="slot cover">Cover</div><div><div class="t">${b.t}</div><div class="m">${b.p} pages · ${b.c}</div></div></a>`).join('');

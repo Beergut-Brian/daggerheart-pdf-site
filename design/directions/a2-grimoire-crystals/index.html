@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=IM+Fell+English:ital@1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* a2 — no frame: the salt grows through the gilt letters. The art is the type. */
+body.land { min-height: 100svh; }
+.field { position: relative; min-height: 100svh; display: grid; place-items: center; grid-template-columns: minmax(0, 1fr); overflow: hidden; isolation: isolate;
+  padding: var(--s9) var(--s4); background: radial-gradient(ellipse 70% 60% at 50% 46%, var(--c-leather), var(--c-leather-deep) 55%, var(--c-night) 100%); }
+.wash { position: absolute; inset: -2%; z-index: 0; filter: url(#f-wash); background: var(--c-night); mix-blend-mode: soft-light; opacity: .9; }
+.light { position: absolute; inset: 0; z-index: 0; background: radial-gradient(ellipse 50% 34% at 50% 44%, var(--c-glow), var(--c-glow-0) 72%), radial-gradient(ellipse at 50% 50%, transparent 52%, var(--c-shadow) 100%); }
+.burst { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.burst.back { z-index: 0; opacity: .9; }
+.burst.front { z-index: 4; }
+.field .lockup { gap: var(--s5); }
+.wm .ln.gilt { position: relative; }
+.xl {
+  background-image: linear-gradient(var(--xd, 180deg), var(--c-gilt-hi) 0%, var(--c-gilt) 26%, transparent 54%),
+    conic-gradient(from 30deg, var(--c-salt), var(--c-salt) 22%, var(--c-salt-mid) 30%, var(--c-salt-mid) 55%, var(--c-salt-shade) 62%, var(--c-salt-mid) 80%, var(--c-salt));
+  background-size: 100% 100%, .38em .38em;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.xl.up { --xd: 0deg; }
+.plate { margin-top: var(--s3); }
+@media (max-width: 599px) { .field { padding: var(--s8) var(--s4); } }
+</style>
+</head>
+<body class="land">
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="field" id="field">
+  <div class="wash" aria-hidden="true"></div>
+  <div class="light" aria-hidden="true"></div>
+  <div class="lockup" id="lockup">
+    <svg class="burst back" id="back" aria-hidden="true" focusable="false"></svg>
+    <svg class="sigil" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="#sigil"/></svg>
+    <h1 class="wm" id="wm"><span class="row r1"><span class="ln gilt"><span class="xl up" data-at=".3,.1" data-spread="-2.9,-1.1" data-seed="3" data-r=".62">H</span>IGH</span> <span class="ln gilt">S<span class="xl" data-at=".86,.7" data-spread="-.5,1.5" data-seed="9" data-r=".5">O</span>DIU<span class="xl up" data-at=".82,.12" data-spread="-1.5,.2" data-seed="21" data-r=".45">M</span></span></span><span class="row r2"><span class="ln gilt">G<span class="xl" data-at=".42,.92" data-spread="1.2,2.6" data-seed="27" data-r=".42">A</span>MIN<span class="xl" data-at=".72,.88" data-spread="-.4,1.9" data-seed="15" data-r=".62">G</span></span></span></h1>
+    <p class="tag">Rules, close at hand. Salt to taste.</p>
+    <a class="plate" href="resources.html" aria-label="Resources — open the book shelf"><span class="plate-crust" aria-hidden="true"></span>RESOURCES</a>
+    <svg class="burst front" id="front" aria-hidden="true" focusable="false"></svg>
+  </div>
+</main>
+<div class="grain" aria-hidden="true"></div>
+<script src="crystals.js"></script>
+<script>
+HSGX.mountDefs();
+const lock = document.getElementById('lockup'), back = document.getElementById('back'), front = document.getElementById('front');
+function bursts() {
+  const w = lock.clientWidth, h = lock.clientHeight;
+  [back, front].forEach((s) => { s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.innerHTML = ''; });
+  const phone = innerWidth < 600;
+  document.querySelectorAll('.xl').forEach((el) => {
+    const at = el.dataset.at.split(',').map(Number), spread = el.dataset.spread.split(',').map(Number), seed = +el.dataset.seed, R = +el.dataset.r * (phone ? 1.15 : 1);
+    HSGX.letterBurst(el, lock, back, { at, spread, seed, R: R * .8, n: 34, smax: .18, d0: .2, pow: 1.25 });
+    HSGX.letterBurst(el, lock, front, { at, seed: seed + 50, R: R * .32, n: 14, smax: .13, d0: .3, pow: 1.4 });
+  });
+}
+function build() { HSGX.fit(document.getElementById('wm')); bursts(); HSGX.plateCrust(document.querySelector('.plate'), 5); }
+HSGX.ready(build);
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+/* Direction A — Salt-Cured Grimoire. Shared tokens + components (identical copy in both A boards).
+   Every colour, size, space, radius, shadow is declared once here; page rules use var() only. */
+:root {
+  /* colour, by role */
+  --c-night: #0d0908;          /* page base */
+  --c-night-2: #17100e;        /* raised chrome */
+  --c-night-3: #2a1d19;        /* hover / focused row */
+  --c-leather: #4a1517;        /* oxblood leather */
+  --c-leather-deep: #250a0b;   /* leather shadow, tooled panels */
+  --c-leather-2: #16202a;      /* night-blue leather (book 2) */
+  --c-leather-3: #1e2717;      /* moss leather (sample shelf) */
+  --c-leather-4: #3b2411;      /* umber leather (sample shelf) */
+  --c-gilt: #d9b46a;           /* gilt lettering, rules */
+  --c-gilt-hi: #f6e3a8;        /* gilt highlight, glint, focus */
+  --c-gilt-lo: #8c6a2c;        /* gilt shadow (stops and rules only) */
+  --c-salt: #f5efe3;           /* crystal top face */
+  --c-salt-mid: #d6c8ae;       /* crystal lit side */
+  --c-salt-shade: #8f7d62;     /* crystal shadow side */
+  --c-text: #efe6d6;           /* body text on dark */
+  --c-text-2: #bfae92;         /* secondary text on dark */
+  --c-page: #f1e7d0;           /* the book page */
+  --c-page-ink: #6b6152;       /* placeholder lines on the page */
+  --c-page-head: #4a1517;      /* heading bar on the page */
+  --c-mark: #f2c44f;           /* search match highlight */
+  --c-mark-ink: #1a1208;       /* text on the match highlight */
+  --c-scrim: rgb(13 9 8 / .72);
+  --c-shadow: rgb(0 0 0 / .62);
+  --c-shadow-soft: rgb(0 0 0 / .38);
+  --c-blind: rgb(0 0 0 / .45);          /* blind-tooled (debossed) line */
+  --c-blind-hi: rgb(255 236 200 / .09); /* lip of a debossed line */
+  --c-glow: rgb(246 210 130 / .22);     /* warm candle light */
+  --c-glow-0: rgb(246 210 130 / 0);
+  --gilt-fill: linear-gradient(176deg, var(--c-gilt-hi) 0%, var(--c-gilt) 38%, var(--c-gilt-lo) 52%, var(--c-gilt) 66%, var(--c-gilt-hi) 100%);
+  --glint: linear-gradient(100deg, transparent 40%, rgb(255 250 225 / .85) 50%, transparent 60%);
+
+  /* type */
+  --f-display: "Cinzel Decorative", "Cinzel", serif;
+  --f-title: "IM Fell English SC", serif;
+  --f-italic: "IM Fell English", serif;
+  --f-ui: "Alegreya Sans", sans-serif;
+  --t-xs: 12px;
+  --t-sm: 14px;
+  --t-md: 16px;
+  --t-lg: 18px;
+  --t-xl: 22px;
+  --t-2xl: 28px;
+  --t-3xl: clamp(48px, 9vw, 104px);
+  --t-wm: clamp(56px, 11vw, 190px);    /* wordmark fallback before fit */
+  --t-btn: 18px;
+  --t-title-lg: clamp(30px, 2.4vw, 36px);
+  --t-tag: clamp(18px, 2vw, 26px);
+  --wm-cap: 216px;                     /* desktop wordmark ceiling */
+  --t-cv-kicker: 6.5cqi;               /* cover lettering, relative to cover width */
+  --t-cv-name: 10.5cqi;
+  --t-cv-small: 9cqi;
+  --lh-tight: .92;
+  --lh-ui: 1.4;
+  --track-wide: .22em;
+  --track-mid: .08em;
+
+  /* space */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
+  --hair: 1px;
+  --tap: 48px;
+  --tap-lg: 60px;
+
+  /* shape */
+  --r-0: 0; --r-1: 2px; --r-2: 4px; --r-3: 8px; --r-sheet: 18px; --r-pill: 999px;
+
+  /* depth */
+  --sh-cover: 0 22px 44px -14px var(--c-shadow), 0 4px 10px var(--c-shadow-soft);
+  --sh-page: 0 30px 70px -24px var(--c-shadow), 0 6px 18px var(--c-shadow-soft);
+  --sh-sheet: 0 -18px 40px -10px var(--c-shadow);
+
+  /* motion */
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --dur-grow: .7s;
+  --dur-fast: .18s;
+
+  /* layout */
+  --bp-md: 900px;
+  --w-content: 1200px;
+  --w-lockup: 1080px;
+  --w-rail: 232px;
+  --w-res: 380px;
+  --w-search: 300px;
+  --w-pagebox: 52px;
+  --stage-trim: 140px;
+  --ph-h: 844px;
+  --ico: 20px;
+  --ico-lg: 22px;
+  --tap-sm: 40px;
+  --tap-xs: 36px;
+  --grab-w: 44px;
+  --grab-h: 5px;
+  --ring: 2px;
+  --line-3: 3px;
+  --line-5: 5px;
+  --spine: 20px;
+  --fitting: 56px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--c-night); color: var(--c-text);
+  font: 400 var(--t-md)/var(--lh-ui) var(--f-ui);
+  -webkit-font-smoothing: antialiased;
+  scrollbar-color: var(--c-gilt-lo) var(--c-night);
+}
+::selection { background: var(--c-gilt); color: var(--c-night); }
+a { color: inherit; text-underline-offset: .22em; text-decoration-thickness: var(--hair); }
+:focus-visible { outline: var(--ring) solid var(--c-gilt-hi); outline-offset: 3px; border-radius: var(--r-1); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: var(--s3); top: var(--s3); z-index: 50; padding: var(--s2) var(--s3); background: var(--c-gilt); color: var(--c-night); transform: translateY(-200%); }
+.skip:focus { transform: none; }
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* grain over everything (code noise, not a bitmap) */
+.grain { position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: .16; mix-blend-mode: overlay; filter: url(#f-grain); background: var(--c-night); }
+
+/* ---------- crystals ---------- */
+.cx-t { fill: var(--c-salt); }
+.cx-l { fill: var(--c-salt-mid); }
+.cx-r { fill: var(--c-salt-shade); }
+.cx-h1 { fill: var(--c-salt-shade); opacity: .55; }
+.cx-h2 { fill: var(--c-salt-mid); }
+.cx-e { fill: none; stroke: var(--c-gilt); stroke-width: .8; stroke-linejoin: round; opacity: .7; vector-effect: non-scaling-stroke; }
+.cx-glow-a { stop-color: var(--c-glow); }
+.cx-glow-b { stop-color: var(--c-glow-0); }
+.cx { transform-box: fill-box; transform-origin: 50% 100%; animation: cx-grow var(--dur-grow) var(--ease-out) both; animation-delay: var(--d, 0s); }
+@keyframes cx-grow { from { transform: scale(0); opacity: 0; } 40% { opacity: 1; } to { transform: scale(1); opacity: 1; } }
+.g-a { stop-color: var(--c-gilt-hi); } .g-b { stop-color: var(--c-gilt); } .g-c { stop-color: var(--c-gilt-lo); }
+#f-leather feDiffuseLighting { lighting-color: var(--c-salt); }
+#f-wash feFlood { flood-color: var(--c-gilt); }
+
+/* ---------- gilt wordmark ---------- */
+.gilt {
+  background-image: var(--glint), var(--gilt-fill);
+  background-size: 300% 100%, 100% 100%;
+  background-position: 160% 0, 0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: var(--c-gilt);
+  animation: glint 9s 1.2s var(--ease-out) infinite;
+}
+@keyframes glint { 0% { background-position: 160% 0, 0 0; } 14%, 100% { background-position: -60% 0, 0 0; } }
+
+/* ---------- wordmark lockup (h1 = real text) ---------- */
+.lockup { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: var(--s5); text-align: center; width: min(100%, var(--w-lockup)); }
+.sigil { width: var(--s8); height: var(--s8); }
+.wm { justify-self: stretch; margin: 0; font: 900 var(--t-wm)/var(--lh-tight) var(--f-display); letter-spacing: .01em;
+  filter: drop-shadow(0 2px 0 var(--c-blind)) drop-shadow(0 -1px 0 var(--c-blind-hi)); }
+.wm .row { display: block; width: max-content; max-width: none; margin-inline: auto; font-size: var(--fit, 1em); white-space: nowrap; }
+.wm .ln { display: inline-block; font-size: var(--fit, 1em); letter-spacing: var(--track, .01em); padding-left: var(--track, 0); }
+.tag { margin: 0; font: italic 400 var(--t-tag)/1.3 var(--f-italic); color: var(--c-text); letter-spacing: .01em; }
+@media (max-width: 599px) {
+  .wm .row { display: contents; }
+  .wm .ln { display: block; width: max-content; margin-inline: auto; }
+  .sigil { width: var(--s7); height: var(--s7); }
+}
+
+/* ---------- the RESOURCES plate ---------- */
+.plate {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--s3);
+  min-height: var(--tap-lg); padding: 0 var(--s7);
+  font: 700 var(--t-btn)/1 var(--f-display); letter-spacing: var(--track-wide); color: var(--c-gilt-hi);
+  text-decoration: none; background: var(--c-leather-deep);
+  box-shadow: inset 0 0 0 var(--hair) var(--c-gilt), inset 0 0 0 5px var(--c-leather-deep), inset 0 0 0 6px var(--c-gilt-lo), var(--sh-cover);
+  transition: color var(--dur-fast), box-shadow var(--dur-fast), background var(--dur-fast);
+}
+.plate::before, .plate::after { content: ""; width: 7px; height: 7px; background: var(--c-gilt); transform: rotate(45deg); flex: none; }
+.plate:hover { color: var(--c-salt); background: var(--c-leather); box-shadow: inset 0 0 0 var(--hair) var(--c-gilt-hi), inset 0 0 0 5px var(--c-leather), inset 0 0 0 6px var(--c-gilt), var(--sh-cover); }
+.plate .plate-crust { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.plate .plate-crust svg { position: absolute; overflow: visible; transition: transform var(--dur-fast) var(--ease-out); }
+.plate:hover .plate-crust svg { transform: translateY(-2px); }
+
+/* ---------- covers (code-drawn, per book) ---------- */
+.cover {
+  container-type: inline-size; position: relative; aspect-ratio: 3 / 4; overflow: hidden;
+  background: var(--cv, var(--c-leather)); border-radius: var(--r-1) var(--r-3) var(--r-3) var(--r-1);
+  box-shadow: var(--sh-cover); isolation: isolate;
+}
+.cover--ox { --cv: var(--c-leather); }
+.cover--blue { --cv: var(--c-leather-2); }
+.cover--moss { --cv: var(--c-leather-3); }
+.cover--umber { --cv: var(--c-leather-4); }
+.cv-leather { position: absolute; inset: 0; filter: url(#f-leather); background: var(--c-night); mix-blend-mode: soft-light; opacity: .9; }
+.cv-spine { position: absolute; left: 0; top: 0; bottom: 0; width: 7cqi; background: linear-gradient(90deg, var(--c-shadow) 0%, var(--c-blind-hi) 60%, var(--c-blind) 100%); }
+.cv-tool { position: absolute; inset: 7cqi 6cqi 7cqi 12cqi; border: var(--hair) solid var(--c-gilt); }
+.cv-tool::before { content: ""; position: absolute; inset: 1.6cqi; border: var(--hair) solid var(--c-gilt-lo); }
+.cv-tool::after { content: ""; position: absolute; inset: 5cqi; border: var(--hair) solid var(--c-blind); box-shadow: 0 1px 0 var(--c-blind-hi), inset 0 1px 0 var(--c-blind-hi); }
+.cv-title { position: absolute; inset: 0 6cqi 0 12cqi; display: grid; align-content: center; justify-items: center; gap: 3cqi; text-align: center; padding: 0 6cqi; }
+.cv-kicker { font: 400 var(--t-cv-kicker)/1 var(--f-title); letter-spacing: var(--track-wide); color: var(--c-gilt); }
+.cv-name, .cv-small { font-variant-ligatures: none; font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; }
+.cv-name { font: 900 var(--t-cv-name)/1 var(--f-display); letter-spacing: .02em; font-variant-ligatures: none; font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; }
+.cv-small { font: 900 var(--t-cv-small)/1.05 var(--f-display); font-variant-ligatures: none; font-feature-settings: "liga" 0, "dlig" 0, "calt" 0; }
+.cv-sigil { width: 22cqi; height: 22cqi; }
+.cv-rule { width: 40cqi; height: var(--hair); background: var(--c-gilt-lo); }
+.cv-crust { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.sig-line { fill: none; stroke: var(--c-gilt); stroke-width: 1.4; stroke-linejoin: round; }
+.sig-fill { fill: var(--c-gilt); }
+.sig-salt { fill: var(--c-salt); }
+.sig-shade { fill: var(--c-gilt-lo); }
+
+/* ---------- resources page ---------- */
+.res-wrap { max-width: var(--w-content); margin: 0 auto; padding: var(--s5) var(--s4) var(--s9); }
+.res-head { display: grid; gap: var(--s3); padding-bottom: var(--s7); }
+.back { justify-self: start; display: inline-flex; align-items: center; min-height: var(--tap); font: 500 var(--t-md)/1 var(--f-ui); color: var(--c-text-2); text-decoration: none; }
+.back:hover { color: var(--c-gilt-hi); text-decoration: underline; }
+.res-head h1 { margin: var(--s4) 0 0; font: 400 var(--t-3xl)/1 var(--f-title); color: var(--c-gilt); letter-spacing: .01em; }
+.res-head p { margin: 0; font: 400 var(--t-lg)/1.45 var(--f-ui); color: var(--c-text-2); max-width: 36ch; }
+.shelf { display: grid; gap: var(--s7); }
+.book { display: grid; gap: var(--s4); text-decoration: none; color: var(--c-text); }
+.book .b-title { margin: 0; font: 400 var(--t-2xl)/1.1 var(--f-title); color: var(--c-salt); text-wrap: balance; }
+.book .b-sub { margin: 0; color: var(--c-text-2); font-size: var(--t-md); max-width: 40ch; }
+.book .b-meta { margin: 0; color: var(--c-text-2); font-size: var(--t-sm); letter-spacing: .02em; font-variant-numeric: tabular-nums lining-nums; }
+.book .b-open { justify-self: start; display: inline-flex; align-items: center; gap: var(--s2); min-height: var(--tap); padding: 0 var(--s5); font: 700 var(--t-sm)/1 var(--f-ui); letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--c-gilt-hi); box-shadow: inset 0 0 0 var(--hair) var(--c-gilt); }
+.book .b-info { display: grid; gap: var(--s2); align-content: start; }
+.book:hover .cover { transform: translateY(-4px); }
+.book .cover { transition: transform var(--dur-fast) var(--ease-out); }
+.book:hover .b-open { background: var(--c-night-3); }
+.book:hover .b-title { color: var(--c-gilt-hi); }
+.book--main .cover { width: 100%; }
+.book--side { grid-template-columns: 40% 1fr; align-items: end; }
+.book--side .b-title { font-size: var(--t-xl); }
+@media (min-width: 900px) {
+  .res-wrap { padding: var(--s6) var(--s8) var(--s10); }
+  .shelf { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--s9); align-items: end; }
+  .book--main { grid-template-columns: 400px 1fr; gap: var(--s7); align-items: end; }
+  .book--main .b-title { font-size: var(--t-title-lg); }
+  .book--side { grid-template-columns: 1fr; }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .cx, .gilt { animation: none; }
+  .cover, .plate .plate-crust svg { transition: none; }
+}

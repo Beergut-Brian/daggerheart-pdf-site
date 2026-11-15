@@ -1,0 +1,12 @@
+# b1-circle-hero — Salt Circle, enclosure
+
+- **What it is:** a giant poured-salt ward (about 2,600 cubic grains and 12 gilt table-object glyphs) fills the viewport and encloses the stacked HIGH / SODIUM / GAMING wordmark. `{ RESOURCES }` sits in the gap at the bottom of the ring, which is the gate.
+- **Variation axis:** ring scale and role = **whole-hero enclosure**. On a phone the ring is about 1.5× the screen width, cropped at the sides, so the wordmark sits inside a monumental arc.
+- **Signature test: pass.** With a coffee shop's name in place of the wordmark, a protective salt circle with a gate makes no sense. The salt ring, the hand-poured taper at the gate and the table-object glyphs (shaker, die, cube) belong only to a salt-named game table.
+- **Strongest part:** the first screen at 390. The ring arcs off both edges, the gilt wordmark fills the inside, and the button closes the gate at thumb height. One image, one point.
+- **Real risk:** the ring is about 1,400 tiny polygons in four paths. That is cheap, but a builder should precompute it at build time rather than ship `salt.js`. At some angles the grain bands look a little sparse, and the density can be raised if Kaden wants a heavier pour. The occult reading is held off by the glyph choice. That needs Kaden's eye.
+- **Resources:** Core is large with the grain-dotted "selected" outline (the ring returning quietly). Hope & Fear sits beside it with a split salt/gilt ring cover. The 6-book scale state is below, captioned "Sample shelf: future titles".
+- **Viewer:** the page is the brightest surface. The current thumbnail has a gilt outline and a small grain ring around "19". Undrawn thumbnails show the rotating grain ring (the loading state). The HSG mark is a mini ward.
+- **Fonts (OFL):** Cinzel Decorative 900 (wordmark, titles), Cinzel 500/700 (labels, button), Alegreya Sans (UI/body). I swapped Pirata One for Cinzel; the reason is in the memo.
+- **Motion:** the pour takes 1.4 s, glyphs wake by about 1.9 s, then a 14 s breath. Reduced motion shows the finished ring with no animation (defaults are the end state; keyframes only animate *from*).
+- **Detect:** fixed: gradient-text leaking onto resources/viewer (the class moved to the landing only) and 0.14em tracking on labels and caption (now .05em/normal). **Kept: 3× gradient-text on index.html.** This is the deliberate R21 gilt fill on the wordmark: three hard gold bands, not a soft gradient, and a brief-cited borrow.
