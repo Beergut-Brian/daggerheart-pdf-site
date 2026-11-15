@@ -150,6 +150,8 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
     return search(index, debounced);
   }, [index, debounced]);
   const focus = focusAt.q === debounced ? focusAt.i : 0;
+  const [moreAt, setMoreAt] = useState<{ q: string; n: number }>({ q: "", n: 0 });
+  const shown = 40 + (moreAt.q === debounced ? moreAt.n : 0); // render 40 rows, then 40 more on demand (keeps typing snappy)
   const setFocus = (f: number | ((n: number) => number)) => setFocusAt((cur) => ({ q: debounced, i: typeof f === "function" ? f(cur.q === debounced ? cur.i : 0) : f }));
 
   // ---- highlight boxes for the current page ----
@@ -183,7 +185,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
       const el = e.target as HTMLElement;
       const typing = el.tagName === "INPUT" || el.tagName === "TEXTAREA";
       if (el === searchInput.current) {
-        if (e.key === "ArrowDown" && result?.hits.length) { e.preventDefault(); setFocus((f) => Math.min(f + 1, result.hits.length - 1)); }
+        if (e.key === "ArrowDown" && result?.hits.length) { e.preventDefault(); setFocus((f) => Math.min(f + 1, Math.min(shown, result.hits.length) - 1)); }
         else if (e.key === "ArrowUp" && result?.hits.length) { e.preventDefault(); setFocus((f) => Math.max(f - 1, 0)); }
         else if (e.key === "Enter" && result?.hits.length) { e.preventDefault(); openHit(focus); }
         else if (e.key === "Escape") { clearSearch(); }
@@ -246,7 +248,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
             {result.total > result.hits.length ? `${result.total}+ results for “${debounced}”. Add a word to narrow it.` : `${result.total} result${result.total === 1 ? "" : "s"} for “${debounced}”`}
           </p>
           <div className="hits" role="listbox" aria-label="Search results">
-            {result.hits.map((h, i) => (
+            {result.hits.slice(0, shown).map((h, i) => (
               <button key={h.page} role="option" aria-selected={i === focus} className={`hit${i === focus ? " focus" : ""}`} onClick={() => openHit(i)} aria-label={`Page ${h.page}, ${chapterOf(h.page)}`}>
                 <PageThumb doc={doc} queue={queue} page={h.page} width={44} />
                 <span>
@@ -255,6 +257,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
                 </span>
               </button>
             ))}
+            {result.hits.length > shown && <button className="more" onClick={() => setMoreAt({ q: debounced, n: (moreAt.q === debounced ? moreAt.n : 0) + 40 })}>Show more results</button>}
           </div>
         </>
       ) : null}

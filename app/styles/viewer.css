@@ -142,3 +142,4 @@
 .vphone .dpill { padding: 0 var(--s3); gap: var(--s1); }
 .vphone .dpager .ib { width: 36px; }
 .vphone .dnum { min-width: 0; padding: 0 var(--s1); }
+.more { display: block; width: calc(100% - var(--s6)); margin: var(--s4) auto; min-height: var(--tap); border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--night); color: var(--star); font: 600 var(--fs-sm)/1 var(--font-ui); cursor: pointer; }

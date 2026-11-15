@@ -14,9 +14,8 @@ export function foldChar(ch: string): string {
 }
 /** Fold a whole string without changing its length. */
 export function fold(s: string): string {
-  let out = "";
-  for (const ch of s) out += foldChar(ch);
-  return out;
+  // bulk lowercase for ASCII; per-character folding only for the (few) non-ASCII code units
+  return s.replace(/[^\x00-\x7f]/g, foldChar).toLowerCase();
 }
 export function tokenize(q: string): string[] {
   return fold(q).split(/[^\p{L}\p{N}']+/u).filter(Boolean);

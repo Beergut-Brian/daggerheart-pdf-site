@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // design boards and agent files are not app code
+    "design/**",
+    ".claude/**",
+    "public/**",
+    "test-results/**",
+    "playwright-report/**",
     // direct port of the approved board's salt engine (untyped by design; its public API is typed)
     "app/lib/salt-engine.ts",
   ]),
