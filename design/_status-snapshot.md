@@ -5,9 +5,9 @@
 **Blocked:**
 - Steer 1 review (Kaden): F1 v2 in `design/directions/f1-wyrm-eclipse/` (v1 frozen beside it). Start with `gate/steer-1/home-vs-v1.png` and `gate/steer-1/resources-vs-v1.png`, then `salt.webm` and `salt-1/2/3.png` (390) / `salt-*-1440.png`. Details in `gate-note.md`.
   - **Home:** same Cinzel gold wordmark and colours; the wyrm and orb are gone; the whole sky is suspended salt grains (round, soft, faint gold glint, slow drift, a few twinkles). Hover or drag a finger and the grains you touch fall and pile along the bottom and on the pill; a tap knocks loose a burst. Button reads DAGGERHEART RESOURCES (one line at 390). A gold glow stays behind the name. Reduced motion: static field + settled pile. 60 fps median and p95 at 390 and 1440 in headless Chromium.
-  - **/resources:** unchanged except the top-right art: a gilded salt cellar of glowing salt with a heart-gold glow behind it, no edge; h1 "Daggerheart Resources". Swap with one word: `?art=hourglass` or `?art=crystal` (renders beside it). Wyrm crops on the sample shelf replaced.
+  - **/resources:** unchanged except the top-right art: the salt-crystal cluster Kaden picked (07:10), screen-blended with a heart-gold glow behind it, no edge; h1 "Daggerheart Resources". Alternates with one word: `?art=cellar` or `?art=hourglass` (renders beside it). Wyrm crops on the sample shelf replaced (one of them, Session Zero Pack, also uses the crystal cluster; swap it if he wants the art unique).
   - **Viewer:** back link "Daggerheart Resources"; nothing else changed.
-  - Two small calls for Kaden: keep or drop the "Touch the salt" hint under the button (default: keep); salt cellar vs hourglass vs crystal (default: salt cellar).
+  - One small call left for Kaden: keep or drop the "Touch the salt" hint under the button (default: keep). Art: crystal cluster (decided 07:10).
   - Real risk: with the creature gone, a still screenshot of home reads close to a plain starfield; the live interaction carries the brand.
 
 ## Profile and stack
@@ -65,6 +65,7 @@ Portfolio/brochure (small resource site). Next.js 16.4.3 App Router, React 19.3,
 | 2026-11-14 | Added a 3-word hint "Touch the salt" under the button that leaves on first touch. | Phone users can't hover; without a cue the field reads as a still starfield. Easy to drop. |
 | 2026-11-14 | /resources h1 capped at 58% width on desktop so "Daggerheart Resources" wraps beside the art. | The longer title ran under the art in the first v2 render. |
 | 2026-11-14 | Removed v1's CSS drop-shadow filter on the salt canvas. | It repainted the full screen every frame; the sprites carry their own glow. |
+| 2026-11-15 | Steer 1b: crystal cluster is the /resources art; on phone the art is 33vw (was 40vw) so the crystal clears the heading. | Kaden 07:10; the crystal fills more of its square than the cellar did. |
 
 ## Spend
 Design-1d run: ~$2.20. Stage 2 run: ~$10.5 of the $30 run cap. Stage 2 redo phase 1: ~$2. Phase 2: ~$10.2 of $30. Steer 1: ~$5.5 of $30.

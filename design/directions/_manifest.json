@@ -317,14 +317,14 @@
         "salt-3.png": "f1-wyrm-eclipse/salt-3.png",
         "resources-390-first.png": "f1-wyrm-eclipse/resources-390-first.png",
         "resources-alt-hourglass-1440-first.png": "f1-wyrm-eclipse/resources-alt-hourglass-1440-first.png",
-        "resources-alt-crystal-1440-first.png": "f1-wyrm-eclipse/resources-alt-crystal-1440-first.png",
         "salt-1-1440.png": "f1-wyrm-eclipse/salt-1-1440.png",
         "salt-2-1440.png": "f1-wyrm-eclipse/salt-2-1440.png",
         "salt-3-1440.png": "f1-wyrm-eclipse/salt-3-1440.png",
         "salt-reduced-390.png": "f1-wyrm-eclipse/salt-reduced-390.png",
         "salt.webm": "f1-wyrm-eclipse/salt.webm",
         "gate/steer-1/home-vs-v1.png": "f1-wyrm-eclipse/gate/steer-1/home-vs-v1.png",
-        "gate/steer-1/resources-vs-v1.png": "f1-wyrm-eclipse/gate/steer-1/resources-vs-v1.png"
+        "gate/steer-1/resources-vs-v1.png": "f1-wyrm-eclipse/gate/steer-1/resources-vs-v1.png",
+        "resources-alt-cellar-1440-first.png": "f1-wyrm-eclipse/resources-alt-cellar-1440-first.png"
       },
       "detect": "f1-wyrm-eclipse/detect.json",
       "gate_note": "f1-wyrm-eclipse/gate-note.md",
@@ -332,7 +332,8 @@
       "salt_engine": "_shared/salt-engine.js v2 (field mode)",
       "version": 2,
       "steer": "steer-1 (DH13, 2026-11-14 23:58)",
-      "frozen_v1": "f1-wyrm-eclipse-v1-frozen/"
+      "frozen_v1": "f1-wyrm-eclipse-v1-frozen/",
+      "resources_art": "g-art-crystal-cluster (Kaden 2026-11-15); alternates ?art=cellar|hourglass"
     },
     {
       "id": "f2-hatchling-pour",

@@ -10,8 +10,8 @@
 <style>
 /* F1 v2 (steer 1): a fancy art piece top right with a glow of the heart gold behind it.
    The art sits on pure black; the whole piece is screen-blended onto the page so the black
-   disappears, and a radial mask removes any edge. Swap the art with ?art=hourglass|crystal. */
-.art { position: absolute; top: calc(var(--s3) * -1); right: 0; width: 40vw; max-width: 420px; aspect-ratio: 1; mix-blend-mode: screen; z-index: 0; pointer-events: none; }
+   disappears, and a radial mask removes any edge. Swap the art with ?art=cellar|hourglass. */
+.art { position: absolute; top: calc(var(--s4) * -1); right: 0; width: 33vw; max-width: 420px; aspect-ratio: 1; mix-blend-mode: screen; z-index: 0; pointer-events: none; }
 .art::before { content: ""; position: absolute; inset: 4%; border-radius: 50%;
   background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 46%, transparent), color-mix(in srgb, var(--gold) 16%, transparent) 55%, transparent); }
 .art img { position: relative; width: 100%; height: 100%; object-fit: cover; display: block;
@@ -41,10 +41,10 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="res-page">
-  <div class="art" aria-hidden="true"><img id="art" src="../../imagery/G/g-art-salt-cellar.jpg" alt=""></div>
+  <div class="art" aria-hidden="true"><img id="art" src="../../imagery/G/g-art-crystal-cluster.jpg" alt=""></div>
   <script>
-  // one-word swap for Kaden: resources.html?art=hourglass | crystal (default: salt cellar)
-  (function () { const a = new URLSearchParams(location.search).get('art'); const m = { hourglass: 'g-art-hourglass', crystal: 'g-art-crystal-cluster' };
+  // one-word swap for Kaden: resources.html?art=cellar | hourglass (default: crystal cluster, Kaden 2026-11-15)
+  (function () { const a = new URLSearchParams(location.search).get('art'); const m = { cellar: 'g-art-salt-cellar', hourglass: 'g-art-hourglass', crystal: 'g-art-crystal-cluster' };
     if (m[a]) document.getElementById('art').src = '../../imagery/G/' + m[a] + '.jpg'; })();
   </script>
   <header class="res-head">
