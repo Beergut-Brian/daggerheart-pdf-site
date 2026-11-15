@@ -1,0 +1,156 @@
+[
+  {
+    "title": "Contents",
+    "page": 4
+  },
+  {
+    "title": "Introduction",
+    "page": 5,
+    "items": [
+      {
+        "title": "Welcome to Hope & Fear",
+        "page": 5
+      }
+    ]
+  },
+  {
+    "title": "Chapter One: Character Options",
+    "page": 8,
+    "items": [
+      {
+        "title": "Classes",
+        "page": 9
+      },
+      {
+        "title": "Brawler",
+        "page": 11
+      },
+      {
+        "title": "Warlock",
+        "page": 15
+      },
+      {
+        "title": "Witch",
+        "page": 17
+      },
+      {
+        "title": "Ancestries",
+        "page": 19
+      },
+      {
+        "title": "Communities",
+        "page": 27
+      },
+      {
+        "title": "Transformations",
+        "page": 35
+      }
+    ]
+  },
+  {
+    "title": "Chapter Two: Equipment & Loot",
+    "page": 44,
+    "items": [
+      {
+        "title": "Primary Weapon Tables",
+        "page": 44
+      },
+      {
+        "title": "Secondary Weapon Tables",
+        "page": 51
+      },
+      {
+        "title": "Armor Tables",
+        "page": 53
+      },
+      {
+        "title": "Items",
+        "page": 55
+      },
+      {
+        "title": "Consumables",
+        "page": 58
+      }
+    ]
+  },
+  {
+    "title": "Chapter Three: Adversaries & Environments",
+    "page": 62,
+    "items": [
+      {
+        "title": "New Adversary Features",
+        "page": 62
+      },
+      {
+        "title": "Adversary Stat Blocks",
+        "page": 62
+      },
+      {
+        "title": "Environment Stat Blocks",
+        "page": 100
+      }
+    ]
+  },
+  {
+    "title": "Chapter Four: Campaign Frames",
+    "page": 116,
+    "items": [
+      {
+        "title": "Campaign Frames",
+        "page": 116
+      },
+      {
+        "title": "Castle High",
+        "page": 117
+      },
+      {
+        "title": "Reign of the Weredragon",
+        "page": 129
+      },
+      {
+        "title": "Dark Heart of Andaluria",
+        "page": 145
+      },
+      {
+        "title": "Journey to Horizon",
+        "page": 159
+      }
+    ]
+  },
+  {
+    "title": "Appendix",
+    "page": 181,
+    "items": [
+      {
+        "title": "Domain Card Reference",
+        "page": 181
+      },
+      {
+        "title": "Additional Sheets",
+        "page": 183
+      },
+      {
+        "title": "Campaign Frame Maps",
+        "page": 188
+      }
+    ]
+  },
+  {
+    "title": "References",
+    "page": 193,
+    "items": [
+      {
+        "title": "Index",
+        "page": 193
+      },
+      {
+        "title": "Adversaries",
+        "page": 196
+      },
+      {
+        "title": "Environments",
+        "page": 197
+      }
+    ]
+  }
+]
