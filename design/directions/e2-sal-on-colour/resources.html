@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="e.css">
+<style>
+/* E2 /resources: two bold colour panels (ref steer-1/03); Sal reads on the blue one */
+body { background: var(--c-salt); }
+.panels { display: grid; gap: var(--s5); padding: 0 var(--edge) var(--s7); }
+.panel { position: relative; overflow: hidden; display: grid; gap: var(--s3); align-content: start; padding: var(--s6) var(--s5) var(--s5);
+  border-radius: var(--r-xl); text-decoration: none; color: var(--c-ink); box-shadow: var(--sh-soft);
+  transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out); }
+.panel:hover { transform: translateY(calc(-1 * var(--s1))); box-shadow: var(--sh-lift); }
+.panel .t { margin: 0; font-family: var(--f-label); font-weight: 400; font-size: var(--fs-title-xl); line-height: 1; letter-spacing: var(--track-label); text-transform: uppercase; text-wrap: balance; max-width: 12ch; }
+.panel .sub { margin: 0; font-weight: 800; max-width: 30ch; }
+.panel .meta { margin: 0; font-weight: 900; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.panel .key { justify-self: start; align-self: start; margin-top: var(--s2); }
+.panel .cover { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--r-m); box-shadow: var(--sh-lift); }
+.sun { background: var(--c-sun); }
+.sun .cover { width: 62%; justify-self: center; margin-top: var(--s4); transform: rotate(-4deg); }
+.sky { background: var(--c-sky-read-top); padding-bottom: 0; }
+.sky .cover { position: absolute; right: var(--s5); top: var(--s6); width: 27%; transform: rotate(5deg); }
+.sky .t, .sky .sub { max-width: 60%; }
+.sky .reader { max-width: none; width: calc(100% + 2 * var(--s5)); margin: 0 calc(-1 * var(--s5)); aspect-ratio: 1; object-fit: cover; object-position: 50% 70%;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, var(--c-ink) 22%); mask-image: linear-gradient(to bottom, transparent 0%, var(--c-ink) 22%); }
+.panel .key .face { min-height: var(--tap); }
+@media (min-width: 900px) {
+  .panels { grid-template-columns: 1.3fr 1fr; align-items: stretch; }
+  .panel { padding: var(--s7) var(--s7) var(--s6); }
+  .sun { grid-template-columns: 1fr 300px; grid-template-rows: auto auto auto 1fr; column-gap: var(--s6); }
+  .sun > :not(.cover) { grid-column: 1; }
+  .sun .cover { grid-column: 2; grid-row: 1 / span 5; width: 100%; align-self: center; margin: 0; }
+  .sky { padding-bottom: 0; }
+  .sky .reader { width: calc(100% + 2 * var(--s7)); margin: calc(-1 * var(--s6)) calc(-1 * var(--s7)) 0; aspect-ratio: 1.45; object-position: 50% 78%; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="page-head">
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>High Sodium Gaming</a>
+  <h1>Resources</h1>
+  <p>Pick a book. Search starts the moment it opens.</p>
+</header>
+<main id="main">
+  <section class="panels" aria-label="Books">
+    <a class="panel sun" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <p class="t">Daggerheart Core Rulebook</p>
+      <p class="sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+      <p class="meta">397 pages · 5 chapters</p>
+      <span class="key"><span class="face">OPEN</span></span>
+      <img class="cover" src="../../references/steer-1/06-cover-core-rulebook.jpg" alt="">
+    </a>
+    <a class="panel sky" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <p class="t">Daggerheart: Hope &amp; Fear</p>
+      <p class="sub">The expansion</p>
+      <p class="meta">204 pages · Expansion</p>
+      <span class="key key-s"><span class="face">OPEN</span></span>
+      <img class="cover" src="../../references/steer-1/05-cover-hope-and-fear.jpg" alt="">
+      <img class="reader" src="../../imagery/E/e2-sal-reading.jpg" alt="">
+    </a>
+  </section>
+  <section class="alt" aria-labelledby="alt-h">
+    <h2 id="alt-h">Alt covers (ours)</h2>
+    <div class="alt-row">
+      <figure><div class="slab"><span class="band" aria-hidden="true">CORE RULEBOOK</span><img src="../../imagery/E/e-cover-core.jpg" alt=""></div><figcaption>Core Rulebook</figcaption></figure>
+      <figure><div class="slab"><span class="band on-sky" aria-hidden="true">HOPE &amp; FEAR</span><img src="../../imagery/E/e-cover-hope-fear.jpg" alt=""></div><figcaption>Hope &amp; Fear</figcaption></figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

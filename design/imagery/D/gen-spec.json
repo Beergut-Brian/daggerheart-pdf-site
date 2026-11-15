@@ -1,0 +1,71 @@
+{
+ "spots": [
+  {
+   "id": "d1-hero-wide",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. CHARACTER \u2014 the Brine Colossus (original creature): a towering golem built from stacked translucent white rock-salt cubes with stepped hopper-crystal faces; broad shoulders, long heavy arms, big blocky hands; a small square head with two glowing teal eyes and no mouth; a warm gold light glowing inside its chest through the crystal; thin teal brine veins running between the cubes; a crust of tiny salt crystals on its shoulders like snow on a ridge; no armour, no clothing, no weapons; calm, gentle, awe-inspiring rather than menacing. Wide scene: the Brine Colossus stands waist-deep in a glowing teal brine lake at dusk, towering over indigo mountains, filling the right two-thirds of the frame, one huge hand raised high above the centre of the image palm-down as if about to sprinkle salt (pour point at about 50% across, 28% down; do not paint a stream below the hand, the website animates it). Cracked white salt flats in the foreground. The left third and the lower-centre band are calm dark indigo sky and mist with no detail, reserved for a large title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "d1-colossus-vista",
+   "stamp": false
+  },
+  {
+   "id": "d1-hero-tall",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. CHARACTER \u2014 the Brine Colossus (original creature): a towering golem built from stacked translucent white rock-salt cubes with stepped hopper-crystal faces; broad shoulders, long heavy arms, big blocky hands; a small square head with two glowing teal eyes and no mouth; a warm gold light glowing inside its chest through the crystal; thin teal brine veins running between the cubes; a crust of tiny salt crystals on its shoulders like snow on a ridge; no armour, no clothing, no weapons; calm, gentle, awe-inspiring rather than menacing. Tall phone composition of the same scene: the Brine Colossus seen from below, head and shoulders and raised hand in the top 45% of the frame, the hand held palm-down above the centre (pour point at about 50% across, 22% down, no stream painted). The middle band (40%\u201375% down) is calm indigo mist with no detail, reserved for a stacked title. Teal brine lake and white salt flats along the bottom. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1344,
+   "board": "d1-colossus-vista",
+   "stamp": false
+  },
+  {
+   "id": "d2-vista-wide",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. Wide landscape with no creature: endless cracked white salt flats under a huge indigo-violet dusk sky, a low gold sunset glowing on the right horizon, a mirror-still teal brine pool reflecting the sky, distant indigo mountains, a few tall white salt-crystal spires on the far left and right. The whole centre is open sky, calm and uncluttered, reserved for a large title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "d2-colossus-perched",
+   "stamp": false
+  },
+  {
+   "id": "d2-vista-tall",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. Tall phone composition of the same landscape with no creature: indigo-violet dusk sky over cracked white salt flats, gold sunset glow low on the horizon, teal brine pool in the lower third. The top 70% is open calm sky reserved for a title and a character. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1344,
+   "board": "d2-colossus-perched",
+   "stamp": false
+  },
+  {
+   "id": "d2-colossus-perched",
+   "prompt": "Same character as the reference image, identical design and materials. STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. CHARACTER \u2014 the Brine Colossus (original creature): a towering golem built from stacked translucent white rock-salt cubes with stepped hopper-crystal faces; broad shoulders, long heavy arms, big blocky hands; a small square head with two glowing teal eyes and no mouth; a warm gold light glowing inside its chest through the crystal; thin teal brine veins running between the cubes; a crust of tiny salt crystals on its shoulders like snow on a ridge; no armour, no clothing, no weapons; calm, gentle, awe-inspiring rather than menacing. The Brine Colossus shown smaller and friendlier, full body, sitting on an invisible ledge with legs dangling, leaning forward and looking down with curious teal eyes, holding a large rough salt crystal in both hands and tipping it so salt would fall straight down from the crystal at the bottom centre (do not paint the falling salt). Isolated on a flat solid #FF00FF magenta background for cut-out, even lighting from the right in gold, no shadow on the background. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art. The golem alone, full body, sitting, isolated on a perfectly flat solid magenta #FF00FF background filling the entire image edge to edge; no scenery, no sky, no ground, no frame, no picture inside a picture.",
+   "width": 1024,
+   "height": 1024,
+   "board": "d2-colossus-perched",
+   "stamp": false,
+   "refs": [
+    "d1-hero-wide.jpg"
+   ]
+  },
+  {
+   "id": "d-character-sheet",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. CHARACTER \u2014 the Brine Colossus (original creature): a towering golem built from stacked translucent white rock-salt cubes with stepped hopper-crystal faces; broad shoulders, long heavy arms, big blocky hands; a small square head with two glowing teal eyes and no mouth; a warm gold light glowing inside its chest through the crystal; thin teal brine veins running between the cubes; a crust of tiny salt crystals on its shoulders like snow on a ridge; no armour, no clothing, no weapons; calm, gentle, awe-inspiring rather than menacing. Character turnaround sheet on a flat solid pale lavender #D9D3EA background: left, the Brine Colossus full body front view; centre, full body three-quarter view; right, three head close-ups showing expressions: calm, curious with a tilted head, delighted with brighter eyes. Even lighting, same scale, no labels. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "both",
+   "stamp": false
+  },
+  {
+   "id": "d-cover-core",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. Book cover painting, portrait: a giant open stone hand of white salt crystal rising from a teal brine sea at dusk, holding a single glowing gold crystal above it like a lantern; indigo sky, gold light; centred composition with a calm empty band across the top 25% for a title set separately. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1024,
+   "board": "both",
+   "stamp": false
+  },
+  {
+   "id": "d-cover-hope-fear",
+   "prompt": "STYLE: painterly fantasy illustration, rich digital oil painting with visible brush strokes, epic scale, cinematic atmospheric depth and haze, dramatic rim light. Colours tied to objects: deep indigo-violet night sky and mountain silhouettes; warm gold sunset light breaking in from the right edge; glowing teal brine water and teal veins inside the crystal; bright white salt crystals with gold highlights; pale lavender mist in the valleys. Book cover painting, portrait: two large salt crystals floating face to face above a salt flat, the left one lit warm gold from within (hope), the right one dark indigo with a teal inner glow (fear), a thin bright seam of light between them; centred composition with a calm empty band across the top 25% for a title set separately. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art. One single continuous painting filling the whole frame edge to edge, no white band, no border, no panels.",
+   "width": 768,
+   "height": 1024,
+   "board": "both",
+   "stamp": false
+  }
+ ]
+}

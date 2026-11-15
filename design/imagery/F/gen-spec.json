@@ -1,0 +1,68 @@
+{
+ "spots": [
+  {
+   "id": "f1-wyrm-wide",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. CHARACTER \u2014 the Salt Wyrm (original creature): a long legless serpent-dragon made of translucent white salt-crystal segments with faceted cube-shaped scales; a small horned head with two glowing gold eyes; a warm gold glow pulsing inside its body showing through the crystal; a fine mist of salt grains trailing from its body; elegant and mysterious, not monstrous. Wide hero: the Salt Wyrm, enormous, coiled in a great loose ring behind the centre of the frame, mostly in silhouette, rim-lit teal, its gold glowing heart forming a bright sun-like orb exactly at the centre behind where a title will sit, light rays spilling outward; its head at the upper right looking down; floating salt crystals everywhere. The centre and lower half are dark enough for a huge bright title to read on top. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "f1-wyrm-eclipse",
+   "stamp": false
+  },
+  {
+   "id": "f1-wyrm-tall",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. CHARACTER \u2014 the Salt Wyrm (original creature): a long legless serpent-dragon made of translucent white salt-crystal segments with faceted cube-shaped scales; a small horned head with two glowing gold eyes; a warm gold glow pulsing inside its body showing through the crystal; a fine mist of salt grains trailing from its body; elegant and mysterious, not monstrous. Tall phone composition: the Salt Wyrm coiled vertically behind the centre, silhouette with teal rim light, its glowing gold heart orb at about 42% down in the centre, head at the top looking down; floating salt crystals; the middle and lower parts dark enough for a stacked bright title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art. Absolutely no text, no title, no caption, no letters anywhere in the image.",
+   "width": 768,
+   "height": 1344,
+   "board": "f1-wyrm-eclipse",
+   "stamp": false
+  },
+  {
+   "id": "f2-hatchling",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. CHARACTER \u2014 the Salt Wyrm (original creature): a long legless serpent-dragon made of translucent white salt-crystal segments with faceted cube-shaped scales; a small horned head with two glowing gold eyes; a warm gold glow pulsing inside its body showing through the crystal; a fine mist of salt grains trailing from its body; elegant and mysterious, not monstrous. A tiny hatchling Salt Wyrm, small and cute, curled around a large glowing salt crystal it hugs, head lifted, tipping the crystal so luminous salt would pour from its lower tip (do not paint the falling salt); glowing gold heart, teal rim light. Isolated on pure flat black #000000 background so it can be composited with screen blending. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1024,
+   "height": 1024,
+   "board": "f2-hatchling-pour",
+   "stamp": false
+  },
+  {
+   "id": "f2-sky-wide",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. Wide empty night sky with no creature: near-black indigo, a soft gold glow low at the bottom centre like light under a door, faint violet haze, thousands of tiny floating salt crystals as stars, denser near the bottom. Very calm and dark in the centre for a huge bright title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "f2-hatchling-pour",
+   "stamp": false
+  },
+  {
+   "id": "f2-sky-tall",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. Tall empty night sky with no creature: near-black indigo, soft gold glow at the bottom centre, floating salt crystals as stars. Dark and calm through the middle for a stacked title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art. Absolutely no text, no title, no caption, no letters, no writing anywhere in the image; no emblem or badge shape.",
+   "width": 768,
+   "height": 1344,
+   "board": "f2-hatchling-pour",
+   "stamp": false
+  },
+  {
+   "id": "f-character-sheet",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. CHARACTER \u2014 the Salt Wyrm (original creature): a long legless serpent-dragon made of translucent white salt-crystal segments with faceted cube-shaped scales; a small horned head with two glowing gold eyes; a warm gold glow pulsing inside its body showing through the crystal; a fine mist of salt grains trailing from its body; elegant and mysterious, not monstrous. Character sheet on a flat solid dark indigo #14122B background: left, the Salt Wyrm full body side view coiled in an S; centre, three-quarter view of the head and upper body; right, three head close-ups with expressions: watchful, curious, pleased with brighter eyes. Same lighting, no labels. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "both",
+   "stamp": false
+  },
+  {
+   "id": "f-cover-core",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. Book cover, portrait: a single large glowing salt crystal floating above an open book in darkness, gold light pouring up from the pages, teal rim light on the crystal, floating salt sparkles; centred with a calm dark band across the top 25% for a title set separately. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1024,
+   "board": "both",
+   "stamp": false
+  },
+  {
+   "id": "f-cover-hope-fear",
+   "prompt": "STYLE: cinematic dark fantasy key art, minimal composition, deep near-black night, volumetric glow and bloom, the main light comes from behind the subject, smooth gradients, crisp crystal edges. Colours tied to objects: near-black indigo sky; thousands of tiny floating white salt crystals glinting like stars; a warm sodium-gold glowing heart inside the creature; cool teal rim light along crystal edges; faint violet haze around the glow. Book cover, portrait: two glowing crystals orbiting each other in darkness, one warm gold, one cold teal-violet, light trails curling around them into a yin-like spiral of salt grains (no symbols); centred with a calm dark band across the top 25% for a title set separately. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1024,
+   "board": "both",
+   "stamp": false
+  }
+ ]
+}

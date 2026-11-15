@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="e.css">
+<style>
+/* E2 — no scene: Sal jumps out of one sunflower panel. The panel gradient is sampled from e2-sal-pour's own background. */
+.e2 .hero { background: linear-gradient(135deg, var(--c-sun-deep) 0%, var(--c-sun-mid) 50%, var(--c-sun-light) 100%); }
+.sal { position: absolute; z-index: 0; top: 0; width: min(65svh, 140vw); aspect-ratio: 1; left: calc(50% - 0.552 * min(65svh, 140vw)); }
+.sal img { width: 100%; height: 100%; transform-origin: 55% 78%; --wig: -6deg;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, var(--c-ink) 12%, var(--c-ink) 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, var(--c-ink) 8%, var(--c-ink) 78%, transparent 90%);
+  -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent 0%, var(--c-ink) 12%, var(--c-ink) 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, var(--c-ink) 8%, var(--c-ink) 78%, transparent 90%);
+  mask-composite: intersect; }
+#cap { left: 55.2%; top: 78%; }   /* e2-sal-pour: where the painted stream leaves the jar (the art pours from the base, not the cap) */
+.copy { position: absolute; z-index: 2; left: var(--edge); right: var(--edge); bottom: var(--s6);
+  display: grid; justify-items: center; gap: var(--s5); text-align: center; }
+.wordmark { font-size: min(19vw, 88px); }
+.act { width: 100%; display: grid; gap: var(--s4); }
+.copy .key { width: 100%; }
+.tagline { color: var(--c-ink); text-wrap: balance; }
+@media (min-width: 700px) {
+  .sal { width: min(72svh, 680px); left: calc(52% - 0.552 * min(72svh, 680px)); }
+  .copy { bottom: var(--s7); grid-template-columns: max-content 1fr; align-items: end; justify-items: start; text-align: left; gap: var(--s6); }
+  .wordmark { font-size: clamp(88px, 10.2vw, 150px); }
+  .wordmark .w-a, .wordmark .w-b { display: inline; }
+  .act { width: auto; justify-self: end; justify-items: end; text-align: right; padding-bottom: var(--s2); }
+  .tagline { white-space: nowrap; }
+  .copy .key { width: auto; --wall: 10px; --press: 7px; }
+  .copy .key .face { font-size: calc(var(--fs-key) * 1.5); padding: var(--s5) var(--s7); }
+}
+</style>
+</head>
+<body class="e2">
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="hero">
+  <div class="sal" aria-hidden="true">
+    <img id="world" src="../../imagery/E/e2-sal-pour.jpg" alt="" role="presentation">
+    <span class="anchor" id="cap"></span>
+  </div>
+  <div class="copy">
+    <h1 class="wordmark"><span class="ln w-a">HIGH</span> <span class="ln w-b">SODIUM</span> <span class="ln w-c">GAMING</span></h1>
+    <div class="act">
+      <p class="tagline">Rules, close at hand. Salt to taste.</p>
+      <a class="key" href="resources.html" aria-label="Resources — open the book shelf"><span class="face">RESOURCES
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 5v6a3 3 0 0 1-3 3H5"/><path d="M9 10l-4 4 4 4"/></svg></span></a>
+    </div>
+  </div>
+  <canvas class="salt" id="salt" aria-hidden="true"></canvas>
+</main>
+<script src="../_shared/salt-engine.js"></script>
+<script src="hero.js"></script>
+</body>
+</html>

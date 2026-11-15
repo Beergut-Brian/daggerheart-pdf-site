@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="e.css">
+<style>
+/* E1 — the whole rendered diorama is the hero */
+.e1 .hero { container-type: size; background: var(--c-sky); }
+.art { position: absolute; inset: 0; z-index: 0; }
+/* the frame is sized like object-fit: cover, so the cap anchor tracks the crop */
+.frame { position: absolute; top: 50%; left: var(--fx); --fx: 50%;
+  width: max(100cqw, calc(100cqh * 768 / 1344)); aspect-ratio: 768 / 1344; transform: translate(calc(-1 * var(--fx)), -50%); }
+.frame img { width: 100%; height: 100%; transform-origin: 50% 40%; --wig: -1.4deg; }
+#cap { left: 50.6%; top: 12%; }           /* e1-diorama-tall: centre of the cap's pour holes */
+.scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, var(--c-scrim) 0%, var(--c-scrim) 22%, var(--c-scrim-0) 58%); }
+.copy { position: absolute; z-index: 2; left: var(--edge); right: var(--edge); bottom: var(--s6);
+  display: grid; justify-items: center; gap: var(--s5); text-align: center; }
+.act { width: 100%; display: grid; gap: var(--s4); }
+.copy .key { width: 100%; }
+.tagline { color: var(--c-salt); text-wrap: balance; }
+.wordmark { font-size: min(19vw, 88px); } /* phone: lines stay narrower than the keycap so its ends catch salt */
+@media (min-width: 700px) { .tagline { white-space: nowrap; } }
+@media (min-width: 700px) {
+  .frame { width: max(100cqw, calc(100cqh * 1536 / 864)); aspect-ratio: 1536 / 864; }
+  .frame img { transform-origin: 58% 52%; }
+  #cap { left: 58.2%; top: 10.4%; }        /* e1-diorama-wide: centre of the cap's pour holes */
+  .scrim { background: linear-gradient(to top, var(--c-scrim) 0%, var(--c-scrim) 14%, var(--c-scrim-0) 52%),
+                       linear-gradient(to right, var(--c-scrim) 0%, var(--c-scrim-0) 46%); }
+  .copy { bottom: var(--s7); grid-template-columns: max-content 1fr; align-items: end; justify-items: start; text-align: left; gap: var(--s6); }
+  .wordmark { font-size: clamp(88px, 10.2vw, 150px); }
+  .wordmark .w-a, .wordmark .w-b { display: inline; }
+  .act { width: auto; justify-self: end; display: grid; justify-items: end; gap: var(--s4); text-align: right; padding-bottom: var(--s2); }
+  .copy .key { width: auto; --wall: 10px; --press: 7px; }
+  .copy .key .face { font-size: calc(var(--fs-key) * 1.5); padding: var(--s5) var(--s7); }
+}
+</style>
+</head>
+<body class="e1">
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" class="hero">
+  <div class="art" aria-hidden="true">
+    <div class="frame">
+      <picture>
+        <source media="(min-width: 700px)" srcset="../../imagery/E/e1-diorama-wide.jpg">
+        <img id="world" src="../../imagery/E/e1-diorama-tall.jpg" alt="" role="presentation">
+      </picture>
+      <span class="anchor" id="cap"></span>
+    </div>
+  </div>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="copy">
+    <h1 class="wordmark"><span class="ln w-a">HIGH</span> <span class="ln w-b">SODIUM</span> <span class="ln w-c">GAMING</span></h1>
+    <div class="act">
+      <p class="tagline">Rules, close at hand. Salt to taste.</p>
+      <a class="key" href="resources.html" aria-label="Resources — open the book shelf"><span class="face">RESOURCES
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 5v6a3 3 0 0 1-3 3H5"/><path d="M9 10l-4 4 4 4"/></svg></span></a>
+    </div>
+  </div>
+  <canvas class="salt" id="salt" aria-hidden="true"></canvas>
+</main>
+<script src="../_shared/salt-engine.js"></script>
+<script src="hero.js"></script>
+</body>
+</html>

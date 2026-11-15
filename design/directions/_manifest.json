@@ -1,7 +1,7 @@
 {
   "project": "hsg-daggerheart",
   "workflow_version": 3,
-  "stage": "2-redo",
+  "stage": "2-redo-phase2",
   "memo_id": [
     "D-painted-epic",
     "E-toy-world",
@@ -155,6 +155,204 @@
         "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
       },
       "stage": "1d"
+    },
+    {
+      "id": "d1-colossus-vista",
+      "stage": "2r2",
+      "kind": "page",
+      "memo_id": "D-painted-epic",
+      "memo": "../direction-memos/D-painted-epic.md",
+      "variation_axes": {
+        "axis": "monster as huge backdrop vs small character on the type",
+        "value": "backdrop"
+      },
+      "pages": {
+        "/": "d1-colossus-vista/index.html",
+        "/resources": "d1-colossus-vista/resources.html",
+        "/resources/core-rulebook": "d1-colossus-vista/viewer.html"
+      },
+      "six_book_state": true,
+      "renders": {
+        "board-1440.png": "d1-colossus-vista/board-1440.png",
+        "board-1440-first.png": "d1-colossus-vista/board-1440-first.png",
+        "board-390.png": "d1-colossus-vista/board-390.png",
+        "board-390-first.png": "d1-colossus-vista/board-390-first.png",
+        "resources-1440-first.png": "d1-colossus-vista/resources-1440-first.png",
+        "viewer-1440-first.png": "d1-colossus-vista/viewer-1440-first.png",
+        "viewer-390.png": "d1-colossus-vista/viewer-390.png",
+        "salt-1.png": "d1-colossus-vista/salt-1.png",
+        "salt-2.png": "d1-colossus-vista/salt-2.png",
+        "salt-3.png": "d1-colossus-vista/salt-3.png"
+      },
+      "detect": "d1-colossus-vista/detect.json",
+      "gate_note": "d1-colossus-vista/gate-note.md",
+      "images": "../imagery/D/",
+      "salt_engine": "_shared/salt-engine.js"
+    },
+    {
+      "id": "d2-colossus-perched",
+      "stage": "2r2",
+      "kind": "page",
+      "memo_id": "D-painted-epic",
+      "memo": "../direction-memos/D-painted-epic.md",
+      "variation_axes": {
+        "axis": "monster as huge backdrop vs small character on the type",
+        "value": "character on type"
+      },
+      "pages": {
+        "/": "d2-colossus-perched/index.html",
+        "/resources": "d2-colossus-perched/resources.html",
+        "/resources/core-rulebook": "d2-colossus-perched/viewer.html"
+      },
+      "six_book_state": false,
+      "renders": {
+        "board-1440.png": "d2-colossus-perched/board-1440.png",
+        "board-1440-first.png": "d2-colossus-perched/board-1440-first.png",
+        "board-390.png": "d2-colossus-perched/board-390.png",
+        "board-390-first.png": "d2-colossus-perched/board-390-first.png",
+        "resources-1440-first.png": "d2-colossus-perched/resources-1440-first.png",
+        "viewer-1440-first.png": "d2-colossus-perched/viewer-1440-first.png",
+        "viewer-390.png": "d2-colossus-perched/viewer-390.png",
+        "salt-1.png": "d2-colossus-perched/salt-1.png",
+        "salt-2.png": "d2-colossus-perched/salt-2.png",
+        "salt-3.png": "d2-colossus-perched/salt-3.png"
+      },
+      "detect": "d2-colossus-perched/detect.json",
+      "gate_note": "d2-colossus-perched/gate-note.md",
+      "images": "../imagery/D/",
+      "salt_engine": "_shared/salt-engine.js"
+    },
+    {
+      "id": "e1-salt-mine-diorama",
+      "stage": "2r2",
+      "kind": "page",
+      "memo_id": "E-toy-world",
+      "memo": "../direction-memos/E-toy-world.md",
+      "variation_axes": {
+        "axis": "whole rendered world vs character on bold colour",
+        "value": "rendered world"
+      },
+      "pages": {
+        "/": "e1-salt-mine-diorama/index.html",
+        "/resources": "e1-salt-mine-diorama/resources.html",
+        "/resources/core-rulebook": "e1-salt-mine-diorama/viewer.html"
+      },
+      "six_book_state": true,
+      "renders": {
+        "board-1440.png": "e1-salt-mine-diorama/board-1440.png",
+        "board-1440-first.png": "e1-salt-mine-diorama/board-1440-first.png",
+        "board-390.png": "e1-salt-mine-diorama/board-390.png",
+        "board-390-first.png": "e1-salt-mine-diorama/board-390-first.png",
+        "resources-1440-first.png": "e1-salt-mine-diorama/resources-1440-first.png",
+        "viewer-1440-first.png": "e1-salt-mine-diorama/viewer-1440-first.png",
+        "viewer-390.png": "e1-salt-mine-diorama/viewer-390.png",
+        "salt-1.png": "e1-salt-mine-diorama/salt-1.png",
+        "salt-2.png": "e1-salt-mine-diorama/salt-2.png",
+        "salt-3.png": "e1-salt-mine-diorama/salt-3.png"
+      },
+      "detect": "e1-salt-mine-diorama/detect.json",
+      "gate_note": "e1-salt-mine-diorama/gate-note.md",
+      "images": "../imagery/E/",
+      "salt_engine": "_shared/salt-engine.js"
+    },
+    {
+      "id": "e2-sal-on-colour",
+      "stage": "2r2",
+      "kind": "page",
+      "memo_id": "E-toy-world",
+      "memo": "../direction-memos/E-toy-world.md",
+      "variation_axes": {
+        "axis": "whole rendered world vs character on bold colour",
+        "value": "character on colour"
+      },
+      "pages": {
+        "/": "e2-sal-on-colour/index.html",
+        "/resources": "e2-sal-on-colour/resources.html",
+        "/resources/core-rulebook": "e2-sal-on-colour/viewer.html"
+      },
+      "six_book_state": false,
+      "renders": {
+        "board-1440.png": "e2-sal-on-colour/board-1440.png",
+        "board-1440-first.png": "e2-sal-on-colour/board-1440-first.png",
+        "board-390.png": "e2-sal-on-colour/board-390.png",
+        "board-390-first.png": "e2-sal-on-colour/board-390-first.png",
+        "resources-1440-first.png": "e2-sal-on-colour/resources-1440-first.png",
+        "viewer-1440-first.png": "e2-sal-on-colour/viewer-1440-first.png",
+        "viewer-390.png": "e2-sal-on-colour/viewer-390.png",
+        "salt-1.png": "e2-sal-on-colour/salt-1.png",
+        "salt-2.png": "e2-sal-on-colour/salt-2.png",
+        "salt-3.png": "e2-sal-on-colour/salt-3.png"
+      },
+      "detect": "e2-sal-on-colour/detect.json",
+      "gate_note": "e2-sal-on-colour/gate-note.md",
+      "images": "../imagery/E/",
+      "salt_engine": "_shared/salt-engine.js"
+    },
+    {
+      "id": "f1-wyrm-eclipse",
+      "stage": "2r2",
+      "kind": "page",
+      "memo_id": "F-glow",
+      "memo": "../direction-memos/F-glow.md",
+      "variation_axes": {
+        "axis": "monster as huge backdrop glow vs small character the visitor plays with",
+        "value": "backdrop glow"
+      },
+      "pages": {
+        "/": "f1-wyrm-eclipse/index.html",
+        "/resources": "f1-wyrm-eclipse/resources.html",
+        "/resources/core-rulebook": "f1-wyrm-eclipse/viewer.html"
+      },
+      "six_book_state": true,
+      "renders": {
+        "board-1440.png": "f1-wyrm-eclipse/board-1440.png",
+        "board-1440-first.png": "f1-wyrm-eclipse/board-1440-first.png",
+        "board-390.png": "f1-wyrm-eclipse/board-390.png",
+        "board-390-first.png": "f1-wyrm-eclipse/board-390-first.png",
+        "resources-1440-first.png": "f1-wyrm-eclipse/resources-1440-first.png",
+        "viewer-1440-first.png": "f1-wyrm-eclipse/viewer-1440-first.png",
+        "viewer-390.png": "f1-wyrm-eclipse/viewer-390.png",
+        "salt-1.png": "f1-wyrm-eclipse/salt-1.png",
+        "salt-2.png": "f1-wyrm-eclipse/salt-2.png",
+        "salt-3.png": "f1-wyrm-eclipse/salt-3.png"
+      },
+      "detect": "f1-wyrm-eclipse/detect.json",
+      "gate_note": "f1-wyrm-eclipse/gate-note.md",
+      "images": "../imagery/F/",
+      "salt_engine": "_shared/salt-engine.js"
+    },
+    {
+      "id": "f2-hatchling-pour",
+      "stage": "2r2",
+      "kind": "page",
+      "memo_id": "F-glow",
+      "memo": "../direction-memos/F-glow.md",
+      "variation_axes": {
+        "axis": "monster as huge backdrop glow vs small character the visitor plays with",
+        "value": "small character"
+      },
+      "pages": {
+        "/": "f2-hatchling-pour/index.html",
+        "/resources": "f2-hatchling-pour/resources.html",
+        "/resources/core-rulebook": "f2-hatchling-pour/viewer.html"
+      },
+      "six_book_state": false,
+      "renders": {
+        "board-1440.png": "f2-hatchling-pour/board-1440.png",
+        "board-1440-first.png": "f2-hatchling-pour/board-1440-first.png",
+        "board-390.png": "f2-hatchling-pour/board-390.png",
+        "board-390-first.png": "f2-hatchling-pour/board-390-first.png",
+        "resources-1440-first.png": "f2-hatchling-pour/resources-1440-first.png",
+        "viewer-1440-first.png": "f2-hatchling-pour/viewer-1440-first.png",
+        "viewer-390.png": "f2-hatchling-pour/viewer-390.png",
+        "salt-1.png": "f2-hatchling-pour/salt-1.png",
+        "salt-2.png": "f2-hatchling-pour/salt-2.png",
+        "salt-3.png": "f2-hatchling-pour/salt-3.png"
+      },
+      "detect": "f2-hatchling-pour/detect.json",
+      "gate_note": "f2-hatchling-pour/gate-note.md",
+      "images": "../imagery/F/",
+      "salt_engine": "_shared/salt-engine.js"
     }
   ],
   "rejected": {
@@ -172,5 +370,7 @@
       "why": "No. way off on those designs.",
       "family": "abstract code-drawn ornament with no characters or scene"
     }
-  }
+  },
+  "recommended": "f1-wyrm-eclipse",
+  "runner_up": "e1-salt-mine-diorama"
 }

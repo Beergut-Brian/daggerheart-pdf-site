@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700;800&family=Cinzel+Decorative:wght@900&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="d.css">
+<style>
+/* D1 colossus-vista: the Colossus IS the scene; its raised hand salts the name. */
+:root { --hero-zoom: 1.06; --hero-origin: 62% 38%; --mark-glow: 0 .04em .5em var(--c-night-deep), 0 0 1.2em var(--c-night-deep); }
+.hero { position: relative; height: 100svh; min-height: 640px; overflow: hidden; touch-action: pan-y; isolation: isolate; background: var(--c-night); }
+.art, .art img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art img { object-fit: cover; object-position: 0% 50%; transform: scale(var(--hero-zoom)); transform-origin: var(--hero-origin); }
+/* light: deepen the night at the edges, push the gold backlight and the brine glow */
+.light { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(38% 46% at 74% 44%, var(--c-glow-gold), transparent 70%),
+              radial-gradient(60% 22% at 60% 92%, var(--c-glow-teal), transparent 70%); }
+.vignette { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 95% at 62% 42%, transparent 52%, var(--c-scrim) 100%); }
+.mist { position: absolute; inset: auto -20% 8% -20%; height: 34%; pointer-events: none; opacity: .9;
+  background: radial-gradient(40% 50% at 30% 60%, var(--c-mist), transparent 70%), radial-gradient(35% 45% at 75% 50%, var(--c-mist), transparent 70%);
+  animation: drift 20s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translateX(8%); } }
+.scrim { position: absolute; pointer-events: none; left: calc(var(--stack-x) - 34rem); width: 68rem; top: 22%; bottom: 0;
+  background: radial-gradient(50% 55% at 50% 58%, var(--c-scrim), var(--c-scrim-soft) 100%); }
+.pour { position: absolute; width: 2px; height: 2px; pointer-events: none; }
+.stack { position: absolute; z-index: 2; left: var(--stack-x, 50%); transform: translateX(-50%); bottom: max(var(--s6), 5svh);
+  display: grid; justify-items: center; gap: var(--s4); text-align: center; width: max-content; max-width: calc(100% - 2 * var(--s4)); }
+.wm { margin: 0; font: 900 var(--fs-mark)/var(--lh-tight) var(--f-mark); letter-spacing: var(--tr-mark); color: var(--c-ivory);
+  text-shadow: 0 -.025em 0 var(--c-gold), var(--mark-glow); }
+.wm .l { display: block; }
+.wm .l2 { color: var(--c-ivory); }
+.tag { margin: 0 0 var(--s3); font: 400 var(--fs-lead)/1.3 var(--f-head); color: var(--c-ivory); text-shadow: 0 1px 12px var(--c-night-deep); }
+.tag em { font-style: normal; color: var(--c-teal); }
+canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+.stack .plaque-wrap { position: relative; z-index: 1; }
+@media (min-width: 700px) {
+  :root { --hero-zoom: 1.1; --hero-origin: 70% 30%; }
+  .stack { bottom: auto; top: calc(var(--pour-y) + 13svh); }
+  .scrim { top: calc(var(--pour-y) + 4svh); }
+  .art img { object-position: 80% 50%; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#hero">Skip to content</a>
+<main class="hero" id="hero">
+  <picture class="art" aria-hidden="true">
+    <source media="(min-width: 700px)" srcset="../../imagery/D/d1-hero-wide.jpg" width="1536" height="864">
+    <img src="../../imagery/D/d1-hero-tall.jpg" alt="" width="768" height="1344" fetchpriority="high">
+  </picture>
+  <div class="light" aria-hidden="true"></div>
+  <div class="mist" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
+  <span class="pour" id="pour" aria-hidden="true"></span>
+  <div class="stack">
+    <h1 class="wm" aria-label="High Sodium Gaming"><span class="l">HIGH</span> <span class="l l2">SODIUM</span> <span class="l">GAMING</span></h1>
+    <p class="tag">Rules, close at hand. <em>Salt to taste.</em></p>
+    <span class="plaque-wrap"><a class="plaque" href="resources.html" aria-label="Resources — open the book shelf">RESOURCES</a></span>
+  </div>
+  <canvas class="salt" id="salt" aria-hidden="true"></canvas>
+</main>
+<script src="../_shared/salt-engine.js"></script>
+<script>
+// Pour point measured from the paintings: wide = the falling stream under the raised hand (700,262 of 1536x864);
+// tall = under the cupped fingers (300,236 of 768x1344).
+window.HERO = {
+  wide: { w: 1536, h: 864, px: .8, py: .5, z: 1.1, ox: .7, oy: .3, fx: .456, fy: .303, stackFollow: true },
+  tall: { w: 768, h: 1344, px: 0, py: .5, z: 1.06, ox: .62, oy: .38, fx: .39, fy: .176, stackFollow: true },
+  engine: { cellPhone: 3, cellDesk: 4, maxPhone: 6000, maxDesk: 14000, ratePhone: 150, rateDesk: 420, spreadPhone: 8, spreadDesk: 12,
+    extra: { glyphBridge: -.07 }, seconds: 2.8, prefillPhone: 450, prefillDesk: 1200, colors: ['#FBF8F1', '#F1E7D3', '#FFFFFF', '#E6D3A8'] },
+};
+</script>
+<script src="hero.js"></script>
+</body>
+</html>

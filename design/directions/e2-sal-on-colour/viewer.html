@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daggerheart Core Rulebook — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="e.css">
+<style>
+/* Viewer: quiet ink chrome, the page is the brightest thing on screen */
+body { background: var(--c-ink-deep); color: var(--c-salt-2); }
+::selection { background: var(--c-sun); color: var(--c-ink); }
+a { color: var(--c-salt-2); }
+.ic { width: 20px; height: 20px; flex: none; }
+.btn-i { display: inline-grid; place-items: center; min-width: 40px; min-height: 40px; padding: 0 var(--s2); border: 0; border-radius: var(--r-s);
+  background: transparent; color: var(--c-salt-2); font: 800 var(--fs-small) var(--f-ui); cursor: pointer; }
+.btn-i:hover { background: var(--c-ink-raise); }
+.hsg { font-family: var(--f-word); font-size: var(--fs-title); color: var(--c-salt); -webkit-text-stroke: 0.06em var(--c-ink-wall); paint-order: stroke fill; letter-spacing: 0.02em; text-decoration: none; }
+.field { display: flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s2) 0 var(--s3); border-radius: var(--r-m);
+  background: var(--c-ink-deep); border: 2px solid var(--c-ink-line); }
+.field:focus-within { border-color: var(--c-sun); }
+.field input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--c-salt); font: 800 var(--fs-body) var(--f-ui); }
+.field input:focus { outline: none; }
+.field input::placeholder { color: var(--c-ink-mute); }
+mark { background: var(--c-sun); color: var(--c-ink); border-radius: 3px; padding: 0 2px; font-weight: 900; }
+.muted { color: var(--c-ink-soft); }
+
+/* book page placeholder: parchment, grey lines, heading bar, two match highlights */
+.bookpage { position: relative; aspect-ratio: 8.5 / 11; background: var(--c-parch); border-radius: var(--r-s); box-shadow: var(--sh-lift);
+  padding: 8% 9%; display: grid; align-content: start; gap: 2.4%; overflow: hidden; }
+.bookpage .hd { aspect-ratio: 9 / 1; width: 52%; background: var(--c-parch-head); border-radius: 2px; margin-bottom: 3%; }
+.bookpage .ln { height: 1.15%; min-height: 4px; background: var(--c-parch-line); border-radius: 2px; }
+.bookpage .ln.s { width: 64%; } .bookpage .ln.m { width: 86%; }
+.bookpage .hit { position: absolute; height: 2.4%; background: var(--c-sun); opacity: 0.85; border-bottom: 3px solid var(--c-felt); border-radius: 2px; }
+
+/* desktop app */
+.app { display: none; }
+@media (min-width: 900px) {
+  .app { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+  .phones { display: none; }
+}
+.top { display: flex; align-items: center; gap: var(--s4); padding: var(--s2) var(--s4); background: var(--c-ink); border-bottom: 1px solid var(--c-ink-line); }
+.top .back { color: var(--c-salt-2); font-size: var(--fs-small); }
+.top .tt { font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grow { flex: 1; }
+.pg { display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-small); font-weight: 700; font-variant-numeric: tabular-nums; }
+.pg input { width: 52px; min-height: 36px; text-align: center; border-radius: var(--r-s); border: 2px solid var(--c-ink-line); background: var(--c-ink-deep); color: var(--c-salt); font: 900 var(--fs-small) var(--f-ui); }
+.zoom { display: flex; gap: var(--s1); }
+.top .field { width: 340px; }
+.body { display: grid; grid-template-columns: 232px 1fr 392px; min-height: 0; }
+.rail { background: var(--c-ink); border-right: 1px solid var(--c-ink-line); display: flex; flex-direction: column; min-height: 0; }
+.tabs { display: flex; gap: var(--s1); padding: var(--s3) var(--s3) 0; border-bottom: 1px solid var(--c-ink-line); }
+.tabs button { flex: 1; min-height: 44px; border: 0; background: transparent; color: var(--c-ink-soft); font: 800 var(--fs-small) var(--f-ui); border-radius: var(--r-s) var(--r-s) 0 0; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--c-salt); background: var(--c-ink-raise); box-shadow: inset 0 -3px 0 var(--c-sun); }
+.thumbs { overflow: hidden; padding: var(--s4); display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s3); align-content: start; }
+.th { display: grid; gap: var(--s1); justify-items: center; font-size: var(--fs-tiny); font-weight: 800; color: var(--c-ink-soft); text-decoration: none; }
+.th .bookpage { width: 100%; box-shadow: none; padding: 10%; gap: 6%; border: 3px solid transparent; }
+.th .bookpage .ln { min-height: 2px; height: 3%; }
+.th[aria-current="page"] { color: var(--c-sun); }
+.th[aria-current="page"] .bookpage { border-color: var(--c-sun); outline: 3px solid var(--c-sun); outline-offset: 1px; }
+.stage { overflow: hidden; display: grid; justify-items: center; align-content: start; padding: var(--s5); gap: var(--s3); }
+.stage .bookpage { width: min(560px, 100%); }
+.onpage { display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-small); font-weight: 800; }
+.res { background: var(--c-ink); border-left: 1px solid var(--c-ink-line); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.res .head { display: flex; justify-content: space-between; align-items: center; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--c-ink-line); }
+.res h2 { margin: 0; font-size: var(--fs-body); font-weight: 900; }
+.hits { list-style: none; margin: 0; padding: var(--s2); display: grid; gap: var(--s1); }
+.hit-row { display: grid; grid-template-columns: 1fr 44px; gap: var(--s3); padding: var(--s3); border-radius: var(--r-m); text-decoration: none; color: var(--c-salt-2); }
+.hit-row:hover { background: var(--c-ink-raise); }
+.hit-row.on { background: var(--c-ink-raise); box-shadow: inset 0 0 0 2px var(--c-sun); }
+.hit-row .snip { margin: 0; font-size: var(--fs-small); line-height: 1.4; }
+.hit-row .where { margin: var(--s1) 0 0; font-size: var(--fs-tiny); font-weight: 800; color: var(--c-ink-soft); font-variant-numeric: tabular-nums; }
+.hit-row .bookpage { width: 44px; padding: 12%; gap: 8%; box-shadow: none; }
+.hit-row .bookpage .ln { min-height: 2px; height: 4%; }
+.kbd { margin-top: auto; padding: var(--s3) var(--s4); font-size: var(--fs-tiny); font-weight: 800; color: var(--c-ink-soft); border-top: 1px solid var(--c-ink-line); }
+
+/* phone screens */
+.phones { display: grid; gap: var(--s6); padding: var(--s4) 0 var(--s6); }
+.phones .lbl { margin: 0 var(--s4) var(--s2); font: 400 var(--fs-small) var(--f-label); letter-spacing: var(--track-label); color: var(--c-ink-soft); text-transform: uppercase; }
+.screen { height: 844px; display: flex; flex-direction: column; background: var(--c-ink-deep); position: relative; overflow: hidden; border-top: 1px solid var(--c-ink-line); border-bottom: 1px solid var(--c-ink-line); }
+.pbar { display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); background: var(--c-ink); }
+.pbar .tt { flex: 1; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pbar .hsg { font-size: var(--fs-title-s); }
+.pscroll { flex: 1; padding: var(--s3); display: grid; gap: var(--s3); align-content: start; overflow: hidden; }
+.dock { display: flex; gap: var(--s2); padding: var(--s3) var(--s3) var(--s5); background: var(--c-ink); border-top: 1px solid var(--c-ink-line); }
+.pill { flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; border: 0; border-radius: var(--r-m);
+  background: var(--c-ink-raise); color: var(--c-salt); font: 900 var(--fs-body) var(--f-ui); font-variant-numeric: tabular-nums; }
+.pill.go { background: var(--c-sun); color: var(--c-ink); }
+.sheet { flex: 1; display: flex; flex-direction: column; background: var(--c-ink); }
+.sheet .bar { display: flex; gap: var(--s2); align-items: center; padding: var(--s3); }
+.sheet .bar .field { flex: 1; }
+.count { padding: 0 var(--s4) var(--s2); font-weight: 900; }
+
+/* state specimen: the one place Sal appears in the viewer */
+.state { max-width: 640px; margin: var(--s7) auto var(--s8); padding: 0 var(--s4); }
+.state .lbl { margin: 0 0 var(--s3); font: 400 var(--fs-small) var(--f-label); letter-spacing: var(--track-label); color: var(--c-ink-soft); text-transform: uppercase; }
+.empty { display: grid; grid-template-columns: 112px 1fr; gap: var(--s4); align-items: center; padding: var(--s4); border-radius: var(--r-l); background: var(--c-ink); }
+.empty img { width: 112px; aspect-ratio: 1; object-fit: cover; object-position: 50% 30%; border-radius: var(--r-m); background: var(--c-coral-wave); }
+.empty p { margin: 0 0 var(--s2); font-weight: 800; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.chips button { min-height: 40px; padding: 0 var(--s4); border: 0; border-radius: var(--r-pill); background: var(--c-ink-raise); color: var(--c-salt); font: 800 var(--fs-small) var(--f-ui); }
+</style>
+</head>
+<body>
+<a class="skip" href="#page">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5L20 20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pages" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="13" y="4" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="4" y="13" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="13" y="13" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="app">
+  <header class="top">
+    <a class="hsg" href="index.html" aria-label="High Sodium Gaming home">HSG</a>
+    <a class="back" href="resources.html"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg>Resources</a>
+    <span class="tt">Daggerheart Core Rulebook</span><span class="grow"></span>
+    <label class="pg">Page <input value="19" inputmode="numeric" aria-label="Go to page"> of 397</label>
+    <div class="zoom"><button class="btn-i" aria-label="Zoom out"><svg class="ic"><use href="#i-minus"/></svg></button><button class="btn-i" aria-label="Zoom in"><svg class="ic"><use href="#i-plus"/></svg></button><button class="btn-i" aria-label="Fit width"><svg class="ic"><use href="#i-fit"/></svg></button></div>
+    <div class="field"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input value="Hope" aria-label="Search Daggerheart Core Rulebook" placeholder="Search the rulebook — try &quot;Hope&quot;"><button class="btn-i" aria-label="Clear search"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  </header>
+  <div class="body">
+    <aside class="rail" aria-label="Pages and chapters">
+      <div class="tabs" role="tablist"><button role="tab" aria-selected="true">Pages</button><button role="tab" aria-selected="false">Chapters</button></div>
+      <div class="thumbs" id="thumbs"></div>
+    </aside>
+    <main class="stage" id="page">
+      <div class="bookpage" id="bigpage" role="img" aria-label="Page 19"></div>
+      <div class="onpage"><button class="btn-i" aria-label="Previous match"><svg class="ic"><use href="#i-up"/></svg></button>1 of 2 on this page<button class="btn-i" aria-label="Next match"><svg class="ic"><use href="#i-down"/></svg></button></div>
+    </main>
+    <aside class="res" aria-label="Search results">
+      <div class="head"><h2>148 results for "Hope"</h2><button class="btn-i" aria-label="Close search"><svg class="ic"><use href="#i-x"/></svg></button></div>
+      <ul class="hits" id="hits-d"></ul>
+      <div class="kbd">↑ ↓ to move · Enter to open</div>
+    </aside>
+  </div>
+</div>
+
+<div class="phones">
+  <section aria-label="Phone, reading">
+    <p class="lbl">Phone · Reading</p>
+    <div class="screen">
+      <div class="pbar"><a class="btn-i" href="resources.html" aria-label="Back to Resources"><svg class="ic"><use href="#i-back"/></svg></a><span class="tt">Daggerheart Core Rulebook</span><a class="hsg" href="index.html" aria-label="High Sodium Gaming home">HSG</a></div>
+      <div class="pscroll"><div class="bookpage" id="ph-page" role="img" aria-label="Page 19"></div><div class="bookpage" id="ph-page2" role="img" aria-label="Page 20"></div></div>
+      <nav class="dock" aria-label="Book controls"><button class="pill"><svg class="ic" aria-hidden="true"><use href="#i-pages"/></svg>Pages</button><button class="pill" aria-label="Page 19 of 397, go to page">19 / 397</button><button class="pill go"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>Search</button></nav>
+    </div>
+  </section>
+  <section aria-label="Phone, search">
+    <p class="lbl">Phone · Search</p>
+    <div class="screen">
+      <div class="sheet">
+        <div class="bar"><div class="field"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input value="Hope" aria-label="Search Daggerheart Core Rulebook"><button class="btn-i" aria-label="Clear search"><svg class="ic"><use href="#i-x"/></svg></button></div><button class="btn-i">Close</button></div>
+        <p class="count">148 results for "Hope"</p>
+        <ul class="hits" id="hits-p"></ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="state" aria-label="No results state">
+  <p class="lbl">State · no results (query "Hoep")</p>
+  <div class="empty">
+    <img src="../../imagery/E/e2-sal-wave.jpg" alt="">
+    <div><p>Nothing for "Hoep". Check the spelling, or try a shorter word.</p>
+      <div class="chips" aria-label="Try"><button>Hope</button><button>Fear</button><button>Stress</button><button>Evasion</button></div></div>
+  </div>
+</section>
+
+<script>
+// sample content: content-pack.md "Hope" rows (real snippets)
+const HITS = [
+  ['…HOPE AND FEAR <mark>Hope</mark> and Fear are currencies used by the players and the GM to represent the way fate turns…', 'Ch 1 · Character Creation', 19],
+  ['…Before you make an action or reaction roll, you can spend a <mark>Hope</mark> to add the Experience\'s modifier to the roll\'s result…', 'Ch 1 · Character Creation', 21],
+  ['…Class <mark>Hope</mark> Feature: Each class has a special move they can make by spending 3 <mark>Hope</mark>…', 'Ch 1 · Class', 28],
+  ['…Make a Scene: Spend 3 <mark>Hope</mark> to temporarily Distract a target within Close range…', 'Ch 1 · Class (Bard)', 29],
+  ['…Evolution: Spend 3 <mark>Hope</mark> to transform into a Beastform without marking a Stress…', 'Ch 1 · Class (Druid)', 31],
+];
+const lines = n => Array.from({ length: n }, (_, i) => `<div class="ln ${i % 7 === 6 ? 's' : i % 5 === 3 ? 'm' : ''}"></div>`).join('');
+const page = (n, hits) => `<div class="hd"></div>${lines(n)}` + (hits ? `<span class="hit" style="top:31%;left:22%;width:14%"></span><span class="hit" style="top:58%;left:48%;width:14%"></span>` : '');
+['bigpage', 'ph-page'].forEach(id => document.getElementById(id).innerHTML = page(26, true));
+document.getElementById('ph-page2').innerHTML = page(26, false);
+document.getElementById('thumbs').innerHTML = Array.from({ length: 10 }, (_, i) => i + 15).map(n =>
+  `<a class="th" href="#" aria-label="Page ${n}"${n === 19 ? ' aria-current="page"' : ''}><div class="bookpage"><div class="hd"></div>${lines(7)}</div>${n}</a>`).join('');
+const rows = HITS.map(([s, c, p], i) => `<li><a class="hit-row${i === 0 ? ' on' : ''}" href="#" aria-label="Page ${p}, ${c}: ${s.replace(/<[^>]+>/g, '')}"><div><p class="snip">${s}</p><p class="where">${c} · p. ${p}</p></div><div class="bookpage" aria-hidden="true"><div class="hd"></div>${lines(6)}</div></a></li>`).join('');
+document.getElementById('hits-d').innerHTML = rows; document.getElementById('hits-p').innerHTML = rows;
+</script>
+</body>
+</html>

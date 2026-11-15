@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="e.css">
+<style>
+/* E1 /resources: books stand on the coral tablecloth; a light salt drift settles on the covers */
+body { background: var(--c-coral); }
+.world { position: relative; }
+canvas.salt { z-index: 4; }
+.page-head h1 { color: var(--c-salt); -webkit-text-stroke: var(--stroke) var(--c-ink); paint-order: stroke fill; text-shadow: var(--extrude); }
+.peek { position: absolute; right: var(--edge); top: var(--s4); width: 76px; aspect-ratio: 1; border-radius: var(--r-l); transform: rotate(5deg);
+  border: var(--s1) solid var(--c-salt); box-shadow: var(--sh-lift); --src: url(../../imagery/E/e1-diorama-tall.jpg); --zoom: 230%; --pos: 50% 7%; }
+.pair { display: grid; gap: var(--s7); padding: 0 var(--edge) var(--s8); }
+.pair .book.main .slab { width: min(74%, 300px); }
+.pair .book.second { grid-template-columns: 40% 1fr; align-items: end; }
+.book .key-s { justify-self: start; margin-top: var(--s2); }
+.book .t-xl { font-size: var(--fs-title-xl); }
+.shelf { padding: 0 var(--edge) var(--s9); }
+.shelf h2 { margin-bottom: var(--s7); }
+.shelf .grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6) var(--s4); }
+.shelf .book:first-child { grid-column: 1 / -1; grid-template-columns: 44% 1fr; align-items: end; }
+.shelf .book .t { font-size: var(--fs-title-s); }
+.shelf .book:first-child .t { font-size: var(--fs-title); }
+.shelf .slab { --wall: 6px; }
+@media (min-width: 700px) {
+  .peek { width: 168px; top: var(--s6); }
+}
+@media (min-width: 900px) {
+  .pair { grid-template-columns: 1.25fr 1fr; align-items: end; gap: var(--s8); }
+  .pair .book.main { grid-template-columns: 340px 1fr; align-items: end; gap: var(--s6); }
+  .pair .book.main .slab { width: 100%; }
+  .pair .book.second { grid-template-columns: 220px 1fr; gap: var(--s5); }
+  .shelf .grid { grid-template-columns: repeat(4, 1fr); gap: var(--s7) var(--s6); }
+  .shelf .book:first-child { grid-column: span 2; grid-row: span 2; grid-template-columns: 1fr; }
+  .shelf .book:first-child .slab { width: 72%; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="world" id="world">
+<header class="page-head">
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>High Sodium Gaming</a>
+  <h1>Resources</h1>
+  <p>Pick a book. Search starts the moment it opens.</p>
+  <div class="peek crop" aria-hidden="true"></div>
+</header>
+<main id="main">
+  <section class="pair" aria-label="Books">
+    <a class="book main" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+      <div class="slab"><img src="../../references/steer-1/06-cover-core-rulebook.jpg" alt=""></div>
+      <div style="display:grid;gap:var(--s2)">
+        <p class="t t-xl">Daggerheart Core Rulebook</p>
+        <p class="sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="meta">397 pages · 5 chapters</p>
+        <span class="key key-s"><span class="face">OPEN</span></span>
+      </div>
+    </a>
+    <a class="book second" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+      <div class="slab"><img src="../../references/steer-1/05-cover-hope-and-fear.jpg" alt=""></div>
+      <div style="display:grid;gap:var(--s2)">
+        <p class="t">Daggerheart: Hope &amp; Fear</p>
+        <p class="sub">The expansion</p>
+        <p class="meta">204 pages · Expansion</p>
+        <span class="key key-s"><span class="face">OPEN</span></span>
+      </div>
+    </a>
+  </section>
+
+  <section class="alt" aria-labelledby="alt-h">
+    <h2 id="alt-h">Alt covers (ours)</h2>
+    <div class="alt-row">
+      <figure><div class="slab"><span class="band" aria-hidden="true">CORE RULEBOOK</span><img src="../../imagery/E/e-cover-core.jpg" alt=""></div><figcaption>Core Rulebook</figcaption></figure>
+      <figure><div class="slab"><span class="band on-sky" aria-hidden="true">HOPE &amp; FEAR</span><img src="../../imagery/E/e-cover-hope-fear.jpg" alt=""></div><figcaption>Hope &amp; Fear</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="shelf" aria-labelledby="shelf-h">
+    <h2 id="shelf-h">Sample shelf: future titles</h2>
+    <div class="grid">
+      <a class="book" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages"><div class="slab"><img src="../../references/steer-1/06-cover-core-rulebook.jpg" alt=""></div><div><p class="t">Daggerheart Core Rulebook</p><p class="meta">397 pages · 5 chapters</p></div></a>
+      <a class="book" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages"><div class="slab"><img src="../../references/steer-1/05-cover-hope-and-fear.jpg" alt=""></div><div><p class="t">Daggerheart: Hope &amp; Fear</p><p class="meta">204 pages · Expansion</p></div></a>
+      <a class="book" href="viewer.html" aria-label="Open Table Quick Reference, 12 pages"><div class="slab"><div class="crop" style="--src:url(../../imagery/E/e1-diorama-wide.jpg);--zoom:520%;--pos:8% 66%"></div></div><div><p class="t">Table Quick Reference</p><p class="meta">12 pages · 3 sections</p></div></a>
+      <a class="book" href="viewer.html" aria-label="Open House Rules, 8 pages"><div class="slab"><div class="crop" style="--src:url(../../imagery/E/e-character-sheet.jpg);--zoom:560%;--pos:85% 52%"></div></div><div><p class="t">House Rules</p><p class="meta">8 pages · 1 chapter</p></div></a>
+      <a class="book" href="viewer.html" aria-label="Open Session Zero Pack, 16 pages"><div class="slab"><div class="crop" style="--src:url(../../imagery/E/e1-diorama-wide.jpg);--zoom:520%;--pos:96% 46%"></div></div><div><p class="t">Session Zero Pack</p><p class="meta">16 pages · 4 sections</p></div></a>
+      <a class="book" href="viewer.html" aria-label="Open Adversary Deck: The Long Title That Wraps Onto Two Lines, 64 pages"><div class="slab"><div class="crop" style="--src:url(../../imagery/E/e-character-sheet.jpg);--zoom:560%;--pos:85% 84%"></div></div><div><p class="t">Adversary Deck: The Long Title That Wraps Onto Two Lines</p><p class="meta">64 pages · 2 chapters</p></div></a>
+    </div>
+  </section>
+</main>
+<canvas class="salt" id="salt" aria-hidden="true"></canvas>
+</div>
+<script src="../_shared/salt-engine.js"></script>
+<script>
+// a light salt drift on the cover tops: no emitter, no tap; the pointer still scatters it
+(function () {
+  const css = getComputedStyle(document.documentElement), tok = n => css.getPropertyValue(n).trim();
+  SaltEngine.mount(document.getElementById('salt'), {
+    cell: 4, maxGrains: 5000, colors: [tok('--c-salt'), tok('--c-salt-2'), tok('--c-salt-3')],
+    solids: [{ selector: '.slab', mode: 'rect' }], prefill: matchMedia('(max-width: 699px)').matches ? 700 : 1800,
+    pointer: { radius: 26, force: 2.6 }, tap: { grains: 0 }, eventTarget: document.getElementById('world'),
+  });
+})();
+</script>
+</body>
+</html>

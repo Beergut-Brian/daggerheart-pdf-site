@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daggerheart Core Rulebook — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700;800&family=Cinzel+Decorative:wght@900&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="d.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-pages" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="9" rx="1"/><rect x="13" y="4" width="7" height="9" rx="1"/><path d="M4 17h16M4 20h10"/></symbol>
+</svg>
+<a class="skip" href="#page">Skip to content</a>
+
+<!-- ≥ 900 px -->
+<div class="v-desk">
+  <header class="topbar">
+    <a class="hsg" href="index.html" aria-label="High Sodium Gaming home">HSG</a>
+    <a class="tb-link" href="resources.html">← Resources</a>
+    <span class="tb-title">Daggerheart Core Rulebook</span>
+    <span class="grow"></span>
+    <label class="pg">Page <input value="19" inputmode="numeric" aria-label="Go to page"> of 397</label>
+    <span class="zoom">
+      <button class="icon-btn" aria-label="Zoom out"><svg class="ico"><use href="#i-minus"/></svg></button>
+      <button class="icon-btn" aria-label="Zoom in"><svg class="ico"><use href="#i-plus"/></svg></button>
+      <button class="icon-btn" aria-label="Fit width"><svg class="ico"><use href="#i-fit"/></svg></button>
+    </span>
+    <div class="field"><svg class="ico"><use href="#i-search"/></svg><input type="search" value="Hope" aria-label="Search Daggerheart Core Rulebook" placeholder="Search the rulebook — try &quot;Hope&quot;"><button class="clear" aria-label="Clear search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+  </header>
+  <div class="v-body">
+    <nav class="rail" aria-label="Pages and chapters">
+      <div class="tabs" role="tablist"><button role="tab" aria-selected="true">Pages</button><button role="tab" aria-selected="false">Chapters</button></div>
+      <div class="thumbs" id="thumbs"></div>
+    </nav>
+    <main class="stage" id="page">
+      <p class="onpage">Match 1 of 2 on this page</p>
+      <div class="page" data-page></div>
+    </main>
+    <aside class="results" aria-label="Search results">
+      <div class="r-head" aria-live="polite">148 results for <q>Hope</q></div>
+      <ol class="rows" data-rows></ol>
+      <p class="kbd">↑ ↓ to move · Enter to open</p>
+    </aside>
+  </div>
+</div>
+
+<!-- < 900 px: two phone screens -->
+<div class="v-phones">
+  <section class="ph-step" aria-label="Phone: reading">
+    <p class="ph-label">1 · Reading</p>
+    <div class="phone">
+      <div class="pbar"><a class="tb-link" href="resources.html" aria-label="Back to Resources"><svg class="ico"><use href="#i-back"/></svg></a><span class="tb-title">Daggerheart Core Rulebook</span></div>
+      <div class="p-stage"><div class="page" data-page></div><div class="page" data-page="plain"></div></div>
+      <nav class="dock" aria-label="Book controls">
+        <button class="pill" aria-label="Pages and chapters"><svg class="ico"><use href="#i-pages"/></svg>Pages</button>
+        <button class="pill" aria-label="Go to page">19 / 397</button>
+        <button class="pill gold" aria-label="Search the book"><svg class="ico"><use href="#i-search"/></svg>Search</button>
+      </nav>
+    </div>
+  </section>
+  <section class="ph-step" aria-label="Phone: search">
+    <p class="ph-label">2 · Search</p>
+    <div class="phone">
+      <div class="sheet">
+        <div class="s-top">
+          <div class="field"><svg class="ico"><use href="#i-search"/></svg><input type="search" value="Hope" aria-label="Search Daggerheart Core Rulebook"><button class="clear" aria-label="Clear search"><svg class="ico"><use href="#i-x"/></svg></button></div>
+          <button class="tb-link" style="background:none;border:0;font:inherit;cursor:pointer">Close</button>
+        </div>
+        <div class="r-head">148 results for <q>Hope</q></div>
+        <ol class="rows" data-rows></ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// Placeholder page: heading bar, grey lines, two "Hope" matches. Never real art.
+const lines = [92, 100, 96, 88, 100, 74, 0, 98, 100, 90, 100, 62, 0, 100, 95, 100, 'h2', 97, 100, 84, 0, 100, 93, 100, 70];
+document.querySelectorAll('[data-page]').forEach(pg => {
+  let n = 0, h = '<div class="hbar"></div>';
+  lines.forEach(w => {
+    if (pg.dataset.page !== 'plain' && (w === 0 && n++ === 0 || w === 'h2')) {
+      h += `<div class="hitline"><span class="g" style="flex:.35"></span><mark class="${w === 'h2' ? '' : 'cur'}">Hope</mark><span class="g"></span></div>`;
+    } else if (w) h += `<div class="ln" style="width:${w}%"></div>`;
+    else h += '<div class="ln" style="background:none"></div>';
+  });
+  pg.innerHTML = h;
+});
+// Thumbnails 15–26, page 19 current.
+document.getElementById('thumbs').innerHTML = Array.from({ length: 12 }, (_, i) => {
+  const p = 15 + i; return `<a class="th${p === 19 ? ' on' : ''}" href="#" aria-label="Page ${p}"${p === 19 ? ' aria-current="page"' : ''}><i></i>${p}</a>`;
+}).join('');
+// The five "Hope" rows from the content pack.
+const R = [
+  ['…HOPE AND FEAR <b>Hope</b> and Fear are currencies used by the players and the GM to represent the way fate turns…', 'Ch 1 · Character Creation', 19],
+  ['…Before you make an action or reaction roll, you can spend a <b>Hope</b> to add the Experience\'s modifier to the roll\'s result…', 'Ch 1 · Character Creation', 21],
+  ['…Class <b>Hope</b> Feature: Each class has a special move they can make by spending 3 <b>Hope</b>…', 'Ch 1 · Class', 28],
+  ['…Make a Scene: Spend 3 <b>Hope</b> to temporarily Distract a target within Close range…', 'Ch 1 · Class (Bard)', 29],
+  ['…Evolution: Spend 3 <b>Hope</b> to transform into a Beastform without marking a Stress…', 'Ch 1 · Class (Druid)', 31],
+];
+document.querySelectorAll('[data-rows]').forEach(ol => {
+  ol.innerHTML = R.map(([s, c, p], i) => `<li><a class="row${i === 0 ? ' focus' : ''}" href="#" aria-label="Page ${p}, ${c}: ${s.replace(/<[^>]+>/g, '')}"><span><p class="snip">${s}</p><p class="where">${c} · <b>p. ${p}</b></p></span><i></i></a></li>`).join('');
+});
+</script>
+</body>
+</html>

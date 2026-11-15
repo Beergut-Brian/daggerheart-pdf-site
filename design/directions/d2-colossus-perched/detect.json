@@ -1,0 +1,95 @@
+[
+  {
+    "antipattern": "dark-glow",
+    "name": "Glowing shadow accents",
+    "description": "Colored glow shadows — a zero-offset chromatic halo (box- or text-shadow) on any background, or any colored blurred shadow on a dark background — are the default \"cool\" look of AI-generated UIs. Use neutral elevation shadows and subtle, purposeful lighting instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/index.html",
+    "line": 0,
+    "snippet": "Colored text-shadow glow (#140d30) on dark background"
+  },
+  {
+    "antipattern": "dark-glow",
+    "name": "Glowing shadow accents",
+    "description": "Colored glow shadows — a zero-offset chromatic halo (box- or text-shadow) on any background, or any colored blurred shadow on a dark background — are the default \"cool\" look of AI-generated UIs. Use neutral elevation shadows and subtle, purposeful lighting instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/index.html",
+    "line": 0,
+    "snippet": "Colored text-shadow glow (#140d30) on dark background"
+  },
+  {
+    "antipattern": "dark-glow",
+    "name": "Glowing shadow accents",
+    "description": "Colored glow shadows — a zero-offset chromatic halo (box- or text-shadow) on any background, or any colored blurred shadow on a dark background — are the default \"cool\" look of AI-generated UIs. Use neutral elevation shadows and subtle, purposeful lighting instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/index.html",
+    "line": 0,
+    "snippet": "Colored text-shadow glow (#140d30) on dark page"
+  },
+  {
+    "antipattern": "radial-halo",
+    "name": "Radial-gradient background halo",
+    "description": "A chromatic radial-gradient wash — saturated at the center, fading to transparent — used as a decorative background glow on a dark page. Same tell as glowing shadows, drawn with a gradient instead of a shadow. Ground the surface with a solid or subtly shifted background instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/index.html",
+    "line": 0,
+    "snippet": "radial-gradient halo (#140d30 → transparent) on dark page"
+  },
+  {
+    "antipattern": "repeating-stripes-gradient",
+    "name": "Repeating-gradient stripes",
+    "description": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/index.html",
+    "line": 0,
+    "snippet": "repeating-gradient decorative stripes",
+    "advisory": true
+  },
+  {
+    "antipattern": "repeating-stripes-gradient",
+    "name": "Repeating-gradient stripes",
+    "description": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/resources.html",
+    "line": 0,
+    "snippet": "repeating-gradient decorative stripes",
+    "advisory": true
+  },
+  {
+    "antipattern": "cramped-padding",
+    "name": "Cramped padding",
+    "description": "Text is too close to the edge of its container. Two shapes: (1) an element with its own text where the space between the rendered text and the border box is too small for the font size, and (2) a wrapper whose children's text lands flush against a visible boundary (border, outline, or non-transparent background) with nothing to inset it. Add at least 8px (ideally 12–16px) of space inside bordered, outlined, or colored containers.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/viewer.html",
+    "line": 0,
+    "snippet": "<div> \"tabs\": children flush against border-bottom on bottom (no inset)"
+  },
+  {
+    "antipattern": "cramped-padding",
+    "name": "Cramped padding",
+    "description": "Text is too close to the edge of its container. Two shapes: (1) an element with its own text where the space between the rendered text and the border box is too small for the font size, and (2) a wrapper whose children's text lands flush against a visible boundary (border, outline, or non-transparent background) with nothing to inset it. Add at least 8px (ideally 12–16px) of space inside bordered, outlined, or colored containers.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/viewer.html",
+    "line": 0,
+    "snippet": "<div> \"phone\": children flush against border-top/bottom on top/bottom (no inset)"
+  },
+  {
+    "antipattern": "repeating-stripes-gradient",
+    "name": "Repeating-gradient stripes",
+    "description": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "/srv/ai-hub/jobs/daggerheart-site-2026-10-23/design/directions/d2-colossus-perched/viewer.html",
+    "line": 0,
+    "snippet": "repeating-gradient decorative stripes",
+    "advisory": true
+  }
+]

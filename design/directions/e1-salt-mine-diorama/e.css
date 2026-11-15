@@ -1,0 +1,153 @@
+/* Direction E — Toy World. Shared tokens + components for both E boards.
+   Every colour, size, spacing and radius is a custom property; rules use var(). */
+:root {
+  /* colour: each tied to an object in the renders */
+  --c-sun: #FFC93C;            /* sunflower dice */
+  --c-sun-deep: #D9A633;       /* e2-sal-pour background, sampled top-left */
+  --c-sun-mid: #E8BC47;        /* e2-sal-pour background, sampled centre */
+  --c-sun-light: #F7D463;      /* e2-sal-pour background, sampled bottom-right */
+  --c-sun-wall: #B9861F;       /* keycap / card wall on yellow */
+  --c-coral: #FF7A66;          /* tablecloth */
+  --c-coral-deep: #E8604F;
+  --c-coral-wall: #B8402F;
+  --c-coral-wave: #FF796E;     /* e2-sal-wave background, sampled */
+  --c-sky: #4FB3E8;            /* vinyl limbs */
+  --c-sky-read-top: #6EC4DA;   /* e2-sal-reading sky, sampled */
+  --c-sky-read-floor: #97D8EA; /* e2-sal-reading floor, sampled */
+  --c-sky-wall: #2F86A6;
+  --c-ink: #2B2350;            /* text on panels, viewer chrome */
+  --c-ink-deep: #1E1840;       /* viewer stage */
+  --c-ink-raise: #3A3170;      /* hover / raised chrome */
+  --c-ink-line: #4A4182;       /* hairlines on ink */
+  --c-ink-wall: #15102E;       /* keycap side walls */
+  --c-ink-soft: #CFC8EE;       /* secondary text on ink (10.4:1) */
+  --c-ink-mute: #A79FD6;       /* tertiary text on ink (6.5:1) */
+  --c-salt: #FFFFFF;
+  --c-salt-2: #F4F1EA;
+  --c-salt-3: #E9E4D8;
+  --c-felt: #1F7A5C;           /* focus ring, match underline */
+  --c-parch: #F6EFDD;          /* book page placeholder */
+  --c-parch-line: #C7BEA8;
+  --c-parch-head: #8C8270;
+  --c-scrim: rgb(30 24 64 / 0.78);
+  --c-scrim-0: rgb(30 24 64 / 0);
+  --c-shadow: rgb(43 35 80 / 0.28);
+  --c-shadow-deep: rgb(21 16 46 / 0.45);
+
+  /* type */
+  --f-word: 'Lilita One', 'Nunito', sans-serif;
+  --f-label: 'Anton', 'Nunito', sans-serif;
+  --f-ui: 'Nunito', system-ui, sans-serif;
+  --fs-wordmark: clamp(80px, 22.5vw, 172px);
+  --fs-h1: clamp(56px, 12vw, 120px);
+  --fs-h2: clamp(28px, 5vw, 44px);
+  --fs-title-xl: clamp(30px, 4.2vw, 52px);
+  --fs-title: 22px;
+  --fs-title-s: 17px;
+  --fs-lead: clamp(18px, 2vw, 24px);
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-tiny: 12px;
+  --fs-key: 20px;
+  --lh-tight: 0.9;
+  --lh-body: 1.45;
+  --track-label: 0.04em;
+
+  /* spacing (4px base) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+  --edge: clamp(16px, 4.5vw, 64px);
+
+  /* radii */
+  --r-s: 8px; --r-m: 14px; --r-l: 22px; --r-xl: 34px; --r-pill: 999px;
+
+  /* depth */
+  --wall: 8px;                 /* keycap / slab wall height */
+  --press: 6px;                /* keycap sink on press */
+  --sh-soft: 0 18px 30px -12px var(--c-shadow);
+  --sh-lift: 0 26px 40px -16px var(--c-shadow-deep);
+  --extrude: 0 1px 0 var(--c-ink), 0 2px 0 var(--c-ink), 0 3px 0 var(--c-ink), 0 4px 0 var(--c-ink),
+             0 5px 0 var(--c-ink), 0 6px 0 var(--c-ink), 0 7px 0 var(--c-ink), 0 8px 0 var(--c-ink-wall),
+             0 9px 0 var(--c-ink-wall), 0 10px 0 var(--c-ink-wall), 0 18px 22px var(--c-shadow-deep);
+  --stroke: 0.055em;
+  --tap: 48px;
+  --t-wiggle: 300ms;
+  --t-fast: 140ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --bp: 700px; /* documented: picture switches wide/tall at 700px */
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--f-ui); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--c-ink); }
+::selection { background: var(--c-ink); color: var(--c-sun); }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--c-felt); outline-offset: 2px; box-shadow: 0 0 0 8px var(--c-salt); }
+.skip { position: absolute; left: var(--s4); top: calc(-1 * var(--s9)); z-index: 50; padding: var(--s3) var(--s4); background: var(--c-salt); color: var(--c-ink); font-weight: 800; border-radius: var(--r-m); }
+.skip:focus { top: var(--s4); }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- wordmark: white Lilita One, ink outline, extruded ink side ---------- */
+.wordmark { margin: 0; font-family: var(--f-word); font-weight: 400; font-size: var(--fs-wordmark); line-height: var(--lh-tight);
+  color: var(--c-salt); letter-spacing: 0.01em; text-transform: uppercase;
+  -webkit-text-stroke: var(--stroke) var(--c-ink); paint-order: stroke fill; text-shadow: var(--extrude); }
+.wordmark .ln { display: block; }
+
+/* ---------- keycap button (ref 04): face + side wall; the face sinks on press ---------- */
+.key { position: relative; display: inline-block; padding-bottom: var(--wall); text-decoration: none; border-radius: var(--r-l); color: var(--c-salt); }
+.key::before { content: ''; position: absolute; left: 0; right: 0; top: var(--wall); bottom: 0; border-radius: var(--r-l);
+  background: linear-gradient(180deg, var(--c-ink-wall), var(--c-ink-deep)); box-shadow: var(--sh-lift); }
+.key .face { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--s3);
+  min-height: calc(var(--tap) + var(--s3)); padding: var(--s4) var(--s6); border-radius: var(--r-l); background: var(--c-ink);
+  font-family: var(--f-label); font-size: var(--fs-key); letter-spacing: var(--track-label); line-height: 1; font-weight: 400;
+  transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
+.key svg { width: 1.1em; height: 1.1em; flex: none; }
+.key:hover .face { background: var(--c-ink-raise); transform: translateY(calc(var(--press) / 2)); }
+.key:active .face { transform: translateY(var(--press)); }
+.key-s { --wall: 5px; --press: 4px; border-radius: var(--r-m); }
+.key-s::before, .key-s .face { border-radius: var(--r-m); }
+.key-s .face { min-height: var(--tap); padding: var(--s3) var(--s5); font-size: var(--fs-small); }
+
+/* ---------- hero shell ---------- */
+.hero { position: relative; height: 100svh; min-height: 640px; overflow: hidden; touch-action: pan-y; isolation: isolate; }
+canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+.anchor { position: absolute; width: 2px; height: 2px; pointer-events: none; }
+.tagline { margin: 0; font-weight: 800; font-size: var(--fs-lead); line-height: 1.25; }
+
+@keyframes wiggle {
+  0% { transform: rotate(0) } 20% { transform: rotate(var(--wig, -5deg)) scale(1.02) } 45% { transform: rotate(calc(var(--wig, -5deg) * -0.8)) }
+  70% { transform: rotate(calc(var(--wig, -5deg) * 0.45)) } 100% { transform: rotate(0) }
+}
+.wiggle { animation: wiggle var(--t-wiggle) var(--ease-out); }
+
+/* ---------- back link ---------- */
+.back { display: inline-flex; align-items: center; gap: var(--s2); min-height: var(--tap); font-weight: 800; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.back svg { width: 20px; height: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wiggle { animation: none; }
+  .key .face { transition: background-color var(--t-fast) linear; }
+  .key:hover .face, .key:active .face { transform: none; }
+}
+
+/* ---------- book card + chunky cover slab (shared by both /resources) ---------- */
+.page-head { padding: var(--s5) var(--edge) var(--s6); display: grid; gap: var(--s2); position: relative; }
+.page-head h1 { margin: 0; font-family: var(--f-word); font-weight: 400; font-size: var(--fs-h1); line-height: var(--lh-tight); }
+.page-head p { margin: 0; font-weight: 800; font-size: var(--fs-lead); max-width: 52ch; padding-right: var(--s9); }
+.book { display: grid; gap: var(--s4); align-content: start; text-decoration: none; color: inherit; border-radius: var(--r-l); }
+.book .t { margin: 0; font-family: var(--f-word); font-weight: 400; font-size: var(--fs-title); line-height: 1.15; text-wrap: balance; }
+.book .sub { margin: 0; font-weight: 700; }
+.book .meta { margin: 0; font-weight: 800; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.book:hover .t { text-decoration: underline; text-decoration-thickness: 3px; }
+.slab { position: relative; padding-bottom: var(--wall); border-radius: var(--r-m); }
+.slab::before { content: ''; position: absolute; left: var(--s1); right: var(--s1); top: var(--wall); bottom: 0; border-radius: var(--r-m);
+  background: var(--c-ink-wall); box-shadow: var(--sh-lift); }
+.slab img, .slab .crop { position: relative; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--r-m); background-color: var(--c-ink); }
+.crop { background-image: var(--src); background-size: var(--zoom, cover); background-position: var(--pos, 50% 50%); background-repeat: no-repeat; }
+.alt { padding: 0 var(--edge) var(--s8); }
+.alt h2, .shelf h2 { margin: 0 0 var(--s4); font-family: var(--f-label); font-weight: 400; font-size: var(--fs-h2); line-height: 1; letter-spacing: var(--track-label); text-transform: uppercase; }
+.alt-row { display: flex; gap: var(--s5); flex-wrap: wrap; }
+.alt figure { margin: 0; width: 124px; display: grid; gap: var(--s2); font-weight: 800; font-size: var(--fs-small); }
+.alt .band { position: absolute; left: 0; right: 0; top: 7%; z-index: 1; text-align: center; font-family: var(--f-label); font-size: var(--fs-tiny); letter-spacing: var(--track-label); color: var(--c-ink); }
+.alt .band.on-sky { top: 6%; color: var(--c-salt); -webkit-text-stroke: 0.12em var(--c-ink); paint-order: stroke fill; }

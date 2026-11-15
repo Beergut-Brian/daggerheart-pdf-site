@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High Sodium Gaming — Daggerheart table resources</title>
+<meta name="description" content="Our table's Daggerheart books, searchable on your phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700;800&family=Cinzel+Decorative:wght@900&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="d.css">
+<style>
+/* D2 colossus-perched: a quiet painted salt flat; the Colossus sits on our name and tips its crystal. */
+:root { --golem: clamp(250px, 26vw, 360px); --golem-sit: .36; --mark-glow: 0 .04em .5em var(--c-night-deep), 0 0 1.2em var(--c-night-deep); }
+.hero { position: relative; height: 100svh; min-height: 680px; overflow: hidden; touch-action: pan-y; isolation: isolate; background: var(--c-night); display: grid; place-items: center; }
+.art, .art img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art img { object-fit: cover; object-position: 50% 50%; }
+.vignette { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(110% 90% at 50% 40%, transparent 50%, var(--c-scrim) 100%); }
+.mist { position: absolute; inset: auto -20% 18% -20%; height: 26%; pointer-events: none;
+  background: radial-gradient(40% 50% at 30% 60%, var(--c-mist), transparent 70%), radial-gradient(35% 45% at 75% 50%, var(--c-mist), transparent 70%);
+  animation: drift 20s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translateX(8%); } }
+.stack { position: relative; z-index: 2; display: grid; justify-items: center; gap: var(--s4); text-align: center; padding-top: calc(var(--golem) * .62);
+  margin-top: calc(-1 * var(--s6)); }
+/* backlight: the sunset gathers behind the creature and the name */
+.stack::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 0; width: 150%; height: 115%; transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(34% 30% at 50% 22%, var(--c-glow-gold), transparent 70%), radial-gradient(50% 46% at 50% 62%, var(--c-scrim), var(--c-scrim-soft) 100%); }
+.perch { position: absolute; left: 50%; width: var(--golem); aspect-ratio: 1; transform: translateX(-50%);
+  top: calc(var(--golem) * .62 - var(--golem) * .86 + var(--fs-mark) * var(--golem-sit)); z-index: 1; pointer-events: none; }
+.perch img { display: block; width: 100%; height: 100%; clip-path: inset(16% 17% 13% 18%);
+  filter: url(#defringe) drop-shadow(0 10px 14px var(--c-shadow)); }
+.pour { position: absolute; left: 50.5%; top: 83%; width: 2px; height: 2px; }
+.wm { margin: 0; font: 900 var(--fs-mark)/var(--lh-tight) var(--f-mark); letter-spacing: var(--tr-mark); color: var(--c-ivory);
+  text-shadow: 0 -.025em 0 var(--c-gold), var(--mark-glow); }
+.wm .l { display: block; }
+.tag { margin: 0 0 var(--s3); font: 400 var(--fs-lead)/1.3 var(--f-head); color: var(--c-ivory); text-shadow: 0 1px 12px var(--c-night-deep); }
+.tag em { font-style: normal; color: var(--c-teal); }
+canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+@media (min-width: 700px) { .stack { margin-top: 0; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- eats the 1px magenta key fringe off the cut-out's edge -->
+  <filter id="defringe" color-interpolation-filters="sRGB"><feComponentTransfer in="SourceAlpha" result="t"><feFuncA type="linear" slope="2.2" intercept="-1"/></feComponentTransfer><feMorphology in="t" operator="erode" radius="1" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter>
+</svg>
+<a class="skip" href="#hero">Skip to content</a>
+<main class="hero" id="hero">
+  <picture class="art" aria-hidden="true">
+    <source media="(min-width: 700px)" srcset="../../imagery/D/d2-vista-wide.jpg" width="1536" height="864">
+    <img src="../../imagery/D/d2-vista-tall.jpg" alt="" width="768" height="1344" fetchpriority="high">
+  </picture>
+  <div class="mist" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="stack">
+    <div class="perch" aria-hidden="true">
+      <img src="../../imagery/D/d2-colossus-perched-cut.png" alt="" width="1024" height="1024">
+      <span class="pour" id="pour"></span>
+    </div>
+    <h1 class="wm" aria-label="High Sodium Gaming"><span class="l">HIGH</span> <span class="l">SODIUM</span> <span class="l">GAMING</span></h1>
+    <p class="tag">Rules, close at hand. <em>Salt to taste.</em></p>
+    <span class="plaque-wrap"><a class="plaque" href="resources.html" aria-label="Resources — open the book shelf">RESOURCES</a></span>
+  </div>
+  <canvas class="salt" id="salt" aria-hidden="true"></canvas>
+</main>
+<script src="../_shared/salt-engine.js"></script>
+<script>
+// The pour anchor lives inside the cut-out (under the tipped crystal), so it follows the creature at every size.
+const phone = !matchMedia('(min-width: 600px)').matches;
+window.salt = SaltEngine.mount(document.getElementById('salt'), {
+  cell: phone ? 3 : 4, maxGrains: phone ? 6000 : 14000, colors: ['#FBF8F1', '#F1E7D3', '#FFFFFF', '#E6D3A8'],
+  emitters: [{ anchor: '#pour', ox: .5, oy: .5, rate: phone ? 240 : 420, spread: phone ? 6 : 10, seconds: 2.8 }],
+  solids: [{ selector: '.wm', mode: 'glyphs' }, { selector: '.plaque', mode: 'rect' }],
+  prefill: phone ? 450 : 1100, glyphBridge: -.07,
+  pointer: { radius: 30, force: 3.2 }, tap: { grains: phone ? 500 : 900 },
+  eventTarget: document.getElementById('hero'),
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+ "spots": [
+  {
+   "id": "e1-diorama-wide",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. CHARACTER \u2014 Sal (original mascot): a chunky vinyl-toy salt-shaker monster about two heads tall; a clear glass cylinder body half-filled with white salt; a domed chrome cap with round pour holes worn like a helmet; two big round glossy black eyes with white highlights printed on the glass; a wide happy open mouth; stubby rounded arms and short legs in matte sky-blue vinyl; two tiny white salt-crystal cube horns poking up through the cap; friendly and mischievous. Wide toy-diorama hero, seen from a high three-quarter angle: a game night tabletop turned into a tiny world: coral tablecloth hills, sunflower-yellow giant dice as boulders, a little salt mine dug into a pile of white salt with mine carts on wooden rails, tiny faceless round blob-creature miniatures (no humans) carrying salt crystals, a sleeping cat-shaped clay pillow at the edge. Sal stands on top of a tall stack of yellow dice at the upper centre, tipping forward so salt would pour from its cap (pour point at about 52% across, 26% down; do not paint the falling stream). The lower-left 40% of the frame is a flat, uncluttered coral tablecloth area reserved for a large title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "e1-salt-mine-diorama",
+   "stamp": false
+  },
+  {
+   "id": "e1-diorama-tall",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. CHARACTER \u2014 Sal (original mascot): a chunky vinyl-toy salt-shaker monster about two heads tall; a clear glass cylinder body half-filled with white salt; a domed chrome cap with round pour holes worn like a helmet; two big round glossy black eyes with white highlights printed on the glass; a wide happy open mouth; stubby rounded arms and short legs in matte sky-blue vinyl; two tiny white salt-crystal cube horns poking up through the cap; friendly and mischievous. Tall phone composition of the same toy diorama: Sal on a stack of yellow dice in the top third, tipping forward to pour (pour point about 50% across, 20% down; no stream painted), the salt mine and mine carts at the bottom; the middle band (38%\u201372% down) is a flat uncluttered coral tablecloth area reserved for a stacked title. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art. A plain full-bleed photograph-style render of the scene itself; no phone, no device, no mockup, no screen frame, no border.",
+   "width": 768,
+   "height": 1344,
+   "board": "e1-salt-mine-diorama",
+   "stamp": false
+  },
+  {
+   "id": "e2-sal-pour",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. CHARACTER \u2014 Sal (original mascot): a chunky vinyl-toy salt-shaker monster about two heads tall; a clear glass cylinder body half-filled with white salt; a domed chrome cap with round pour holes worn like a helmet; two big round glossy black eyes with white highlights printed on the glass; a wide happy open mouth; stubby rounded arms and short legs in matte sky-blue vinyl; two tiny white salt-crystal cube horns poking up through the cap; friendly and mischievous. Sal mid-jump, full body, three-quarter view, tipped forward and upside-down-ish so salt would pour from its cap at the bottom centre (do not paint the falling salt), arms out with joy. Isolated on a flat solid sunflower-yellow #FFC93C background (this exact colour is the page panel), soft contact shadow only, no other objects. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1024,
+   "height": 1024,
+   "board": "e2-sal-on-colour",
+   "stamp": false
+  },
+  {
+   "id": "e2-sal-reading",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. CHARACTER \u2014 Sal (original mascot): a chunky vinyl-toy salt-shaker monster about two heads tall; a clear glass cylinder body half-filled with white salt; a domed chrome cap with round pour holes worn like a helmet; two big round glossy black eyes with white highlights printed on the glass; a wide happy open mouth; stubby rounded arms and short legs in matte sky-blue vinyl; two tiny white salt-crystal cube horns poking up through the cap; friendly and mischievous. Sal sitting cross-legged reading a huge open book with blank pages, tongue out in concentration, a small pile of salt spilled beside it. Isolated on a flat solid sky-blue #4FB3E8 background (this exact colour is the page panel), soft contact shadow only. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1024,
+   "height": 1024,
+   "board": "e2-sal-on-colour",
+   "stamp": false
+  },
+  {
+   "id": "e2-sal-wave",
+   "prompt": "Same character as the reference image, identical design and materials. STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. CHARACTER \u2014 Sal (original mascot): a chunky vinyl-toy salt-shaker monster about two heads tall; a clear glass cylinder body half-filled with white salt; a domed chrome cap with round pour holes worn like a helmet; two big round glossy black eyes with white highlights printed on the glass; a wide happy open mouth; stubby rounded arms and short legs in matte sky-blue vinyl; two tiny white salt-crystal cube horns poking up through the cap; friendly and mischievous. Sal waving hello with one stubby arm, the other arm holding a single small salt crystal, standing, front view. Isolated on a flat solid coral #FF7A66 background (this exact colour is the page panel), soft contact shadow only. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art. Sal exactly as in the other shots: a clear glass salt-shaker body filled with white salt, a silver domed cap with holes, two small white horns, light blue arms and feet, big friendly eyes; not yellow, no coloured body.",
+   "width": 1024,
+   "height": 1024,
+   "board": "e2-sal-on-colour",
+   "stamp": false,
+   "refs": [
+    "e2-sal-pour.jpg"
+   ]
+  },
+  {
+   "id": "e-character-sheet",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. CHARACTER \u2014 Sal (original mascot): a chunky vinyl-toy salt-shaker monster about two heads tall; a clear glass cylinder body half-filled with white salt; a domed chrome cap with round pour holes worn like a helmet; two big round glossy black eyes with white highlights printed on the glass; a wide happy open mouth; stubby rounded arms and short legs in matte sky-blue vinyl; two tiny white salt-crystal cube horns poking up through the cap; friendly and mischievous. Character turnaround sheet on a flat solid off-white #F6F1E7 background: left, Sal full body front view; centre, full body three-quarter view; right, three head close-ups with expressions: happy, sneaky grin, surprised with salt puffing out of the cap. Same scale, even studio lighting, no labels. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 1536,
+   "height": 864,
+   "board": "both",
+   "stamp": false
+  },
+  {
+   "id": "e-cover-core",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. Book cover, portrait 3D toy render: a chunky toy book standing upright like a building with a little door, white salt crystals stacked on its top like snow, sunflower-yellow dice around its base, sky-blue background; centred with a calm empty band across the top 25% for a title set separately. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1024,
+   "board": "both",
+   "stamp": false
+  },
+  {
+   "id": "e-cover-hope-fear",
+   "prompt": "STYLE: glossy 3D render in a designer vinyl-toy look, chunky rounded shapes, soft studio lighting with a warm daylight key light and soft contact shadows, tilt-shift diorama depth of field, clean plastic and matte clay materials, cheerful saturated colours. Colours tied to objects: sunflower-yellow giant dice and panels; coral-red tablecloth hills; sky-blue vinyl limbs and sky; mint-green felt patches; warm wood-brown table edge and mine-cart rails; bright white salt. Book cover, portrait 3D toy render: two chunky toy twelve-sided dice side by side on a coral tablecloth, the left one glossy sunflower-yellow with a tiny sun above it, the right one glossy deep purple with a tiny storm cloud above it, a sprinkle of white salt between them, no numbers or symbols on the dice faces; centred with a calm empty band across the top 25% for a title set separately. No text, no letters, no numbers, no logos, no watermark, no signature, no frame or border, no human faces, no humans, no photographs, nothing resembling Daggerheart or Darrington Press characters, logos, card frames or cover art.",
+   "width": 768,
+   "height": 1024,
+   "board": "both",
+   "stamp": false
+  }
+ ]
+}

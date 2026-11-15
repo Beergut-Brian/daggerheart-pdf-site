@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources — High Sodium Gaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="f.css">
+<style>
+/* F2: the hatchling has climbed onto the Core Rulebook and sits on its top edge. */
+.cwrap { position: relative; }
+.perch { position: absolute; bottom: calc(100% - 22px); right: -6px; width: 128px; aspect-ratio: 250 / 245; overflow: hidden; mix-blend-mode: screen; pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 55% 50% at 46% 62%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 55% 50% at 46% 62%, #000 55%, transparent 100%); }
+.perch img { position: absolute; max-width: none; width: 409.6%; left: -194%; top: -251%; }
+.res-head { margin-bottom: var(--s9); }
+.book.main .cover { max-width: 300px; }
+.book.side { grid-template-columns: 112px 1fr; align-items: end; }
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--night) 88%, transparent) 55%); }
+@media (min-width: 900px) {
+  .perch { width: 170px; }
+  .book.main .cover { max-width: none; }
+  .book.side { grid-template-columns: 200px 1fr; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="res-page">
+  <header class="res-head">
+    <a class="back" href="index.html"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>High Sodium Gaming</a>
+    <h1>Resources</h1>
+    <p>Pick a book. Search starts the moment it opens.</p>
+  </header>
+  <main id="main">
+    <div class="books">
+      <a class="book main" href="viewer.html" aria-label="Open Daggerheart Core Rulebook, 397 pages">
+        <div class="cwrap"><img class="cover" src="../../references/steer-1/06-cover-core-rulebook.jpg" alt="" width="989" height="1280"><div class="perch" aria-hidden="true"><img src="../../imagery/F/f2-hatchling.jpg" alt=""></div></div>
+        <div style="display: grid; gap: var(--s3)">
+          <h2>Daggerheart Core Rulebook</h2>
+          <p class="sub">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+          <p class="meta">397 pages · 5 chapters</p>
+          <span class="pill small">Open</span>
+        </div>
+      </a>
+      <a class="book side" href="viewer.html" aria-label="Open Daggerheart: Hope &amp; Fear, 204 pages">
+        <img class="cover" src="../../references/steer-1/05-cover-hope-and-fear.jpg" alt="" width="989" height="1280">
+        <div style="display: grid; gap: var(--s3)">
+          <h2>Daggerheart: Hope &amp; Fear</h2>
+          <p class="sub">The expansion</p>
+          <p class="meta">204 pages · Expansion</p>
+          <span class="pill small">Open</span>
+        </div>
+      </a>
+    </div>
+
+    <section class="alt" aria-labelledby="alt-h">
+      <h3 id="alt-h">Alt covers (ours)</h3>
+      <div class="row">
+        <figure><img src="../../imagery/F/f-cover-core.jpg" alt="Alternate Core Rulebook cover: a salt-crystal heart rising from an open book"><figcaption>Core Rulebook</figcaption></figure>
+        <figure><img src="../../imagery/F/f-cover-hope-fear.jpg" alt="Alternate Hope &amp; Fear cover: a gold and a teal crystal circling in salt"><figcaption>Hope &amp; Fear</figcaption></figure>
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

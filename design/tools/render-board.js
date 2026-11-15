@@ -23,5 +23,17 @@ const jobs = [
     await p.close();
     console.log('rendered', out);
   }
+  // salt interaction proof at 390: pouring, piled, after a swipe
+  const p = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: false });
+  await p.goto('file://' + path.join(dir, 'index.html'), { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await p.evaluate(() => document.fonts.ready);
+  await p.waitForTimeout(700);
+  await p.screenshot({ path: path.join(dir, 'salt-1.png') }); console.log('rendered salt-1.png (pouring)');
+  await p.waitForTimeout(3800);
+  await p.screenshot({ path: path.join(dir, 'salt-2.png') }); console.log('rendered salt-2.png (piled)');
+  const box = await p.locator('h1').first().boundingBox();
+  if (box) { await p.mouse.move(box.x - 5, box.y + 4); for (let k = 0; k <= 24; k++) await p.mouse.move(box.x + box.width * k / 24, box.y + box.height * 0.15 + Math.sin(k / 2.5) * 24, { steps: 2 }); }
+  await p.waitForTimeout(160);
+  await p.screenshot({ path: path.join(dir, 'salt-3.png') }); console.log('rendered salt-3.png (after swipe)');
   await b.close();
 })().catch(e => { console.error(e.message); process.exit(1); });
