@@ -16,7 +16,7 @@ export async function openDocument(url: string, onProgress?: (pct: number) => vo
   const task = pdfjs.getDocument({
     url,
     disableAutoFetch: true,
-    disableStream: false,
+    disableStream: true,
     rangeChunkSize: 256 * 1024,
     wasmUrl: "/pdfjs/wasm/",
     iccUrl: "/pdfjs/iccs/",
