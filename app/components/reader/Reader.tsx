@@ -71,6 +71,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
   useEffect(() => {
     let dead = false;
     t0.current = performance.now();
+    firstPaint.current = false;
     const slowTimer = setTimeout(() => setSlow(true), 8000);
     let task: Awaited<ReturnType<typeof openDocument>> | null = null;
     (async () => {
@@ -82,7 +83,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
         if (!staticOutline) readOutline(d).then((o) => { if (!dead) setOutline(o); });
       } catch { if (!dead) setLoad({ state: "failed" }); }
     })();
-    return () => { dead = true; clearTimeout(slowTimer); queue.clear(); task?.destroy(); };
+    return () => { dead = true; clearTimeout(slowTimer); queue.clear(); queue.pause(); task?.destroy(); };
   }, [book, staticOutline, retry, queue]);
 
   // ---- state to the URL (?p=19&q=hope); read back by the initialisers above ----
@@ -125,11 +126,12 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
         const ms = Math.round(performance.now() - t0.current);
         (window as unknown as { __firstPageMs?: number }).__firstPageMs = ms;
         document.body.dataset.firstPageMs = String(ms);
+        queue.resume();
       }
       if (!dead) document.body.dataset.pageReady = String(page);
     })().catch(() => {});
     return () => { dead = true; task?.cancel(); };
-  }, [doc, page, pageWidth, desktop]);
+  }, [doc, page, pageWidth, desktop, queue]);
 
   // ---- search: lazy index, instant ranking ----
   const wantIndex = query.trim().length >= 2;

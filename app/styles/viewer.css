@@ -138,3 +138,7 @@
 .sheetbody { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
 .sheetbody > .thumbs { padding: var(--s4); }
 @media (prefers-reduced-motion: reduce) { .tp canvas { transition: none; } }
+.vphone .dock { padding: var(--s2) var(--s3) var(--s4); gap: var(--s1); }
+.vphone .dpill { padding: 0 var(--s3); gap: var(--s1); }
+.vphone .dpager .ib { width: 36px; }
+.vphone .dnum { min-width: 0; padding: 0 var(--s1); }

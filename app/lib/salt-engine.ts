@@ -38,6 +38,10 @@ export function mountSalt(canvas: HTMLCanvasElement, opts: any): SaltHandle {
       if (glint) { g.globalCompositeOperation = 'lighter'; g.fillStyle = glint + '88'; g.beginPath(); g.arc(m + 2, m - 2, m * 0.35, 0, Math.PI * 2); g.fill(); }
       return s;
     }
+    // CSS may hand us #fff / rgb(): normalise every colour to #rrggbb through a scratch canvas
+    const scratch = document.createElement('canvas').getContext('2d');
+    const hex6 = (c) => { scratch.fillStyle = '#000'; scratch.fillStyle = c; return scratch.fillStyle; };
+    o.colors = o.colors.map(hex6); o.glint = hex6(o.glint);
     const sprites = o.colors.map(c => makeSprite(c, false));
     const glints = o.colors.map(c => makeSprite(c, o.glint));
     // deterministic per-cell jitter so the pile looks grainy but never shimmers
@@ -159,6 +163,7 @@ export function mountSalt(canvas: HTMLCanvasElement, opts: any): SaltHandle {
 
     function resize() {
       const r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return; // hidden or mid-navigation: keep the last good state
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       cssW = r.width; cssH = r.height;
       for (const c of [canvas, fieldLayer, pileLayer]) { c.width = Math.round(cssW * dpr); c.height = Math.round(cssH * dpr); }
@@ -264,6 +269,7 @@ export function mountSalt(canvas: HTMLCanvasElement, opts: any): SaltHandle {
       pileDirty = false;
     }
     function draw(t) {
+      if (!cssW || !cssH) return;
       if (fieldDirty) drawField();
       // the pile is the expensive layer: redraw it at most ~20 times a second while grains settle
       if (pileDirty && (t - lastPileDraw > 48 || !running)) { drawPile(); lastPileDraw = t; }

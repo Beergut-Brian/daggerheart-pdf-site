@@ -19,6 +19,7 @@ export async function openDocument(url: string, onProgress?: (pct: number) => vo
     disableStream: false,
     rangeChunkSize: 256 * 1024,
     wasmUrl: "/pdfjs/wasm/",
+    iccUrl: "/pdfjs/iccs/",
     cMapUrl: "/pdfjs/cmaps/",
     cMapPacked: true,
     standardFontDataUrl: "/pdfjs/standard_fonts/",
@@ -67,11 +68,15 @@ export function renderInto(page: PDFPageProxy, canvas: HTMLCanvasElement, cssWid
 export class RenderQueue {
   private q: (() => Promise<void>)[] = [];
   private running = 0;
+  private paused = true;
   constructor(private limit = 2) {}
   add(job: () => Promise<void>) { this.q.push(job); this.pump(); }
   clear() { this.q = []; }
+  /** thumbnails wait until the main page has painted */
+  resume() { this.paused = false; this.pump(); }
+  pause() { this.paused = true; }
   private pump() {
-    while (this.running < this.limit && this.q.length) {
+    while (!this.paused && this.running < this.limit && this.q.length) {
       const job = this.q.shift()!;
       this.running++;
       job().catch(() => {}).finally(() => { this.running--; this.pump(); });
