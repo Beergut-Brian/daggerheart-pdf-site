@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../_shared/greybox.css"><link rel="stylesheet" href="../_shared/viewer.css"><script src="../_shared/viewer.js"></script><title>viewer-desktop — grey box</title>
+<style>
+body { height: 100vh; }
+.app { display: grid; grid-template-rows: auto 1fr; height: calc(100vh - 33px); }
+.top { display: flex; align-items: center; gap: var(--s4); padding: var(--s2) var(--s4); background: var(--g0); border-bottom: 1px solid var(--g3); }
+.top .tt { font-weight: 800; } .top .grow { flex: 1; }
+.top .field { width: 360px; }
+.pg { font-size: 14px; display: flex; gap: var(--s2); align-items: center; } .pg b { border: 1.5px solid var(--g4); padding: 4px 10px; border-radius: 4px; }
+.body { display: grid; grid-template-columns: 220px 1fr 380px; min-height: 0; }
+.rail { background: var(--g0); border-right: 1px solid var(--g3); display: flex; flex-direction: column; min-height: 0; }
+.rail .list { overflow: hidden; padding: var(--s3) var(--s4); display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); align-content: start; }
+.stage { overflow: hidden; display: grid; justify-items: center; align-content: start; padding: var(--s5); gap: var(--s3); }
+.stage .page { width: min(560px, 100%); }
+.res { background: var(--g0); border-left: 1px solid var(--g3); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.res .head { display: flex; justify-content: space-between; align-items: center; padding: var(--s3); border-bottom: 1px solid var(--g3); }
+.kbd { font-size: 12px; color: var(--g5); padding: var(--s3); border-top: 1px solid var(--g3); margin-top: auto; }
+.brand { font-weight: 900; letter-spacing: .1em; font-size: 13px; }
+@media (max-width: 899px) { body { height: auto; } .app { height: auto; } .body { grid-template-columns: 1fr; } .rail, .res { display: none; } .top .field, .pg, .zoom { display: none; } .note.only-phone { display: block; } }
+.note.only-phone { display: none; margin: var(--s4); }
+</style></head><body>
+<div class="board-label"><b>viewer-desktop</b> · /resources/core-rulebook · Desktop: Pages/Chapters rail left, page centre, search results panel right (open after "Hope")</div>
+<div class="app">
+  <div class="top">
+    <span class="brand">HSG</span><a href="#">← Resources</a><span class="tt">Daggerheart Core Rulebook</span><span class="grow"></span>
+    <span class="pg">Page <b>19</b> of 397</span>
+    <span class="zoom" style="display:flex;gap:6px"><span class="ic">−</span><span class="ic">+</span><span class="ic">fit</span></span>
+    <div class="field"><span class="ic" style="width:24px;height:24px;border:0">⌕</span><span class="q">Hope</span><span class="x">✕</span></div>
+  </div>
+  <div class="body">
+    <aside class="rail"><div class="tabs"><span class="on">Pages</span><span>Chapters</span></div><div class="list" id="th"></div></aside>
+    <main class="stage">
+      <div class="slot page">Page 19 render (PDF.js canvas + text layer)<span class="mark" style="top:31%"></span><span class="mark" style="top:58%;width:30%"></span></div>
+      <span class="note">Matches on the page highlighted · "1 of 2 on this page" · Prev / Next match</span>
+    </main>
+    <aside class="res"><div class="head"><b>148 results for "Hope"</b><span class="muted">Close ✕</span></div><div id="hits"></div>
+      <div class="kbd">↑ ↓ to move · Enter to open</div></aside>
+  </div>
+</div>
+<p class="note only-phone">Below 900px this board collapses to the phone viewer. See viewer-phone-a-sheet and viewer-phone-b-filmstrip.</p>
+<script>document.getElementById('th').innerHTML = thumbs(15,12,19); document.getElementById('hits').innerHTML = hitRows();</script>
+</body></html>

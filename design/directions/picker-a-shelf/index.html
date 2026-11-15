@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>picker-a-shelf — grey box</title><link rel="stylesheet" href="../_shared/greybox.css"><script src="../_shared/books.js"></script>
+<style>
+header { padding: var(--s5) var(--s4) var(--s4); display: grid; gap: var(--s2); }
+header a { font-size: 14px; }
+h1 { margin: 0; font-size: clamp(40px, 10vw, 96px); font-weight: 900; line-height: 1; }
+header p { margin: 0; }
+section.state { padding: var(--s4); border-top: 1px solid var(--g3); }
+.state-tag { margin-bottom: var(--s4); }
+/* Phone: books lie flat, a stacked pile of spines (full-width bars) */
+.shelf { display: grid; gap: 6px; }
+.spine { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--s3); min-height: 64px;
+  padding: var(--s3) var(--s4); background: var(--g0); border: 2px solid var(--g6); border-radius: 3px; text-decoration: none; }
+.spine:nth-child(odd) { margin-right: var(--s5); } .spine:nth-child(even) { margin-left: var(--s3); }
+.spine .t { font-weight: 800; font-size: 17px; line-height: 1.15; }
+.spine .m { font-size: 13px; color: var(--g5); }
+.spine .open { font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.spine .crest { width: 36px; height: 36px; padding: 0; font-size: 9px; }
+.ledge { height: 14px; background: var(--g4); border-radius: 2px; margin-top: var(--s2); }
+.feature { display: grid; gap: var(--s4); }
+.feature .cover { aspect-ratio: 3/4; max-height: 420px; }
+.feature .s { margin: 0; }
+.ghost-spine { min-height: 64px; border: 2px dashed var(--g3); border-radius: 3px; display: grid; place-items: center; color: var(--g4); font-size: 13px; }
+@media (min-width: 900px) {
+  header, section.state { padding-left: var(--s8); padding-right: var(--s8); }
+  /* Desktop: books stand upright on a shelf, spine text vertical; hover pulls one out */
+  .shelf { grid-auto-flow: column; grid-auto-columns: 96px; align-items: end; gap: var(--s2); }
+  .spine { writing-mode: vertical-rl; grid-template-columns: none; grid-template-rows: 1fr auto; height: 420px; overflow: hidden;
+    margin: 0 !important; padding: var(--s4) var(--s3); }
+  .shelf#six { margin-top: var(--s7); }
+  .spine:nth-child(2) { height: 380px; } .spine:nth-child(3) { height: 300px; } .spine:nth-child(4) { height: 260px; } .spine:nth-child(5) { height: 340px; }
+  .spine.pulled { transform: translateY(-24px); outline: 4px solid var(--g4); }
+  .feature { grid-template-columns: 300px 340px; align-items: end; gap: var(--s6); }
+  .one { display: grid; grid-template-columns: auto 1fr; gap: var(--s7); align-items: end; }
+}
+</style></head><body>
+<div class="board-label"><b>picker-a-shelf</b> · /resources · Book-spine shelf: books are spines on a shelf (desktop upright, phone stacked flat). Two states below.</div>
+<header><a href="#">← High Sodium Gaming</a><h1>Resources</h1><p>Pick a book. Search starts the moment it opens.</p></header>
+
+<section class="state"><span class="state-tag">State 1 · one book</span>
+  <div class="one">
+    <div class="feature">
+      <div class="slot cover">Cover slot (code-drawn, per book)<small>DH7: drawn cover, not PDF art</small></div>
+      <div><div style="font-weight:800;font-size:24px">Daggerheart Core Rulebook</div>
+        <p class="s muted">Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <p class="muted" style="margin:var(--s2) 0 var(--s4)">397 pages · 5 chapters</p>
+        <a class="btn" href="#">Open</a></div>
+    </div>
+    <div><div class="shelf"><div class="ghost-spine">More books land here</div></div><div class="ledge"></div></div>
+  </div>
+</section>
+
+<section class="state"><span class="state-tag">State 2 · six books (Sample shelf)</span>
+  <div class="shelf" id="six"></div><div class="ledge"></div>
+  <p class="note" style="margin-top:var(--s4)">Desktop: spine heights vary with page count (scaled, min/max clamped). Focus or hover pulls a spine forward and shows subtitle in a caption under the shelf.</p>
+</section>
+<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
+<script>
+document.getElementById('six').innerHTML = BOOKS.map((b,i)=>`<a class="spine${i===0?' pulled':''}" href="#" aria-label="Open ${b.t}, ${b.p} pages">
+<span><span class="t">${b.t}</span><br><span class="m">${b.p} pages · ${b.c}</span></span><span class="open">Open</span></a>`).join('');
+</script>
+</body></html>

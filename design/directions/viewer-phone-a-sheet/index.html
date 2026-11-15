@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../_shared/greybox.css"><link rel="stylesheet" href="../_shared/viewer.css"><script src="../_shared/viewer.js"></script><title>viewer-phone-a-sheet — grey box</title></head><body>
+<div class="board-label"><b>viewer-phone-a-sheet</b> · /resources/core-rulebook (phone) · Page fills the screen; one bottom dock opens a sheet for Pages/Chapters, search takes the full sheet</div>
+<div class="phones">
+ <div class="step"><h2>1 · Reading</h2><p>Page fills the width. Dock at the thumb: Pages, page n/397, Search. Top bar hides on scroll.</p>
+  <div class="phone"><div class="pbar"><span class="ic">←</span><span class="tt">Daggerheart Core Rulebook</span></div>
+   <div style="flex:1;padding:var(--s2);overflow:hidden"><div class="slot page">Page 19<small>pinch to zoom · swipe for next page</small></div><div class="slot page" style="margin-top:var(--s2)">Page 20</div></div>
+   <div class="dock"><span class="pill">☰ Pages</span><span class="pill">19 / 397</span><span class="pill">⌕ Search</span></div></div></div>
+ <div class="step"><h2>2 · Pages and chapters sheet</h2><p>Sheet rises to 75%. Tabs: Pages (3-across grid, current page outlined) and Chapters. Drag down or Close.</p>
+  <div class="phone"><div class="pbar"><span class="ic">←</span><span class="tt">Daggerheart Core Rulebook</span></div><div style="flex:1"><div class="slot page" style="margin:var(--s2)">Page 19</div></div><div class="scrim"></div>
+   <div class="sheet" style="height:75%"><div class="grab"></div><div class="tabs"><span>Pages</span><span class="on">Chapters</span></div>
+    <div id="ch" style="overflow:hidden"></div>
+    <div class="tabs" style="border:0;border-top:1px solid var(--g3)"><span class="muted" style="font-weight:400">Pages tab: 3-across thumbnail grid</span></div></div></div></div>
+ <div class="step"><h2>3 · Search results</h2><p>Search opens the sheet full height, field focused, keyboard up. Tap a row: sheet drops, page opens with matches highlighted.</p>
+  <div class="phone"><div class="sheet" style="height:100%;border-radius:0;border:0"><div style="padding:var(--s3);display:flex;gap:var(--s2);align-items:center"><div class="field" style="flex:1"><span class="q">Hope</span><span class="x">✕</span></div><span>Close</span></div>
+   <div class="count">148 results for "Hope"</div><div id="hits" style="overflow:hidden"></div></div></div></div>
+</div>
+<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
+<script>document.getElementById('ch').innerHTML = chapterRows('Ch 1'); document.getElementById('hits').innerHTML = hitRows();</script>
+</body></html>

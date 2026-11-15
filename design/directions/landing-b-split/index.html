@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>landing-b-split — grey box</title><link rel="stylesheet" href="../_shared/greybox.css">
+<style>
+.hero { min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; }
+.type { padding: var(--s6) var(--s4) var(--s4); display: grid; gap: var(--s4); align-content: start; }
+h1 { margin: 0; font-weight: 900; line-height: .86; font-size: clamp(64px, 21vw, 168px); letter-spacing: -.01em; }
+h1 span { display: block; }
+.line { margin: 0; font-size: 18px; max-width: 28ch; }
+.art { border-radius: 0; min-height: 280px; margin: 0 var(--s4); }
+.cta { padding: var(--s5) var(--s4) var(--s6); display: grid; gap: var(--s2); }
+.cta .btn { width: 100%; min-height: 56px; }
+@media (min-width: 900px) {
+  .hero { grid-template-columns: 7fr 5fr; grid-template-rows: 1fr auto; }
+  .type { grid-column: 1; grid-row: 1; align-content: center; padding: var(--s8) var(--s8) var(--s5); }
+  .art { grid-column: 2; grid-row: 1 / span 2; margin: 0; min-height: auto; }
+  .cta { grid-column: 1; grid-row: 2; padding: 0 var(--s8) var(--s8); justify-items: start; }
+  .cta .btn { width: auto; min-width: 280px; }
+}
+</style></head><body>
+<div class="board-label"><b>landing-b-split</b> · / · Asymmetric split: wordmark left and huge, art owns the right column (phone: art band between type and a thumb-zone button)</div>
+<main class="hero">
+  <div class="type">
+    <h1 aria-label="High Sodium Gaming"><span>HIGH</span><span>SODIUM</span><span>GAMING</span></h1>
+    <p class="line">Rules, close at hand. Salt to taste.</p>
+  </div>
+  <div class="slot art">Hero art slot (code-drawn SVG/CSS)<small>Tall column on desktop; a band on phone. Art bleeds off the edge.</small></div>
+  <div class="cta">
+    <a class="btn" href="#">RESOURCES</a>
+    <span class="note">Phone: button sits in the bottom thumb zone, full width</span>
+  </div>
+</main>
+<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
+</body></html>

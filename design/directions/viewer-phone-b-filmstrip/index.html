@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../_shared/greybox.css"><link rel="stylesheet" href="../_shared/viewer.css"><script src="../_shared/viewer.js"></script><title>viewer-phone-b-filmstrip — grey box</title>
+<style>.strip { display: grid; grid-auto-flow: column; grid-auto-columns: 46px; gap: var(--s2); padding: var(--s2) var(--s3); background: var(--g0); border-top: 1px solid var(--g3); overflow: hidden; }
+.chiprow { display: flex; gap: var(--s2); padding: var(--s2) var(--s3) 0; background: var(--g0); border-top: 1px solid var(--g3); overflow: hidden; font-size: 12px; }
+.chiprow span { white-space: nowrap; border: 1.5px solid var(--g4); border-radius: 999px; padding: 4px 10px; } .chiprow span.on { background: var(--g6); color: var(--g0); border-color: var(--g6); }
+</style></head><body>
+<div class="board-label"><b>viewer-phone-b-filmstrip</b> · /resources/core-rulebook (phone) · A thumbnail filmstrip lives under the page at all times; chapters are chips above it; search splits the screen so the page stays visible</div>
+<div class="phones">
+ <div class="step"><h2>1 · Reading</h2><p>Filmstrip always visible under the page: scrub it with a thumb. Chapter chips above it jump the strip.</p>
+  <div class="phone"><div class="pbar"><span class="ic">←</span><span class="tt">Daggerheart Core Rulebook</span><span class="ic">⌕</span></div>
+   <div style="flex:1;padding:var(--s2);overflow:hidden"><div class="slot page">Page 19<small>swipe for next page</small></div></div>
+   <div class="chiprow"><span>Intro</span><span class="on">Ch 1 Preparing</span><span>Ch 2 Playing</span><span>Ch 3 Running</span></div>
+   <div class="strip" id="st"></div><div style="text-align:center;font-size:12px;padding-bottom:var(--s3);background:var(--g0)">19 / 397</div></div></div>
+ <div class="step"><h2>2 · Chapters sheet</h2><p>Tap the active chip (or swipe the strip up) for the full chapter list with sections; pick one and the strip jumps.</p>
+  <div class="phone"><div class="pbar"><span class="ic">←</span><span class="tt">Daggerheart Core Rulebook</span><span class="ic">⌕</span></div><div style="flex:1"><div class="slot page" style="margin:var(--s2)">Page 19</div></div><div class="scrim"></div>
+   <div class="sheet" style="height:68%"><div class="grab"></div><div style="padding:0 var(--s4) var(--s2);font-weight:700">Chapters</div><div id="ch" style="overflow:hidden"></div></div></div></div>
+ <div class="step"><h2>3 · Search results, split</h2><p>Results take the lower half; the top half previews the tapped result's page with matches highlighted. Tap again to read full screen.</p>
+  <div class="phone"><div style="padding:var(--s3);background:var(--g0);display:flex;gap:var(--s2);align-items:center;border-bottom:1px solid var(--g3)"><div class="field" style="flex:1"><span class="q">Hope</span><span class="x">✕</span></div><span>Done</span></div>
+   <div style="height:40%;padding:var(--s2);overflow:hidden;position:relative"><div class="slot page">Page 19 preview<span class="mark" style="top:31%"></span></div></div>
+   <div style="flex:1;background:var(--g0);border-top:2px solid var(--g6);overflow:hidden"><div class="count">148 results for "Hope"</div><div id="hits"></div></div></div></div>
+</div>
+<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
+<script>document.getElementById('st').innerHTML = thumbs(16,7,19); document.getElementById('ch').innerHTML = chapterRows('Ch 1'); document.getElementById('hits').innerHTML = hitRows();</script>
+</body></html>

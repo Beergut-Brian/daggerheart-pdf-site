@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>landing-a-monument — grey box</title><link rel="stylesheet" href="../_shared/greybox.css">
+<style>
+.hero { position: relative; min-height: 100svh; display: grid; place-items: center; padding: var(--s7) var(--s4); overflow: hidden; }
+.hero .art { position: absolute; inset: 0; border-radius: 0; z-index: 0; align-content: end; padding-bottom: var(--s6); }
+.stack { position: relative; z-index: 1; text-align: center; display: grid; gap: var(--s5); justify-items: center;
+  background: rgba(242,242,242,.88); padding: var(--s6) var(--s5); border: 1px solid var(--g3); }
+h1 { margin: 0; font-weight: 900; line-height: .9; letter-spacing: .02em; font-size: clamp(56px, 16vw, 200px); }
+h1 span { display: block; }
+h1 .mid { font-size: .62em; letter-spacing: .3em; }
+.line { margin: 0; font-size: 18px; }
+.sigil { width: 72px; height: 72px; border-radius: 50%; }
+</style></head><body>
+<div class="board-label"><b>landing-a-monument</b> · / · Centred monument: wordmark stacked on the axis, art surrounds it, button on the axis</div>
+<main class="hero">
+  <div class="slot art">Hero art slot (full-bleed, code-drawn SVG/CSS, behind type)<small>Art frames the centre; the wordmark sits in the calm middle</small></div>
+  <div class="stack">
+    <div class="slot sigil">Sigil<small>small</small></div>
+    <h1 aria-label="High Sodium Gaming"><span>HIGH</span><span class="mid">SODIUM</span><span>GAMING</span></h1>
+    <p class="line">Rules, close at hand. Salt to taste.</p>
+    <a class="btn" href="#">RESOURCES</a>
+  </div>
+</main>
+<footer class="footer">Unofficial fan resource for our table. Daggerheart is a trademark of Darrington Press.</footer>
+</body></html>

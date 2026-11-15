@@ -1,6 +1,149 @@
 {
   "project": "hsg-daggerheart",
-  "workflow_version": 2,
+  "workflow_version": 3,
+  "stage": "1d",
   "memo_id": null,
-  "boards": []
+  "rendered_with": "playwright-core + /ms-playwright/chromium-1248 (design-preview tooling not readable in container)",
+  "boards": [
+    {
+      "id": "landing-a-monument",
+      "kind": "page",
+      "route": "/",
+      "page": "landing",
+      "variant": "a",
+      "structural_choice": "Landing composition",
+      "description": "Centred monument: wordmark stacked on the axis inside full-bleed art; button on the axis",
+      "fidelity": "grey-box",
+      "path": "landing-a-monument/index.html",
+      "renders": {
+        "390": "landing-a-monument/board-390.png",
+        "1440": "landing-a-monument/board-1440-first.png"
+      },
+      "detect": {
+        "file": "landing-a-monument/detect.json",
+        "findings": 3,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    },
+    {
+      "id": "landing-b-split",
+      "kind": "page",
+      "route": "/",
+      "page": "landing",
+      "variant": "b",
+      "structural_choice": "Landing composition",
+      "description": "Asymmetric split: wordmark huge and left, art owns a right column (phone: art band, full-width thumb-zone button)",
+      "fidelity": "grey-box",
+      "path": "landing-b-split/index.html",
+      "renders": {
+        "390": "landing-b-split/board-390.png",
+        "1440": "landing-b-split/board-1440-first.png"
+      },
+      "detect": {
+        "file": "landing-b-split/detect.json",
+        "findings": 2,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    },
+    {
+      "id": "picker-a-shelf",
+      "kind": "page",
+      "route": "/resources",
+      "page": "picker",
+      "variant": "a",
+      "structural_choice": "Picker metaphor",
+      "description": "Book-spine shelf: books as spines (upright on desktop, stacked flat on phone); 1-book and 6-book states",
+      "fidelity": "grey-box",
+      "path": "picker-a-shelf/index.html",
+      "renders": {
+        "390": "picker-a-shelf/board-390.png",
+        "1440": "picker-a-shelf/board-1440-first.png"
+      },
+      "detect": {
+        "file": "picker-a-shelf/detect.json",
+        "findings": 3,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    },
+    {
+      "id": "picker-b-covers",
+      "kind": "page",
+      "route": "/resources",
+      "page": "picker",
+      "variant": "b",
+      "structural_choice": "Picker metaphor",
+      "description": "Large covers grid: one big cover alone; main book stays large, others tile; 1-book and 6-book states",
+      "fidelity": "grey-box",
+      "path": "picker-b-covers/index.html",
+      "renders": {
+        "390": "picker-b-covers/board-390.png",
+        "1440": "picker-b-covers/board-1440-first.png"
+      },
+      "detect": {
+        "file": "picker-b-covers/detect.json",
+        "findings": 2,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    },
+    {
+      "id": "viewer-desktop",
+      "kind": "page",
+      "route": "/resources/core-rulebook",
+      "page": "viewer-desktop",
+      "variant": "-",
+      "structural_choice": null,
+      "description": "Desktop viewer: Pages/Chapters rail left, page centre, search results panel right (\"Hope\", 5 rows)",
+      "fidelity": "grey-box",
+      "path": "viewer-desktop/index.html",
+      "renders": {
+        "390": "viewer-desktop/board-390.png",
+        "1440": "viewer-desktop/board-1440-first.png"
+      },
+      "detect": {
+        "file": "viewer-desktop/detect.json",
+        "findings": 3,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    },
+    {
+      "id": "viewer-phone-a-sheet",
+      "kind": "page",
+      "route": "/resources/core-rulebook",
+      "page": "viewer-phone",
+      "variant": "a",
+      "structural_choice": "Phone navigation",
+      "description": "Bottom dock + sheet: page fills screen; Pages/Chapters in a 75% sheet; search takes the full sheet",
+      "fidelity": "grey-box",
+      "path": "viewer-phone-a-sheet/index.html",
+      "renders": {
+        "390": "viewer-phone-a-sheet/board-390.png",
+        "1440": "viewer-phone-a-sheet/board-1440-first.png"
+      },
+      "detect": {
+        "file": "viewer-phone-a-sheet/detect.json",
+        "findings": 4,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    },
+    {
+      "id": "viewer-phone-b-filmstrip",
+      "kind": "page",
+      "route": "/resources/core-rulebook",
+      "page": "viewer-phone",
+      "variant": "b",
+      "structural_choice": "Phone navigation",
+      "description": "Persistent filmstrip + chapter chips under the page; search splits the screen so the page stays visible",
+      "fidelity": "grey-box",
+      "path": "viewer-phone-b-filmstrip/index.html",
+      "renders": {
+        "390": "viewer-phone-b-filmstrip/board-390.png",
+        "1440": "viewer-phone-b-filmstrip/board-1440-first.png"
+      },
+      "detect": {
+        "file": "viewer-phone-b-filmstrip/detect.json",
+        "findings": 3,
+        "triage": "scaffold-only: board label caps, striped placeholder slots, phone frame; no page-design findings to act on at grey-box stage"
+      }
+    }
+  ]
 }
