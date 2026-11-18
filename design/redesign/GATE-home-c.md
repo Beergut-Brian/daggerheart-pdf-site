@@ -1,0 +1,10 @@
+# Gate: home-c (soft splat hero, Kaden's original idea)
+- **What it is:** not a true Gaussian splat. Real 3DGS needs many views or an image-to-3D model. This is one photo plus a Depth Anything V2 depth map, turned into 587,776 soft, round gaussian splats (146,944 on phones) placed along their camera rays, so at rest it is the photo exactly. The mouse orbits the camera ±3.2° yaw and ±2° pitch around the fire; touch screens drift slowly.
+- **Proof it draws over file://:** the bundle reads back pixels from its first frame before it shows the canvas, then logs `home-c splat: canvas drew {"splats":587776,...}`. With the `<picture>` removed, the render is unchanged. No outside requests.
+- **Fallbacks:** reduced-motion and no-WebGL show home-a's photo with no canvas. The loop pauses offscreen and in hidden tabs.
+- **Page weight (hero):** 980 KB raw / 466 KB gzip: splat.bundle.js 545 / 137 KB (three.js), scene-data.js 435 / 329 KB (WebP colour and depth, base64). The 108 KB fallback AVIF still loads underneath. For comparison, home-d is 185 KB gzip and home-a about 108 KB.
+- **Frame time:** headless SwiftShader, CPU only, so a lower bound; mean over 3 s.
+  - 1440 full grid: 452-659 ms. After the automatic step-down to the half grid: 298 ms. 390: 145 ms.
+  - It is limited by fill rate (about 6M fragments per frame). A laptop GPU should hold 60 fps, but this is untested on real hardware. Devices running under about 45 fps step down to the half grid by themselves.
+- **Polish:** 3 passes in home-c/polish.md. JPEG blocks and banding fixed (WebP texture plus dither); darkening within 1.5 luma of home-a in every region; no holes or seams at max orbit. detect.json shows only home-a's two kept warnings.
+- **Verdict vs home-a:** at rest home-c is home-a, so it risks nothing visually. On a mouse it adds a subtle, real sense of depth: the canopy slides over the clearing and the embers rise in front. It costs about 4x the bytes and a GPU loop, and on phones it is only a slow drift. I'd ship home-a unless Kaden likes the parallax in the webm. home-d is the bolder version of the splat idea.

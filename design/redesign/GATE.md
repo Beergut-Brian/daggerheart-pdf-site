@@ -1,4 +1,20 @@
-# Redesign gate: boards for Kaden (2026-11-17)
+# Redesign gate: boards for Kaden (pass 2, 2026-11-18)
+
+## What changed in this pass
+- **Button (all boards):** the primary button keeps the reference layout: an outlined button with the icon in a filled box on the left and the label on the right. On hover or keyboard focus, the icon box's fill slides right until it fills the whole button: 300 ms, ease-out, reversing on leave. The label turns dark so it stays readable. Keyboard focus adds a 2px ember ring. With reduced motion the colour changes at once, with no slide. It is used by the home hero buttons and the Open buttons on resources; the viewer has no primary button. Proof: `renders/button-hover.webm`, `renders/button-hover.png` (rest / mid / full). Details: `GATE-button.md`.
+- **home-c (new, soft splat, the original idea):** home-a's page with the photo turned into about 588k soft round splats placed in depth by a real depth model (Depth Anything V2 small). At rest it looks exactly like the photo; the camera turns a few degrees toward the mouse, so the canopy slides over the clearing. Touch screens get a slow drift; reduced motion shows the flat photo. Renders: `home-c-1440.png`, `home-c-390.png`, `home-c-parallax.webm`. Details: `GATE-home-c.md`.
+- **home-d (new, pixel-art splat, after the JungleSilicon video):** the same scene as about 86k hard-edged square pixels, about 4.4 px each, in a 21-colour posterised palette. The fire is the glowing accent and the embers are single square pixels. The edges fade to black so the scene floats, and it orbits toward the mouse. Reduced motion shows a pixel-art still. Renders: `home-d-1440.png`, `home-d-390.png`, `home-d-parallax.webm`, `home-d-vs-inspo.png`. Details: `GATE-home-d.md`.
+
+## home-c vs home-d (Leader's verdict)
+- **Neither is a true Gaussian splat.** A real one needs many photos or an image-to-3D model. Both are one photo pushed into depth, so the camera can only turn a few degrees before the flat back shows.
+- **home-c** risks nothing: it is home-a until you move the mouse, then it adds quiet, real depth. It costs about 466 KB gzip against home-a's 108 KB, plus a GPU loop. On phones it is only a slow drift, and most visitors are on phones.
+- **home-d** is the only one of the four landings that looks unlike any other site. It matches the inspiration's pixel scale, posterised palette, inner glow and floating motes. It can't match the inspiration's modelled dioramas seen from the side: from one top-down photo it is a relief with the edges faded out. It is lighter than home-c (185 KB gzip, about 10 KB if three.js is replaced by plain WebGL in the build). It drops the photo's ring of people around the fire.
+- **Pick:** home-d if Kaden wants the JungleSilicon feel, which is what he asked about. Otherwise home-a. home-c is the least worth the cost: on most screens it looks the same as home-a.
+- **Not measured:** frame times on a real GPU. Headless rendering here is CPU-only: home-d took 58 ms per frame and home-c 300-660 ms, both worst cases.
+
+---
+
+## Pass 1 (2026-11-17)
 
 **Boards** (open from file://; all fonts and images are local):
 - `home-a/index.html`: the reference structure. A floating light pill nav, Kaden's campfire as a full-bleed hero with the fire to the right, heavy left darkening and edges fading to near-black. Copy sits bottom-left at the reference's 15% line: tag pill, two-tone headline, one sub-line, outlined CTA with the book icon in a white square → Daggerheart Resources.

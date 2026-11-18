@@ -10,14 +10,14 @@ const URL = 'file://' + path.join(R, 'home-c/index.html');
 const GL = ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
 const want = process.argv.slice(2).length ? process.argv.slice(2) : ['still', 'orbit', 'perf', 'fallback'];
 
-async function open(b, w, opts = {}) {
+async function open(b, w, opts = {}, hash = '') {
   const small = w < 800;
   const ctx = await b.newContext({ viewport: { width: w, height: small ? 844 : 900 }, deviceScaleFactor: small ? 2 : 1, ...opts });
   const p = await ctx.newPage();
   p.on('request', (r) => { const u = r.url(); if (!u.startsWith('file://' + R) && !u.startsWith('data:')) console.log('  OUTSIDE REQUEST', u); });
   p.on('pageerror', (e) => console.log('  PAGE ERROR', e.message));
-  p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error') console.log('  console', m.type(), m.text().slice(0, 200)); });
-  await p.goto(URL, { waitUntil: 'load', timeout: 60000 });
+  p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error' || m.text().startsWith('home-c')) console.log('  console', m.type(), m.text().slice(0, 200)); });
+  await p.goto(URL + hash, { waitUntil: 'load', timeout: 60000 });
   await p.evaluate(() => document.fonts.ready);
   return { ctx, p };
 }
@@ -26,8 +26,12 @@ const drawn = (p) => p.waitForFunction(() => document.querySelector('.hero.is-sp
 (async () => {
   const b = await chromium.launch({ executablePath: '/ms-playwright/chromium-1248/chrome-linux64/chrome', args: GL });
   if (want.includes('still')) for (const [w, out] of [[1440, 'home-c-1440.png'], [390, 'home-c-390.png']]) {
-    const { ctx, p } = await open(b, w);
-    console.log(out, 'canvas drawn:', await drawn(p));
+    const { ctx, p } = await open(b, w, {}, '#full');   // pin the grid: no step-down mid-capture
+    console.log(out, 'canvas drawn:', await drawn(p), 'proof', JSON.stringify(await p.evaluate(() => window.HC_SPLAT && window.HC_SPLAT.proof)));
+    // proof the pixels are the canvas, not the photo: remove the fallback <picture> and shoot again
+    await p.evaluate(() => { window.HC_SPLAT && window.HC_SPLAT.set(0, 0); document.querySelector('.hero-media').style.display = 'none'; });
+    await p.screenshot({ path: '/tmp/home-c-proof-' + w + '.png' });
+    await p.evaluate(() => { document.querySelector('.hero-media').style.display = ''; });
     // freeze at rest for the still (the page idles on touch widths)
     await p.evaluate(() => window.HC_SPLAT && window.HC_SPLAT.set(0, 0));
     await p.waitForTimeout(800);
@@ -36,7 +40,7 @@ const drawn = (p) => p.waitForFunction(() => document.querySelector('.hero.is-sp
     await ctx.close();
   }
   if (want.includes('orbit')) {
-    const { ctx, p } = await open(b, 1440);
+    const { ctx, p } = await open(b, 1440, {}, '#full');
     await drawn(p);
     for (const [x, y, n] of [[-1, -1, 'tl'], [1, 1, 'br'], [1, -1, 'tr'], [-1, 1, 'bl']]) {
       await p.mouse.move(-10, -10);
@@ -46,10 +50,12 @@ const drawn = (p) => p.waitForFunction(() => document.querySelector('.hero.is-sp
     console.log('orbit stills in /tmp/home-c-orbit-*.png');
     await ctx.close();
   }
-  if (want.includes('perf')) for (const w of [1440, 390]) {
-    const { ctx, p } = await open(b, w);
+  // perf: '#full' pins the full grid (no step-down); the plain URL lets the page step down if it is slow
+  if (want.includes('perf')) for (const [w, hash] of [[1440, '#full'], [1440, ''], [390, '']]) {
+    const { ctx, p } = await open(b, w, {}, hash);
     await drawn(p);
     await p.mouse.move(w * 0.3, 400);
+    if (!hash) await p.waitForTimeout(4000);              // let the step-down (if any) happen first
     const r = await p.evaluate(() => new Promise((res) => {
       const ts = []; const t0 = performance.now();
       (function f(t) { ts.push(t); if (t - t0 < 3000) requestAnimationFrame(f); else {
@@ -57,7 +63,7 @@ const drawn = (p) => p.waitForFunction(() => document.querySelector('.hero.is-sp
         res({ frames: d.length, mean: d.reduce((a, b) => a + b, 0) / d.length, p95: d[Math.floor(d.length * 0.95)] });
       } })(t0); requestAnimationFrame(f => 0);
     }));
-    console.log('perf', w, 'frames', r.frames, 'mean ms', r.mean.toFixed(1), 'p95 ms', r.p95.toFixed(1));
+    console.log('perf', w + hash, JSON.stringify(await p.evaluate(() => window.HC_SPLAT.proof)), 'frames', r.frames, 'mean ms', r.mean.toFixed(1), 'p95 ms', r.p95.toFixed(1));
     await ctx.close();
   }
   if (want.includes('fallback')) {
@@ -75,23 +81,24 @@ const drawn = (p) => p.waitForFunction(() => document.querySelector('.hero.is-sp
     await b2.close();
   }
   if (want.includes('video')) {
-    // SwiftShader draws ~2 frames/s, so a realtime recordVideo would be a slideshow. Instead the page's clock is
-    // faked (Playwright clock: rAF + performance.now), the real mouse is moved, and every 1/30 s step is captured
-    // and encoded at 30 fps with Playwright's bundled ffmpeg. Motion and easing are the page's own.
+    // SwiftShader draws ~2 frames/s, so a realtime recordVideo would be a slideshow. Instead the page's loop is
+    // stopped, the real mouse is moved (the page's own pointermove handler sets the target), the page's own update
+    // is advanced by 1/30 s (HC_SPLAT.advance: same easing and ember clock), and each frame is captured and encoded
+    // at 30 fps with Playwright's bundled ffmpeg.
     const { spawn } = require('child_process');
     const FPS = 30;
-    const { ctx, p } = await open(b, 1440);
+    const { ctx, p } = await open(b, 1440, {}, '#full');
     await drawn(p);
     await p.mouse.move(720, 450);
-    await p.clock.install();
+    await p.evaluate(() => window.HC_SPLAT.stop());
     const ff = spawn('/ms-playwright/ffmpeg-1013/ffmpeg-linux', ['-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', 'pipe:0',
-      '-y', '-an', '-c:v', 'vp8', '-b:v', '6M', '-crf', '6', '-qmin', '0', '-qmax', '24', '-deadline', 'good', '-threads', '4', path.join(OUT, 'home-c-parallax.webm')], { stdio: ['pipe', 'inherit', 'inherit'] });
+      '-y', '-an', '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '28', '-deadline', 'good', '-cpu-used', '4', '-row-mt', '1', '-threads', '4', '-pix_fmt', 'yuv420p', path.join(OUT, 'home-c-parallax.webm')], { stdio: ['pipe', 'inherit', 'inherit'] });
     const path_ = [];
     const seg = (a, c, sec) => { const n = Math.round(sec * FPS); for (let i = 1; i <= n; i++) { const t = i / n, e = t * t * (3 - 2 * t); path_.push([a + (c - a) * e, 440 + 50 * Math.sin(t * Math.PI)]); } };
     seg(720, 720, 0.5); seg(720, 60, 1.3); seg(60, 1380, 3.2); seg(1380, 720, 1.6); seg(720, 720, 0.6);
     for (const [x, y] of path_) {
       await p.mouse.move(x, y);
-      await p.clock.runFor(1000 / FPS);
+      await p.evaluate((ms) => window.HC_SPLAT.advance(ms), 1000 / FPS);
       ff.stdin.write(await p.screenshot({ type: 'jpeg', quality: 92 }));
     }
     ff.stdin.end();
