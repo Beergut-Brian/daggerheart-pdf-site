@@ -12,3 +12,4 @@
 - 2026-11-18 build: tokens, fonts, base + button ported; salt engine removed; nav + Cta components
 - 2026-11-18 build: landing (home-d), plain WebGL splat, static scene assets, landing tests
 - 2026-11-18 build: resources/viewer restyled (builder), tests green, PERF.md, review set; ready for review (not pushed)
+- 2026-11-18 build: phone hero fits first screen at 390x844 and 375x667 (shorter image band, smaller phone headline, tighter nav at <400px); test added

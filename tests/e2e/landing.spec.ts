@@ -51,4 +51,15 @@ test.describe("landing /", () => {
     // the scene (palette indices) is a static asset, not in any JS chunk
     expect(js.some((s) => s.includes('"palette"') && s.includes("fireDepth"))).toBe(false);
   });
+
+  for (const [w, h] of [[390, 844], [375, 667]]) {
+    test(`phone ${w}x${h}: the whole CTA sits inside the first screen`, async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+      const page = await ctx.newPage();
+      await page.goto("/");
+      const box = await page.locator(".hero .cta").boundingBox();
+      expect(box!.y + box!.height).toBeLessThanOrEqual(h);
+      await ctx.close();
+    });
+  }
 });

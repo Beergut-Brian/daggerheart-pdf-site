@@ -76,7 +76,7 @@ export interface Framing { stride: number; pxPerSplat: number; cw: number; ch: n
 export function frame(s: SceneMeta, heroW: number, heroH: number, vw: number, vh: number, mobile: boolean): Framing {
   const unit = s.srcW / s.w;
   let bx: number, by: number, bw: number, bh: number, py: number;
-  if (mobile) { bx = 0; by = 0; bw = heroW; bh = Math.min(0.66 * vh, 600); py = 0.5; }
+  if (mobile) { bx = 0; by = 0; bw = heroW; bh = Math.min(Math.max(vh - 392, 256), 600); py = 0.5; }
   else { bx = 0.1 * vw; by = -0.1 * heroH; bw = heroW - bx + 0.2 * vw; bh = heroH * 1.24; py = 0.52; }
   const sc = Math.max(bw / s.srcW, bh / s.srcH);
   const ix = bx + (bw - s.srcW * sc) * 0.5, iy = by + (bh - s.srcH * sc) * py;

@@ -24,20 +24,22 @@
 
   @media (max-width: 699px) {
     .hero { min-height: 100svh; display: flex; flex-direction: column; }
-    .hero-media { inset: 0 0 auto 0; height: min(66svh, 37.5rem); }
+    .hero-media { inset: 0 0 auto 0; height: clamp(16rem, 100svh - 24.5rem, 37.5rem); }
     .hero-media img { object-position: 50% 50%; }
     .hero-shade {
-      height: min(66svh, 37.5rem); bottom: auto;
+      height: clamp(16rem, 100svh - 24.5rem, 37.5rem); bottom: auto;
       background:
         linear-gradient(180deg, var(--scrim-mid) 0, var(--scrim-none) 22%, var(--scrim-none) 58%, var(--scrim-strong) 86%, var(--scrim-solid) 100%),
         radial-gradient(120% 70% at 50% 58%, var(--scrim-none) 40%, var(--scrim-mid) 100%);
     }
     .hero-copy {
       position: relative; left: auto; top: auto; transform: none;
-      margin-top: calc(min(66svh, 37.5rem) - var(--space-12));
-      padding: 0 var(--space-5) var(--space-12);
+      margin-top: calc(clamp(16rem, 100svh - 24.5rem, 37.5rem) - var(--space-12));
+      padding: 0 var(--space-5) var(--space-8);
     }
-    .hero-copy .tag { margin-bottom: var(--space-5); }
+    .hero-copy .tag { margin-bottom: var(--space-4); }
+    .hero-copy .display { font-size: clamp(1.75rem, 8.4vw, 2.25rem); }
+    .hero-copy .lead { font-size: var(--text-body); }
     .hero-copy .lead { margin-top: var(--space-4); }
-    .hero-copy .cta { margin-top: var(--space-8); }
+    .hero-copy .cta { margin-top: var(--space-6); }
   }
