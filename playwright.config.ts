@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: `http://localhost:${port}`,
-    launchOptions: { executablePath: process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome", args: ["--no-sandbox"] },
+    launchOptions: { executablePath: process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome", args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] },
   },
   projects: [
     { name: "desktop-1440", use: { viewport: { width: 1440, height: 900 } } },

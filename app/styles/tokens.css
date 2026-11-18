@@ -1,0 +1,116 @@
+/* High Sodium Gaming, redesign 2026-11-17: design tokens.
+   The only file with raw colour values. Board CSS uses these variables; the builder ports them to Tailwind 4 @theme.
+   Contrast (WCAG 2.x, against --color-bg #0d0d0d unless noted):
+     --color-text       #f2f2f0  17.3:1 AAA (15.2:1 on --color-surface-2)
+     --color-text-soft  #b5b5b5   9.5:1 AAA (8.3:1 on --color-surface-2)
+     --color-text-dim   #9a9a9a   6.9:1 AA  (6.5:1 on --color-surface, 6.1:1 on --color-surface-2)
+     --color-text-faint #8c8c8c   5.8:1 AA  (5.1:1 on surface-2, 4.9:1 on --color-placeholder, 4.6:1 on surface-3)
+     --color-nav-link   #4d4d4d on --color-nav-bg #f4f4f2   7.7:1 AAA
+     --color-nav-ink    #111111 on --color-nav-bg           17.2:1 AAA
+     --color-page-ink   #1d1b18 on --color-page #f3efe6     15.0:1 AAA (13.7:1 on --color-page-box)
+     --color-page-ink-soft #4a453d on --color-page           8.3:1 AAA
+     --color-ember-text #f0a35e on --color-surface #151515   8.8:1 AAA (8.2:1 on surface-2)
+     --color-cta-ink    #111111 on --color-cta-square #f4f4f2 17.2:1 AAA (also the CTA label on its hover/focus fill)
+   Hero copy sits on --scrim-strong/--scrim-solid over the photo, so its pairs resolve to near --color-bg. */
+
+
+:root {
+  /* colour: roles */
+  --color-bg: #0d0d0d;            /* page ground, image edge-fade target */
+  --color-surface: #151515;       /* panels, viewer rails */
+  --color-surface-2: #1c1c1c;     /* raised: CTA fill, inputs, active rows */
+  --color-surface-3: #242424;     /* hover */
+  --color-line: #2a2a2a;          /* hairlines */
+  --color-line-strong: #3d3d3d;   /* tag pill border, input border */
+  --color-text: #f2f2f0;
+  --color-text-soft: #b5b5b5;
+  --color-text-dim: #9a9a9a;
+  --color-text-faint: #8c8c8c;
+  --color-cta-border: #d9d9d6;    /* outlined CTA */
+  --color-cta-square: #f4f4f2;    /* white icon square */
+  --color-cta-ink: #111111;
+  --color-nav-bg: #f4f4f2;        /* light pill nav */
+  --color-nav-ink: #111111;
+  --color-nav-link: #4d4d4d;
+  --color-nav-divider: #d4d4d0;
+  --color-ember: #ff9a45;         /* embers, tag dot, focus ring: the only warm colour */
+  --color-ember-text: #f0a35e;
+  --color-hit: rgb(255 170 80 / 0.42);       /* search hit wash on the page */
+  --color-hit-focus: rgb(255 140 40 / 0.75);
+  --color-page: #f3efe6;          /* the PDF page: brightest thing in the viewer */
+  --color-page-ink: #1d1b18;
+  --color-page-ink-soft: #4a453d;
+  --color-page-rule: #d8d1c2;
+  --color-page-box: #ebe5d8;
+  --color-placeholder: #1f1f1f;   /* sample-state cover blanks */
+
+  /* overlays (image darkening and fades) */
+  --scrim-solid: rgb(13 13 13 / 1);
+  --scrim-strong: rgb(13 13 13 / 0.88);
+  --scrim-mid: rgb(13 13 13 / 0.55);
+  --scrim-soft: rgb(13 13 13 / 0.22);
+  --scrim-none: rgb(13 13 13 / 0);
+  --scrim-sheet: rgb(0 0 0 / 0.55);
+  --glass: rgb(21 21 21 / 0.72);
+
+  /* type */
+  --font-sans: var(--font-inter-tight), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+  --text-display: clamp(2.5rem, 1.2rem + 2.85vw, 4.25rem);  /* 40 → 68 (1440 ≈ 60) */
+  --text-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);        /* 36 → 56 */
+  --text-h2: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);      /* 22 → 28 */
+  --text-h3: 1.125rem;   /* 18 */
+  --text-lead: 1.0625rem; /* 17 */
+  --text-body: 0.9375rem; /* 15 */
+  --text-small: 0.8125rem; /* 13 */
+  --text-tag: 0.6875rem;  /* 11: tag pill, uppercase mono only */
+  --text-micro: 0.75rem;  /* 12: viewer meta, page numbers, hints */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --leading-display: 1.04;
+  --leading-tight: 1.2;
+  --leading-body: 1.55;
+  --tracking-display: -0.026em;
+  --tracking-heading: -0.02em;
+  --tracking-tag: 0.18em;
+
+  /* spacing (4px base) */
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+  --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+  --gutter: max(1.25rem, 15vw);        /* reference: copy and nav start ~15% from the left */
+  --gutter-tight: max(1rem, 4vw);
+
+  /* sizes */
+  --nav-height: 3.25rem;      /* 52 */
+  --nav-top: 0.875rem;
+  --cta-height: 4rem;         /* 64 */
+  --cta-square: 3.5rem;       /* 56 */
+  --tag-height: 1.875rem;     /* 30 */
+  --control: 2.5rem;          /* round icon controls */
+  --bar-height: 3.5rem;       /* viewer top bar */
+  --rail-width: 17.5rem;
+  --results-width: 24rem;
+  --measure: 34rem;
+
+  /* radii */
+  --radius-sm: 0.375rem;  /* 6: icon square, thumbs */
+  --radius-md: 0.625rem;  /* 10: CTA, cards, inputs */
+  --radius-lg: 1rem;      /* sheets */
+  --radius-full: 999px;
+
+  /* shadows */
+  --shadow-nav: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 8px 30px rgb(0 0 0 / 0.35);
+  --shadow-cover: 0 30px 60px -20px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-page: 0 24px 80px rgb(0 0 0 / 0.6);
+  --shadow-sheet: 0 -20px 50px rgb(0 0 0 / 0.6);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur-med: 260ms;
+  --dur-fill: 300ms;  /* CTA hover/focus fill slide */
+
+  /* breakpoints (reference only; CSS media queries cannot read vars): sm 390, md 700, lg 1024, xl 1440 */
+}

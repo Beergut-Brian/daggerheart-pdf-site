@@ -2,7 +2,7 @@
 
 Next.js 16 (App Router) · React 19 · Tailwind 4 · pdf.js (`pdfjs-dist`).
 
-- `/` landing: a sky of salt that falls and piles when touched (`app/lib/salt-engine.ts`, `app/components/SaltHero.tsx`).
+- `/` landing (see `app/page.tsx`).
 - `/resources` the shelf, driven by `app/books.ts`.
 - `/resources/[slug]` the reader: range-request PDF, thumbnails, chapters, instant search from a prebuilt index.
 

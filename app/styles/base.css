@@ -1,113 +1,135 @@
-/* Direction F — Glow. v2 (steer 1, DH13): the Wyrm is gone; salt field home, salt-cellar art on resources. Tokens + shared components for the three pages.
-   Every colour, size, space and radius is a custom property; rules use var(). */
-:root {
-  /* colour roles */
-  --night: #07061A;          /* page ground, viewer chrome */
-  --raised: #15123A;         /* raised surfaces: panels, cards, bars */
-  --raised-hi: #211C52;      /* hover / focused row */
-  --line: #2E2868;           /* hairlines (non-text) */
-  --gold: #FFC861;           /* heart gold: glow, pill edge, active */
-  --gold-soft: #FFE29A;      /* wordmark low stop, warm salt */
-  --chrome: #FFFFFF;         /* wordmark top stop */
-  --teal: #6FE3D6;           /* focus ring, search match */
-  --star: #F5F3FF;           /* body text */
-  --haze: #A49FD0;           /* secondary text, AA on night and raised */
-  --parch: #F3EEDF;          /* book page placeholder */
-  --parch-line: #CFC6B2;     /* grey text lines on the page */
-  --parch-head: #8C8370;     /* heading bar on the page */
-  --match: #FFC861;          /* match highlight on the page */
-  --salt-1: #FFF7DF; --salt-2: #FFE29A; --salt-3: #BDF3EC; --salt-4: #FFFFFF;
-  /* v2 field grains: bright white salt with a faint warm cast; the glint is the heart gold */
-  --grain-1: #FFFFFF; --grain-2: #FBF8F1; --grain-3: #F2EEE6; --grain-4: #FFF6DE; --grain-glint: #FFC861;
+/* Shared components for the redesign boards. Tokens only. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--color-ember); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  /* type */
-  --font-display: var(--font-cinzel), 'Cinzel', serif;
-  --font-ui: var(--font-space), 'Space Grotesk', system-ui, sans-serif;
-  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 30px;
-  --fs-tag: clamp(18px, 1.7vw, 24px);
-  --fs-h1: clamp(44px, 9vw, 96px);
-  --fs-wm: min(17vw, 132px);
-  --lh-tight: .92; --lh-body: 1.5;
-  --track-wide: .22em; --track-wm: .01em;
-
-  /* space */
-  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
-
-  /* shape */
-  --r-xs: 3px; --r-sm: 6px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
-  --pill-h: 56px; --tap: 44px;
-
-  /* depth (offset + blur) */
-  --shadow-card: 0 24px 60px -18px color-mix(in srgb, var(--gold) 38%, transparent), 0 10px 30px -10px color-mix(in srgb, #000 70%, transparent);
-  --shadow-pill: 0 6px 26px -4px color-mix(in srgb, var(--gold) 55%, transparent);
-  --shadow-pill-hi: 0 8px 38px -2px color-mix(in srgb, var(--gold) 80%, transparent);
-  --shadow-page: 0 18px 50px -12px color-mix(in srgb, #000 80%, transparent);
-
-  --ease-out: cubic-bezier(.16, 1, .3, 1);
+/* ---------- Nav: light floating pill ---------- */
+.site-nav {
+  position: absolute; z-index: 20; top: var(--nav-top);
+  left: var(--gutter); right: var(--gutter-tight);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  pointer-events: none;
+}
+.site-nav > * { pointer-events: auto; }
+.nav-pill {
+  display: flex; align-items: center; gap: var(--space-6);
+  height: var(--nav-height);
+  padding: 0 var(--space-6) 0 var(--space-5);
+  background: var(--color-nav-bg); color: var(--color-nav-ink);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-nav);
+}
+.wordmark {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-weight: var(--weight-semibold); font-size: var(--text-body);
+  letter-spacing: -0.01em; white-space: nowrap; color: var(--color-nav-ink);
+}
+.wordmark .mark { height: 1.75rem; width: auto; flex: none; }
+.nav-links { display: flex; align-items: center; gap: var(--space-6); list-style: none; margin: 0; padding: 0; }
+.nav-links a { color: var(--color-nav-link); font-size: var(--text-body); white-space: nowrap; transition: color var(--dur-fast); }
+.nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--color-nav-ink); }
+.nav-divider { width: 1px; height: 1.125rem; background: var(--color-nav-divider); }
+.nav-books { display: contents; }
+@media (max-width: 899px) {
+  .site-nav { left: var(--gutter-tight); }
+  .nav-books, .nav-divider, .nav-links .nav-home { display: none; }
+  .nav-pill { width: 100%; justify-content: space-between; padding: 0 var(--space-5) 0 var(--space-4); }
+  .nav-links a { font-size: var(--text-small); }
 }
 
-* { box-sizing: border-box; }
-html { background: var(--night); color: var(--star); scrollbar-color: var(--line) var(--night); }
-body { margin: 0; font: 400 var(--fs-md)/var(--lh-body) var(--font-ui); background: var(--night); color: var(--star); -webkit-font-smoothing: antialiased; }
-::selection { background: var(--gold); color: var(--night); }
-a { color: inherit; text-underline-offset: .2em; }
-:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: var(--r-xs); }
-.icon { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* round controls that sit outside the pill (viewer only: they must map to something real) */
+.round-control {
+  width: var(--control); height: var(--control); border-radius: var(--radius-full);
+  display: grid; place-items: center; color: var(--color-text-soft);
+  border: 1px solid var(--color-line-strong); background: var(--glass);
+}
+.round-control svg { width: 1.125rem; height: 1.125rem; }
 
-.skip { position: absolute; left: var(--s4); top: -100px; z-index: 50; background: var(--star); color: var(--night); padding: var(--s2) var(--s4); border-radius: var(--r-sm); font-weight: 700; }
-.skip:focus { top: var(--s4); }
+/* ---------- Tag pill ---------- */
+.tag {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  height: var(--tag-height); padding: 0 var(--space-4) 0 var(--space-3);
+  border: 1px solid var(--color-line-strong); border-radius: var(--radius-full);
+  background: var(--scrim-mid);
+  font-family: var(--font-mono); font-size: var(--text-tag); font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase; color: var(--color-text-soft);
+  white-space: nowrap;
+}
+.tag::before {
+  content: ""; width: 0.3125rem; height: 0.3125rem; border-radius: var(--radius-full);
+  background: var(--color-ember);
+}
 
-/* the glowing pill (landing RESOURCES, picker Open) */
-.pill { display: inline-flex; align-items: center; justify-content: center; gap: var(--s3); min-height: var(--pill-h); padding: 0 var(--s7);
-  border-radius: var(--r-pill); border: 1px solid var(--gold); color: var(--star); text-decoration: none;
-  background: color-mix(in srgb, var(--raised) 78%, transparent); backdrop-filter: blur(6px);
-  font: 700 var(--fs-md)/1 var(--font-ui); letter-spacing: var(--track-wide); text-transform: uppercase;
-  box-shadow: var(--shadow-pill); transition: box-shadow .4s var(--ease-out), background-color .4s var(--ease-out), translate .4s var(--ease-out); }
-.pill:hover { box-shadow: var(--shadow-pill-hi); background: color-mix(in srgb, var(--raised-hi) 85%, transparent); translate: 0 -1px; }
-.pill:focus-visible { outline-offset: 5px; border-radius: var(--r-pill); }
-.pill.small { min-height: var(--tap); padding: 0 var(--s5); font-size: var(--fs-sm); letter-spacing: .16em; }
+/* ---------- Display headline: dim first line, bright rest ---------- */
+.display {
+  margin: 0; font-weight: var(--weight-medium);
+  font-size: var(--text-display); line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display); color: var(--color-text);
+  text-wrap: balance;
+}
+.display .dim { display: block; color: var(--color-text-dim); }
+.display .bright { display: block; }
+.lead { margin: 0; font-size: var(--text-lead); line-height: var(--leading-body); color: var(--color-text-soft); max-width: var(--measure); text-wrap: pretty; }
 
-/* the wordmark: chrome-to-gold metal lit from behind (ref steer-1/02) */
-.wm { margin: 0; font: 900 var(--fs-wm)/var(--lh-tight) var(--font-display); letter-spacing: var(--track-wm); text-align: center;
-  background: linear-gradient(180deg, var(--chrome) 8%, var(--salt-1) 42%, var(--gold-soft) 68%, var(--gold) 100%);
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: var(--star);
-  filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--night) 70%, transparent)) drop-shadow(0 0 28px color-mix(in srgb, var(--gold) 55%, transparent)); }
-.wm .l { display: block; }
-.tag { margin: 0; font: 500 var(--fs-tag)/1.3 var(--font-ui); color: var(--star); letter-spacing: .02em; text-align: center; text-wrap: balance; }
+/* ---------- Outlined CTA with icon in a white square ---------- */
+.cta {
+  --cta-icon-size: var(--cta-square);
+  position: relative; isolation: isolate;
+  display: inline-flex; align-items: center; gap: var(--space-5);
+  height: var(--cta-height); padding: var(--space-1) var(--space-8) var(--space-1) var(--space-1);
+  border: 1px solid var(--color-cta-border); border-radius: var(--radius-md);
+  background: var(--color-surface-2); color: var(--color-text);
+  font-size: var(--text-lead); font-weight: var(--weight-medium); letter-spacing: -0.005em;
+  transition: color var(--dur-fill) var(--ease-out), border-color var(--dur-fill) var(--ease-out), background-color 0s;
+}
+/* Fill layer: starts as the icon square, grows right to cover the whole button on hover/focus. */
+.cta::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--color-cta-square);
+  clip-path: inset(calc((100% - var(--cta-icon-size)) / 2) calc(100% - var(--space-1) - var(--cta-icon-size)) calc((100% - var(--cta-icon-size)) / 2) var(--space-1) round var(--radius-sm));
+  transition: clip-path var(--dur-fill) var(--ease-out);
+}
+/* Background snaps light only after the slide ends (and back at once on leave), so the label never sits on dark. */
+a.cta:hover, a.cta:focus-visible, button.cta:hover, button.cta:focus-visible {
+  color: var(--color-cta-ink); border-color: var(--color-cta-square); background-color: var(--color-cta-square);
+  transition: color var(--dur-fill) var(--ease-out), border-color var(--dur-fill) var(--ease-out), background-color 0s var(--dur-fill);
+}
+a.cta:hover::before, a.cta:focus-visible::before, button.cta:hover::before, button.cta:focus-visible::before { clip-path: inset(0 0 0 0 round var(--radius-md)); }
+.cta:focus-visible { outline: 2px solid var(--color-ember); outline-offset: 3px; }
+.cta .cta-icon {
+  width: var(--cta-icon-size); height: var(--cta-icon-size); flex: none;
+  border-radius: var(--radius-sm); background: var(--color-cta-square); color: var(--color-cta-ink);
+  display: grid; place-items: center;
+}
+.cta .cta-icon svg { width: 1.375rem; height: 1.375rem; }
+.cta--sm { --cta-icon-size: var(--control); height: 3rem; gap: var(--space-4); padding-right: var(--space-5); font-size: var(--text-body); }
+.cta--sm .cta-icon svg { width: 1.125rem; height: 1.125rem; }
+@media (prefers-reduced-motion: reduce) {
+  .cta, .cta::before, a.cta:hover, a.cta:focus-visible, button.cta:hover, button.cta:focus-visible { transition: none; }
+}
 
-/* landing hero shared mechanics */
-.hero { position: relative; height: max(100svh, 640px); overflow: hidden; isolation: isolate; touch-action: pan-y; --hero-h: max(100svh, 640px); }
-.frame { position: absolute; left: 50%; top: 50%; width: max(100%, calc(var(--hero-h) * var(--ar))); aspect-ratio: var(--ar); translate: -50% -50%; z-index: -2; }
-.frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.pour { position: absolute; left: var(--pour-x); top: var(--pour-y); width: 2px; height: 2px; }
-canvas.salt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
-/* v2: no CSS filter on the canvas (it repainted every frame); the grain sprites carry their own soft glow */
-.stack { position: absolute; left: 0; right: 0; z-index: 2; display: grid; justify-items: center; gap: var(--s5); padding: 0 var(--s4); }
-.stack .pill { margin-top: var(--s3); }
+/* ---------- Meta (mono small caps) ---------- */
+.meta { font-family: var(--font-mono); font-size: var(--text-tag); letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-dim); }
 
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-/* ---------- resources ---------- */
-.res-page { min-height: 100svh; padding: var(--s5) var(--s4) var(--s8); position: relative; overflow: hidden; }
-.back { display: inline-flex; align-items: center; gap: var(--s2); min-height: var(--tap); color: var(--haze); text-decoration: none; font-size: var(--fs-sm); font-weight: 500; }
-.back:hover { color: var(--star); }
-.res-head { display: grid; gap: var(--s2); margin-bottom: var(--s7); position: relative; z-index: 1; }
-.res-head h1 { margin: var(--s3) 0 0; font: 900 var(--fs-h1)/1 var(--font-display); color: var(--star); letter-spacing: 0; }
-.res-head p { margin: 0; color: var(--haze); font-size: var(--fs-lg); }
-.books { display: grid; gap: var(--s7); position: relative; z-index: 1; }
-.book { display: grid; gap: var(--s4); text-decoration: none; color: var(--star); align-content: start; }
-.book .cover { display: block; width: 100%; height: auto; aspect-ratio: 989 / 1280; object-fit: cover; border-radius: var(--r-sm); box-shadow: var(--shadow-card); transition: box-shadow .5s var(--ease-out), translate .5s var(--ease-out); }
-.book:hover .cover { translate: 0 -4px; box-shadow: 0 34px 80px -16px color-mix(in srgb, var(--gold) 55%, transparent), 0 10px 30px -10px color-mix(in srgb, #000 70%, transparent); }
-.book h2 { margin: 0; font: 700 var(--fs-xl)/1.15 var(--font-display); text-wrap: balance; }
-.book .sub { margin: 0; color: var(--haze); font-size: var(--fs-md); max-width: 38ch; }
-.book .meta { margin: 0; color: var(--haze); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
-.book .pill { justify-self: start; }
-.book.main { grid-template-columns: 1fr; }
+/* ---------- Skip link ---------- */
+.skip { position: absolute; left: var(--space-4); top: -4rem; z-index: 100; padding: var(--space-3) var(--space-4); background: var(--color-nav-bg); color: var(--color-nav-ink); border-radius: var(--radius-md); }
+.skip:focus { top: var(--space-4); }
 
-@media (min-width: 900px) {
-  .res-page { padding: var(--s6) var(--s8) var(--s9); }
-  .books { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: end; gap: var(--s8); max-width: 1180px; }
-  .book.main { grid-template-columns: 340px 1fr; align-items: end; gap: var(--s6); }
-  .book.side { grid-template-columns: 200px 1fr; align-items: end; gap: var(--s5); }
-  .book.main h2 { font-size: var(--fs-2xl); }
+@media (max-width: 399px) {
+  .nav-pill .wordmark { font-size: var(--text-small); gap: var(--space-2); }
+  .nav-pill { padding: 0 var(--space-4) 0 var(--space-3); }
 }

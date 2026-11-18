@@ -1,10 +1,14 @@
-import Link from "next/link";
+import Cta from "./components/Cta";
+import SiteNav from "./components/SiteNav";
 
 export default function NotFound() {
   return (
-    <main id="main" className="vstate">
-      <p>No book by that name on the shelf.</p>
-      <Link className="pill small" href="/resources">Back to Daggerheart Resources</Link>
-    </main>
+    <>
+      <SiteNav current="resources" />
+      <main id="main" className="vstate vstate-page">
+        <p className="display">No book by that name on the shelf.</p>
+        <Cta small href="/resources">Daggerheart Resources</Cta>
+      </main>
+    </>
   );
 }

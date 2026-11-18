@@ -316,7 +316,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
   // ---------- states ----------
   if (desktop === null) return <div className="vstate" role="status">Opening the book…</div>;
   if (load.state === "failed") return (
-    <div className="vstate"><p>The book didn’t open. Check your signal.</p><button className="pill small" onClick={() => { setLoad({ state: "opening" }); setSlow(false); setRetry((n) => n + 1); }}>Try again</button><Link className="back" href="/resources">Daggerheart Resources</Link></div>
+    <div className="vstate"><p>The book didn’t open. Check your signal.</p><button className="btn" onClick={() => { setLoad({ state: "opening" }); setSlow(false); setRetry((n) => n + 1); }}>Try again</button><Link className="back" href="/resources">Daggerheart Resources</Link></div>
   );
   const status = load.state === "ready" ? null : (
     <div className="vstate overlay" role="status">
@@ -329,12 +329,14 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
     return (
       <div className="vdesk viewer">
         <header className="vbar">
-          <Link className="hsg" href="/" aria-label="High Sodium Gaming home">HSG</Link>
+          <Link className="hsg" href="/" aria-label="High Sodium Gaming home"><img src="/brand/shaker.png" alt="High Sodium Gaming" width={26} height={24} /></Link>
           <Link className="vback" href="/resources"><Icon id="back" />Daggerheart Resources</Link>
+          <span className="sep" aria-hidden="true" />
           <span className="vtitle">{book.title}</span>
           <span className="grow" />
           <label className="pgnum">Page <input value={pageText} inputMode="numeric" aria-label="Go to page" size={3} aria-invalid={!!pageError}
             onChange={(e) => setDraft(e.target.value)} onBlur={commitPage} onKeyDown={(e) => { if (e.key === "Enter") { commitPage(); (e.target as HTMLInputElement).blur(); } }} /> of {total}</label>
+          <span className="divider" aria-hidden="true" />
           <div className="zoom" role="group" aria-label="Zoom">
             <button className="ib" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(0.6, +(z / 1.25).toFixed(3)))}><Icon id="minus" /></button>
             <button className="ib" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(3, +(z * 1.25).toFixed(3)))}><Icon id="plus" /></button>
@@ -370,7 +372,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
   // phone
   return (
     <div className="vphone viewer">
-      <div className="pbar"><Link className="ib" href="/resources" aria-label="Daggerheart Resources"><Icon id="back" /></Link><span className="vtitle">{book.title}</span><Link className="hsg" href="/" aria-label="High Sodium Gaming home">HSG</Link></div>
+      <div className="vbar pbar"><Link className="ib" href="/resources" aria-label="Daggerheart Resources"><Icon id="back" /></Link><span className="vtitle">{book.title}</span><Link className="hsg" href="/" aria-label="High Sodium Gaming home"><img src="/brand/shaker.png" alt="High Sodium Gaming" width={26} height={24} /></Link></div>
       <main className="stage pstage" id="main" ref={stage} onPointerDown={onTouchStart} onPointerUp={onTouchEnd}>
         {pageError && <p className="perr" role="alert">{pageError}</p>}
         {pageView}{matchNav}
@@ -385,6 +387,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
         </span>
         <button className="dpill" onClick={() => { setSheet("search"); setTimeout(() => searchInput.current?.focus(), 50); }}><Icon id="search" />Search</button>
       </nav>
+      {sheet && <div className="scrim" aria-hidden="true" onClick={() => setSheet(null)} />}
       {sheet && (
         <div className={`sheet${sheet === "search" ? " tall" : ""}`} role="dialog" aria-label="Pages, chapters and search">
           <div className="grab" aria-hidden="true" />
@@ -392,7 +395,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
             <div className="tabs" role="tablist">
               {(["pages", "chapters", "search"] as const).map((t) => <button key={t} role="tab" aria-selected={sheet === t} className={sheet === t ? "on" : ""} onClick={() => setSheet(t)}>{t === "pages" ? "Pages" : t === "chapters" ? "Chapters" : "Search"}</button>)}
             </div>
-            <button className="close" onClick={() => setSheet(null)}>Close</button>
+            <button className="ib close" aria-label="Close" onClick={() => setSheet(null)}><Icon id="x" /></button>
           </div>
           {sheet === "search" && <div className="sfield">{searchField}</div>}
           <div className="sheetbody">{sheet === "pages" ? thumbGrid(110) : sheet === "chapters" ? chapterList : resultsBody}</div>

@@ -40,8 +40,8 @@ describe("ranking", () => {
     expect(search(idx, "  ").total).toBe(0);
   });
   it("caps the hits list but reports the total", () => {
-    const big = prepare({ book: "b", pages: 300, t: Array.from({ length: 300 }, () => "salt") });
-    const r = search(big, "salt", 50);
+    const big = prepare({ book: "b", pages: 300, t: Array.from({ length: 300 }, () => "word") });
+    const r = search(big, "word", 50);
     expect(r.total).toBe(300);
     expect(r.hits).toHaveLength(50);
   });
