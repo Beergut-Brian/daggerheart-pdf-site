@@ -1,42 +1,52 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { books, bookMeta } from "../books";
+import Cta from "../components/Cta";
+import SiteNav from "../components/SiteNav";
 
 export const metadata: Metadata = { title: "Daggerheart Resources — High Sodium Gaming" };
 
 export default function Resources() {
+  // 1 book: cover beside its text. 2: two columns. 3+: compact grid, covers are the links.
+  const layout = books.length === 1 ? "shelf--one" : books.length >= 3 ? "shelf--many" : "";
+  const compact = books.length >= 3;
   return (
-    <div className="res-page">
-      <div className="art" aria-hidden="true">
+    <>
+      <SiteNav current="resources" />
+      <div className="res-glow" aria-hidden="true">
         <picture>
-          <source srcSet="/art/crystal-cluster.avif" type="image/avif" />
-          <img src="/art/crystal-cluster.webp" alt="" width={900} height={900} />
+          <source type="image/avif" srcSet="/img/hero-campfire-1200.avif" />
+          <img src="/img/hero-campfire-1200.webp" alt="" width={1200} height={672} />
         </picture>
       </div>
-      <header className="res-head">
-        <Link className="back" href="/">
-          <svg className="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>High Sodium Gaming
-        </Link>
-        <h1>Daggerheart Resources</h1>
-      </header>
-      <main id="main">
-        <div className="books">
-          {books.map((b, i) => (
-            <Link key={b.slug} className={`book ${i === 0 ? "main" : "side"}`} href={`/resources/${b.slug}`} aria-label={`Open ${b.title}, ${b.pages} pages`}>
-              <picture>
-                <source srcSet={`/covers/${b.cover}.avif`} type="image/avif" />
-                <img className="cover" src={`/covers/${b.cover}.webp`} alt="" width={760} height={984} />
-              </picture>
-              <div style={{ display: "grid", gap: "var(--s3)" }}>
+      <main id="main" className="res-main">
+        <header className="res-head">
+          <span className="tag">{books.length} {books.length === 1 ? "book" : "books"}</span>
+          <h1 className="display"><span className="dim">Daggerheart</span>{" "}<span className="bright">Resources</span></h1>
+        </header>
+        <ul className={`shelf ${layout}`.trim()} aria-label="Books">
+          {books.map((b) => (
+            <li key={b.slug} className="book">
+              <Link
+                className="cover"
+                href={`/resources/${b.slug}`}
+                {...(compact ? { "aria-label": `Open ${b.title}, ${b.pages} pages` } : { "aria-hidden": true, tabIndex: -1 })}
+              >
+                <picture>
+                  <source type="image/avif" srcSet={`/covers/${b.cover}.avif`} />
+                  <img src={`/covers/${b.cover}.webp`} alt="" width={760} height={984} />
+                </picture>
+              </Link>
+              <div className="book-body">
                 <h2>{b.title}</h2>
-                <p className="sub">{b.subtitle}</p>
-                <p className="meta">{bookMeta(b)}</p>
-                <span className="pill small">Open</span>
+                {!compact && <p>{b.subtitle}</p>}
+                <span className="meta">{bookMeta(b)}</span>
               </div>
-            </Link>
+              {!compact && <Cta small href={`/resources/${b.slug}`} label={`Open ${b.title}, ${b.pages} pages`}>Open</Cta>}
+            </li>
           ))}
-        </div>
+        </ul>
       </main>
-    </div>
+    </>
   );
 }
