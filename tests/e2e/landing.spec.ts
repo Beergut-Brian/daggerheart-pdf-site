@@ -13,6 +13,17 @@ test.describe("landing /", () => {
     await expect(page).toHaveURL(/\/resources$/);
   });
 
+  test("nav shows the salt shaker logo left of the wordmark", async ({ page }) => {
+    await page.goto("/");
+    const logo = page.locator(".site-nav img.mark");
+    await expect(logo).toHaveAttribute("alt", "High Sodium Gaming");
+    expect(await logo.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+    const [a, b] = await Promise.all([logo.boundingBox(), page.locator(".site-nav .wordmark").boundingBox()]);
+    expect(a!.x).toBeLessThanOrEqual(b!.x + 1);
+    expect(a!.height).toBeGreaterThanOrEqual(24);
+    expect(a!.height).toBeLessThanOrEqual(28);
+  });
+
   test("has no footer, no unofficial text and no salt", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("footer")).toHaveCount(0);

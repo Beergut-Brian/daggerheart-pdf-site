@@ -329,7 +329,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
     return (
       <div className="vdesk viewer">
         <header className="vbar">
-          <Link className="hsg" href="/" aria-label="High Sodium Gaming home">HSG</Link>
+          <Link className="hsg" href="/" aria-label="High Sodium Gaming home"><img src="/brand/shaker.png" alt="High Sodium Gaming" width={26} height={24} /></Link>
           <Link className="vback" href="/resources"><Icon id="back" />Daggerheart Resources</Link>
           <span className="sep" aria-hidden="true" />
           <span className="vtitle">{book.title}</span>
@@ -372,7 +372,7 @@ export default function Reader({ book, staticOutline }: { book: Book; staticOutl
   // phone
   return (
     <div className="vphone viewer">
-      <div className="vbar pbar"><Link className="ib" href="/resources" aria-label="Daggerheart Resources"><Icon id="back" /></Link><span className="vtitle">{book.title}</span><Link className="hsg" href="/" aria-label="High Sodium Gaming home">HSG</Link></div>
+      <div className="vbar pbar"><Link className="ib" href="/resources" aria-label="Daggerheart Resources"><Icon id="back" /></Link><span className="vtitle">{book.title}</span><Link className="hsg" href="/" aria-label="High Sodium Gaming home"><img src="/brand/shaker.png" alt="High Sodium Gaming" width={26} height={24} /></Link></div>
       <main className="stage pstage" id="main" ref={stage} onPointerDown={onTouchStart} onPointerUp={onTouchEnd}>
         {pageError && <p className="perr" role="alert">{pageError}</p>}
         {pageView}{matchNav}
