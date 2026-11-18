@@ -10,7 +10,7 @@
      --color-page-ink   #1d1b18 on --color-page #f3efe6     15.0:1 AAA (13.7:1 on --color-page-box)
      --color-page-ink-soft #4a453d on --color-page           8.3:1 AAA
      --color-ember-text #f0a35e on --color-surface #151515   8.8:1 AAA (8.2:1 on surface-2)
-     --color-cta-ink    #111111 on --color-cta-square #f4f4f2 17.2:1 AAA
+     --color-cta-ink    #111111 on --color-cta-square #f4f4f2 17.2:1 AAA (also the CTA label on its hover/focus fill)
    Hero copy sits on --scrim-strong/--scrim-solid over the photo, so its pairs resolve to near --color-bg. */
 
 @font-face { font-family: "Inter Tight"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/inter-tight-latin-400-normal.woff2") format("woff2"); }
@@ -115,6 +115,7 @@
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --dur-fast: 140ms;
   --dur-med: 260ms;
+  --dur-fill: 300ms;  /* CTA hover/focus fill slide */
 
   /* breakpoints (reference only; CSS media queries cannot read vars): sm 390, md 700, lg 1024, xl 1440 */
 }

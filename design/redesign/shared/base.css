@@ -91,24 +91,40 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* ---------- Outlined CTA with icon in a white square ---------- */
 .cta {
+  --cta-icon-size: var(--cta-square);
+  position: relative; isolation: isolate;
   display: inline-flex; align-items: center; gap: var(--space-5);
   height: var(--cta-height); padding: var(--space-1) var(--space-8) var(--space-1) var(--space-1);
   border: 1px solid var(--color-cta-border); border-radius: var(--radius-md);
   background: var(--color-surface-2); color: var(--color-text);
   font-size: var(--text-lead); font-weight: var(--weight-medium); letter-spacing: -0.005em;
-  transition: background var(--dur-fast), border-color var(--dur-fast);
+  transition: color var(--dur-fill) var(--ease-out), border-color var(--dur-fill) var(--ease-out), background-color 0s;
 }
-.cta:hover { background: var(--color-surface-3); }
+/* Fill layer: starts as the icon square, grows right to cover the whole button on hover/focus. */
+.cta::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--color-cta-square);
+  clip-path: inset(calc((100% - var(--cta-icon-size)) / 2) calc(100% - var(--space-1) - var(--cta-icon-size)) calc((100% - var(--cta-icon-size)) / 2) var(--space-1) round var(--radius-sm));
+  transition: clip-path var(--dur-fill) var(--ease-out);
+}
+/* Background snaps light only after the slide ends (and back at once on leave), so the label never sits on dark. */
+a.cta:hover, a.cta:focus-visible, button.cta:hover, button.cta:focus-visible {
+  color: var(--color-cta-ink); border-color: var(--color-cta-square); background-color: var(--color-cta-square);
+  transition: color var(--dur-fill) var(--ease-out), border-color var(--dur-fill) var(--ease-out), background-color 0s var(--dur-fill);
+}
+a.cta:hover::before, a.cta:focus-visible::before, button.cta:hover::before, button.cta:focus-visible::before { clip-path: inset(0 0 0 0 round var(--radius-md)); }
+.cta:focus-visible { outline: 2px solid var(--color-ember); outline-offset: 3px; }
 .cta .cta-icon {
-  width: var(--cta-square); height: var(--cta-square); flex: none;
+  width: var(--cta-icon-size); height: var(--cta-icon-size); flex: none;
   border-radius: var(--radius-sm); background: var(--color-cta-square); color: var(--color-cta-ink);
-  display: grid; place-items: center; transition: transform var(--dur-med) var(--ease-out);
+  display: grid; place-items: center;
 }
-.cta:hover .cta-icon { transform: translateX(2px); }
 .cta .cta-icon svg { width: 1.375rem; height: 1.375rem; }
-.cta--sm { height: 3rem; gap: var(--space-4); padding-right: var(--space-5); font-size: var(--text-body); }
-.cta--sm .cta-icon { width: 2.5rem; height: 2.5rem; }
+.cta--sm { --cta-icon-size: var(--control); height: 3rem; gap: var(--space-4); padding-right: var(--space-5); font-size: var(--text-body); }
 .cta--sm .cta-icon svg { width: 1.125rem; height: 1.125rem; }
+@media (prefers-reduced-motion: reduce) {
+  .cta, .cta::before, a.cta:hover, a.cta:focus-visible, button.cta:hover, button.cta:focus-visible { transition: none; }
+}
 
 /* ---------- Meta (mono small caps) ---------- */
 .meta { font-family: var(--font-mono); font-size: var(--text-tag); letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-dim); }

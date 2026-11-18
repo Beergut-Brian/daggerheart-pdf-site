@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Inspiration vs home-d</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  /* both panels 1280x720 at 1:1 CSS px: the JungleSilicon frame and a crop of renders/home-d-1440.png around the fire */
+  body { margin: 0; background: var(--color-bg); display: flex; gap: var(--space-5); font-family: var(--font-mono); }
+  figure { margin: 0; position: relative; width: 1280px; height: 720px; overflow: hidden; }
+  figure img { display: block; image-rendering: pixelated; }
+  .crop img { position: absolute; left: -160px; top: -90px; }
+  figcaption { position: absolute; left: var(--space-3); bottom: var(--space-3); padding: var(--space-1) var(--space-3); background: var(--scrim-strong); color: var(--color-text-soft); font-size: var(--text-small); letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-sm); }
+</style></head>
+<body>
+  <figure><img src="../../references/redesign-2026-11-17/03-frame-10s.png" alt="JungleSilicon pixel splat frame" width="1280" height="720"><figcaption>Inspiration · JungleSilicon frame 1280×720</figcaption></figure>
+  <figure class="crop"><img src="../renders/home-d-1440.png" alt="home-d at 1440" width="1440" height="900"><figcaption>home-d · 1440 render, 1280×720 crop, same scale</figcaption></figure>
+</body></html>
