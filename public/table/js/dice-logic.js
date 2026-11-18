@@ -187,9 +187,10 @@ export function formatResult(r, { attack = false } = {}) {
     const text = r.outcome === 'critical' ? 'Critical success' : `${r.total} with ${r.outcome === 'hope' ? 'Hope' : 'Fear'}`;
     let detail = `Hope ${r.hope} · Fear ${r.fear}${r.mod ? ' ' + signed(r.mod) : ''}`;
     if (r.outcome === 'critical') detail += ` = ${r.total}`;
-    let hit = null;
-    if (attack) { hit = isHit(r); detail = (hit ? (r.outcome === 'critical' ? 'Critical hit' : 'Hit') : 'Miss') + ` (${HIT_TARGET}+) · ` + detail; }
-    return { text: attack ? text + (hit ? ': hit!' : ': miss') : text, detail, tone: r.outcome, hit };
+    if (!attack) return { text, detail, tone: r.outcome, hit: null };
+    const hit = isHit(r);
+    if (r.outcome === 'critical') return { text: 'Critical hit!', detail: 'Critical success · ' + detail, tone: r.outcome, hit };
+    return { text: text + (hit ? ': hit!' : ': miss'), detail: (hit ? 'Hit' : 'Miss') + ` (${HIT_TARGET}+) · ` + detail, tone: r.outcome, hit };
   }
   const parts = r.dice.map((d, i) => (d.sign < 0 ? '- ' : i ? '+ ' : '') + d.value).join(' ');
   return { text: `${r.total} on ${r.text}`, detail: parts + (r.mod ? ' ' + signed(r.mod) : ''), tone: 'plain', hit: null };

@@ -123,6 +123,6 @@ describe("rollNotation and formatResult", () => {
     expect(formatResult(dualityFrom(6, 6, 0))).toMatchObject({ text: "Critical success", tone: "critical" });
     expect(formatResult(dualityFrom(9, 4, 2), { attack: true })).toMatchObject({ text: "15 with Hope: hit!", hit: true });
     expect(formatResult(dualityFrom(3, 4, 0), { attack: true })).toMatchObject({ text: "7 with Fear: miss", hit: false });
-    expect(formatResult(dualityFrom(2, 2, 0), { attack: true }).detail).toMatch(/^Critical hit/);
+    expect(formatResult(dualityFrom(2, 2, 0), { attack: true })).toMatchObject({ text: "Critical hit!", hit: true, tone: "critical" });
   });
 });

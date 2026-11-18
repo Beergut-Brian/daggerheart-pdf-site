@@ -21,14 +21,13 @@ export function createPlay({ bar, canAct, dice = null, attack = null }) {
     if (c.kind === 'duality' || c.kind === 'attack') {
       const r = duality(c.mod), atk = c.kind === 'attack', line = formatResult(r, { attack: atk });
       const done = () => bar.add(line);
-      const thrown = dice ? dice.throwDice([{ type: 'd12', value: r.hope, style: 'hope' }, { type: 'd12', value: r.fear, style: 'fear' }]) : 0;
-      if (atk && attack) setTimeout(() => attack.play({ hit: isHit(r), critical: r.outcome === 'critical', onImpact: done }), thrown);
-      else setTimeout(done, thrown);
+      const after = atk && attack ? () => attack.play({ hit: isHit(r), critical: r.outcome === 'critical', onImpact: done }) : done;
+      if (dice) dice.throwDice([{ type: 'd12', value: r.hope, style: 'hope' }, { type: 'd12', value: r.fear, style: 'fear' }], after); else after();
       return { ...c, result: r, line };
     }
     const r = rollNotation(c.notation, rng), line = formatResult(r);
-    const thrown = dice ? dice.throwDice(r.dice.map((d) => ({ type: 'd' + d.sides, value: d.value, style: 'bone' }))) : 0;
-    setTimeout(() => bar.add(line), thrown);
+    const done = () => bar.add(line);
+    if (dice) dice.throwDice(r.dice.map((d) => ({ type: 'd' + d.sides, value: d.value, style: 'bone' })), done); else done();
     return { ...c, result: r, line };
   }
 

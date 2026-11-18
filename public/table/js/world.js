@@ -1,9 +1,10 @@
 // The table and everything on it.
 import * as THREE from '../vendor/three.bundle.js';
 import * as TX from './textures.js';
-import { Builder, makeMaterials, buildMinis, buildTerrain, makeDie } from './models.js';
+import { Builder, makeMaterials, buildTerrain, makeDie } from './models.js';
 import { makeCanvas, rng } from './textures.js';
 import { paintSpine, paintWing } from './surfaces.js';
+import { MINIS } from './minis.js';
 
 const { RoundedBoxGeometry, RoomEnvironment } = THREE;
 const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
@@ -258,7 +259,16 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   mat.position.set(MAT.x, 0.015, MAT.z); mat.receiveShadow = true; mat.castShadow = true; scene.add(mat);
 
   const land = new THREE.Group(); scene.add(land);
-  land.add(buildTerrain(mats), buildMinis(mats));
+  land.add(buildTerrain(mats));
+  // each mini is its own object (js/minis.js), so it can move
+  const miniCtx = { builder: new Builder(21), mats };
+  const minis = MINIS.map((def) => {
+    const obj = def.loader(miniCtx);
+    const pivot = new THREE.Group();
+    pivot.position.set(def.position[0], 0.03, def.position[1]); pivot.rotation.set(0, def.rotation, 0, 'YXZ'); pivot.scale.setScalar(def.scale ?? 1);
+    pivot.add(obj); land.add(pivot);
+    return { def, obj, pivot, home: pivot.position.clone(), yaw: def.rotation };
+  });
 
   // ---- GM screen
   const screen = new THREE.Group(); screen.position.set(0.3, 0, -5.15); scene.add(screen);
@@ -417,14 +427,14 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   // ---- per-frame
   const tmp = new THREE.Vector3();
   const world = {
-    scene, books, candles, lamp, MAT, atlas, intro: 0, lampPower: 330, moving: true, frame: 0, candleShadows: true,
+    scene, books, candles, lamp, MAT, atlas, minis, mats, intro: 0, lampPower: 330, moving: true, stirring: false, frame: 0, candleShadows: true,
     focus: new THREE.Vector3(-0.2, 0.25, 2.2),
     update(time, dt, camera, pxScale) {
       const k = world.intro;                               // 0..1, lights coming up
       const n = world.frame++;
       // shadow maps are the expensive part: redraw the lamp's only while something moves,
       // and take turns on the candles (their flicker hides the lower rate)
-      if (world.moving || n < 4) lamp.shadow.needsUpdate = true;
+      if (world.moving || world.stirring || n < 4) lamp.shadow.needsUpdate = true;   // stirring: dice or a mini moving; candles keep their slow turns
       lamp.intensity = world.lampPower * ease(k * 1.2);
       dust.material.uniforms.uTime.value = time; dust.material.uniforms.uPx.value = pxScale; dust.material.uniforms.uAmt.value = ease(k);
       let waxGlow = 0;

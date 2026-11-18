@@ -30,6 +30,39 @@ and ends the opening with an "Open …" button that opens the live site in a new
   miniatures, terrain, dice and procedural textures.
 - `js/main.js`: camera, pointer, the opening sequence, bloom / depth of field.
 
+## Dice commands
+
+The bar at the bottom takes chat-style commands (press `/` anywhere to jump to it):
+
+- `/roll duality`, `/r`, `/r dual`, `/roll 2d12`, `/roll 2d12+3`: the Duality Dice, one Hope d12
+  (gold) and one Fear d12 (violet). The higher die names the roll; doubles are a critical success.
+- `/roll d20`, `/roll 3d6+2`, `/roll 1d8+1d6`: any d4, d6, d8, d10, d12 or d20 with modifiers
+  (at most 10 of one kind and 20 dice in all). Plain `d20` without the slash rolls too.
+- `/attack +2` or `/roll 2d12+2 attack`: a Duality roll; then one of the party attacks the golem.
+  A total of 12 or more hits (`HIT_TARGET` in `js/dice-logic.js`); a critical always hits.
+- `/help` lists them. Up and Down walk back through what you typed; Escape leaves the bar.
+
+The d10 is numbered 1 to 10 (not 0 to 9), so its face is what you add. The d4 is read at its top point.
+
+Files: `js/dice-logic.js` (the rules: parser, rolls, log lines; no three.js or DOM, unit-tested
+in `tests/unit/dice.test.ts`), `js/command.js` (bar and roll log), `js/play.js` (what a command
+does), `js/dice3d.js` (thrown dice), `js/attack.js` (the attack), `js/minis.js` (the minis).
+
+## Putting your own minis on the table
+
+Every mini is one entry in `MINIS` in `js/minis.js`: where it stands, which way it faces, its
+scale and base, `role: 'hero'` or `'monster'`, and for heroes `attack: 'melee' | 'ranged' | 'magic'`
+(ranged and magic heroes throw a glowing bolt in their `bolt` colour). The monster with
+`target: true` is the one the party attacks; heroes take turns.
+
+`loader` returns the figure as a three.js object, built at the origin, facing +z, standing on
+y = 0. To use a scanned or sculpted mini, export it as `.glb` into `models/`, then load it before
+the table is built and return it from `loader`, for example
+`loader: (ctx) => ctx.gltf['models/paladin.glb'].scene.clone()`. `vendor/three.bundle.js` does
+not include `GLTFLoader` today, so that bundle needs rebuilding with
+`three/examples/jsm/loaders/GLTFLoader.js` added to its exports first (not done in this change).
+Keep a model light (a few thousand triangles, one or two materials) so phones keep up.
+
 ## HTML-in-Canvas
 
 Where the browser has HTML-in-Canvas (desktop Chrome and Edge, the Claude
@@ -50,4 +83,9 @@ Add after `#`, joined with `&`:
 - `open=core` or `open=hf` open a book on load; `p=0.6` freezes the opening there
 - `dof=off`, `post=off` switch off depth of field / all post-processing
 
-From the console: `__table.open('core')`, `__table.close()`.
+- `seed=42` makes every roll repeatable
+
+From the console: `__table.open('core')`, `__table.close()`, `__table.roll('/attack +2')`,
+`__table.forceRoll(6, 6)` (the next Duality roll shows Hope 6, Fear 6), `__table.nextAttacker('ranger')`,
+`__table.dice()` (each thrown die's rolled value and the number actually facing up),
+`__table.timeScale(0)` and `__table.step(50)` (freeze, then step, dice and attacks in ms; for stills).

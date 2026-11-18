@@ -262,22 +262,20 @@ function golem(b) {
   for (const sx of [-1, 1]) b.part(sph(0.022, 6, 5), { p: [sx * 0.05, 0.85, 0.15], c: 0x9fe8ff, m: 'glow' });
 }
 
-export function buildMinis(mats) {
-  const b = new Builder(21);
-  const put = (x, z, rot, baseR, top, fn) => b.at({ p: [x, 0.03, z], r: [0, rot, 0] }, () => { miniBase(b, baseR, top); b.at({ p: [0, 0.012, 0] }, () => fn(b)); });
-  const grass = 0x4c6a2e, flag = 0x6a6c74;
-  // the party, on the road
-  put(0.55, -1.35, 0.9, 0.165, grass, HEROES.guardian);
-  put(-0.15, -0.95, 0.7, 0.165, grass, HEROES.wizard);
-  put(-0.75, -1.5, 0.5, 0.165, grass, HEROES.ranger);
-  put(0.95, -0.75, 1.2, 0.165, grass, HEROES.rogue);
-  put(0.1, -1.9, 0.75, 0.165, grass, HEROES.seraph);
-  // the dead in the ruin
-  put(-1.55, -2.45, 2.1, 0.165, flag, (b) => skeleton(b, 0));
-  put(-2.35, -2.05, 1.7, 0.165, flag, (b) => skeleton(b, 1));
-  put(-1.05, -3.15, 2.4, 0.165, flag, (b) => skeleton(b, 1));
-  // the big one
-  put(2.55, -2.35, -1.1, 0.42, 0x3f5f66, golem);
+// The figures, for js/minis.js. Each builds at the origin, facing +z, on its base.
+export const FIGURES = {
+  ...HEROES,
+  skeleton: (b) => skeleton(b, 0),
+  skeletonRaised: (b) => skeleton(b, 1),
+  golem,
+};
+
+// One mini as its own object: base + figure merged per material, so each mini
+// is still only a few draw calls. Pass the same Builder for every mini to keep
+// the random details (pebbles, rock jitter) identical from build to build.
+export function buildMini(b, mats, figure, baseR, top) {
+  b.b = {};
+  b.at({ p: [0, 0, 0] }, () => { miniBase(b, baseR, top); b.at({ p: [0, 0.012, 0] }, () => figure(b)); });
   return b.build(mats);
 }
 

@@ -7,7 +7,7 @@ import { LOG_SIZE } from './surfaces.js';
 
 const SHOW_MS = 8000, FADE_MS = 700, KEEP = 6, HISTORY = 30;
 
-export function createCommandBar({ surfaces, log, canvas, onCommand }) {
+export function createCommandBar({ surfaces, log, canvas, onCommand, renderer = null }) {
   const form = document.querySelector('#cmd'), input = document.querySelector('#cmd-in'), live = document.querySelector('#log-live');
   const root = document.documentElement;
   const entries = [];                 // { text, detail, tone, t }
@@ -72,7 +72,9 @@ export function createCommandBar({ surfaces, log, canvas, onCommand }) {
   const cam = new THREE.OrthographicCamera(0, 1, 0, -1, -1, 1);
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).translate(0.5, 0.5, 0),
     new THREE.MeshBasicMaterial({ map: surfaces.get('log').texture, transparent: true, depthTest: false, depthWrite: false, toneMapped: false }));
-  quad.visible = false; quad.frustumCulled = false; scene.add(quad);
+  quad.frustumCulled = false; scene.add(quad);
+  if (renderer) renderer.compile(scene, cam);     // no shader stall on the first log line
+  quad.visible = false;
 
   function update(now) {
     const focused = document.activeElement === input;

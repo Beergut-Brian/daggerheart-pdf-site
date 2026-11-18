@@ -36,9 +36,9 @@ function hop(t, h0) {
   return 0;
 }
 
-export function createDice({ scene, atlas, calm }) {
+export function createDice({ scene, atlas, calm, clock = () => performance.now() }) {
   const group = new THREE.Group(); scene.add(group);
-  let live = [], state = 'idle', t0 = 0, clearAt = 0, pending = null, seed = 1, spareFrames = 0;
+  let live = [], state = 'idle', t0 = 0, clearAt = 0, pending = null, seed = 1, spareFrames = 0, onRest = null;
   const r = seededRng(9001);
 
   function place(list) {
@@ -107,21 +107,22 @@ export function createDice({ scene, atlas, calm }) {
     live = [];
   }
 
-  // list: [{ type: 'd12', value: 7, style: 'hope' | 'fear' | 'bone' }]; returns ms until the dice are still
-  function throwDice(list) {
-    const swap = live.length && state !== 'idle';
-    if (swap) { state = 'swap'; t0 = performance.now(); pending = list; return SWAP_MS + (calm ? 0 : THROW_MS); }
+  // list: [{ type: 'd12', value: 7, style: 'hope' | 'fear' | 'bone' }]; done() runs once the dice are still
+  function throwDice(list, done) {
+    if (onRest) { const f = onRest; onRest = null; f(); }     // a roll still in the air reports now
+    onRest = done || null;
+    if (live.length && state !== 'idle') { state = 'swap'; t0 = clock(); pending = list; return; }
     start(list);
-    return calm ? 0 : THROW_MS + 60;
   }
   function start(list) {
     disposeAll();
     spawn(list);
-    state = calm ? 'rest' : 'throw'; t0 = performance.now(); clearAt = t0 + (calm ? 0 : THROW_MS) + HOLD_MS;
-    if (calm) live.forEach((L) => pose(L, 1));
+    state = calm ? 'rest' : 'throw'; t0 = clock(); clearAt = t0 + (calm ? 0 : THROW_MS) + HOLD_MS;
+    if (calm) { live.forEach((L) => pose(L, 1)); rested(); }
   }
+  function rested() { if (onRest) { const f = onRest; onRest = null; f(); } }
 
-  function update(now) {
+  function update(now = clock()) {
     if (state === 'idle') { if (spareFrames > 0) spareFrames--; return; }
     if (state === 'swap') {
       const u = Math.min(1, (now - t0) / SWAP_MS);
@@ -132,7 +133,7 @@ export function createDice({ scene, atlas, calm }) {
     if (state === 'throw') {
       let all = true;
       for (const L of live) { const t = Math.max(0, (now - t0 - L.delay) / THROW_MS); pose(L, Math.min(1, t)); if (t < 1) all = false; }
-      if (all) state = 'rest';
+      if (all) { state = 'rest'; rested(); }
       return;
     }
     if (state === 'rest' && now >= clearAt) { state = 'clear'; t0 = now; }
