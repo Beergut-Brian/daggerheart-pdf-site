@@ -361,13 +361,14 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
     c.castShadow = c.receiveShadow = true; scene.add(c);
   }
 
-  // the note, a little curled
+  // the note (the character's attack card), a little curled
+  let note;
   {
     const g = new THREE.PlaneGeometry(2.05, 2.05 * (400 / 560), 12, 8).rotateX(-Math.PI / 2);
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); p.setY(i, 0.012 + Math.pow(Math.abs(x) / 1.02, 3) * 0.07 + Math.pow(Math.max(0, z) / 0.73, 3) * 0.035); }
     g.computeVertexNormals();
-    const note = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: surfaces.get('note').texture, roughness: 0.88, side: THREE.DoubleSide }));
+    note = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: surfaces.get('note').texture, roughness: 0.88, side: THREE.DoubleSide }));
     note.position.set(-5.55, 0, 3.55); note.rotation.y = 0.2; note.castShadow = true; note.receiveShadow = true; scene.add(note);
   }
 
@@ -427,7 +428,7 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   // ---- per-frame
   const tmp = new THREE.Vector3();
   const world = {
-    scene, books, candles, lamp, MAT, atlas, minis, mats, intro: 0, lampPower: 330, moving: true, stirring: false, frame: 0, candleShadows: true,
+    scene, books, candles, lamp, MAT, atlas, minis, mats, note, intro: 0, lampPower: 330, moving: true, stirring: false, frame: 0, candleShadows: true,
     focus: new THREE.Vector3(-0.2, 0.25, 2.2),
     update(time, dt, camera, pxScale) {
       const k = world.intro;                               // 0..1, lights coming up

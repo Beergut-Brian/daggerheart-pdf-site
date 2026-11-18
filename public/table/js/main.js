@@ -1,7 +1,8 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
-import { BOOKS, hrefFor, HOME_HREF, ON_SITE, pickTier } from './config.js';
-import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages } from './surfaces.js';
+import { BOOKS, CHARACTERS, hrefFor, HOME_HREF, ON_SITE, pickTier } from './config.js';
+import { createCard } from './card.js';
+import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
 import { createCommandBar } from './command.js';
 import { createPlay } from './play.js';
@@ -49,7 +50,8 @@ async function boot() {
   const images = await loadCoverImages(BOOKS);
 
   const surfaces = new Surfaces(renderer);
-  defineSurfaces(surfaces, BOOKS, images);
+  const character = CHARACTERS[0] || null, cardState = { hot: -1 };
+  defineSurfaces(surfaces, BOOKS, images, { character, cardState });
   const log = { rows: [] };
   defineLogSurface(surfaces, log);
   const mode = await surfaces.ready();
@@ -186,6 +188,7 @@ async function boot() {
     if (state.phase !== 'table') return;
     const book = bookById(id);
     setHot(null);
+    if (card) { card.leave(); card.closeSheet(false); canvas.classList.remove('is-card'); }
     state.open = book; state.phase = 'opening'; state.t0 = performance.now();
     document.body.classList.add('is-open', 'has-touched');
     surfaces.get('right-' + id).el.classList.add('is-open');
@@ -235,6 +238,8 @@ async function boot() {
     el.addEventListener('click', (e) => { e.preventDefault(); openBook(b.id); });
   }
 
+  let card = null;     // the attack card (set up with the dice, below)
+
   // ---------------------------------------------------------------- pointer
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const hits = books.map((b) => b.hit);
@@ -244,6 +249,15 @@ async function boot() {
     ray.setFromCamera(ndc, camera);
     const h = ray.intersectObjects(list, false)[0];
     return h ? h.object.userData.book : null;
+  }
+  // the attack card: where on the note the pointer is (uv), or null
+  function noteUv(ev) {
+    if (!card || !world.note) return null;
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const h = ray.intersectObject(world.note, false)[0];
+    return h ? h.uv : null;
   }
   const onOpenBook = (ev) => state.phase === 'open' && !!pick(ev, [state.open.hitOpen]);
   const pointers = new Map();
@@ -271,7 +285,9 @@ async function boot() {
       }
       drag.x = e.clientX; drag.y = e.clientY;
     } else if (e.pointerType === 'mouse' && state.phase === 'table') {
-      setHot(pick(e), 'mouse');
+      const id = pick(e);
+      setHot(id, 'mouse');
+      if (card) canvas.classList.toggle('is-card', card.hover(id ? null : noteUv(e)));
     } else if (e.pointerType === 'mouse' && state.phase === 'open') {
       canvas.classList.toggle('is-hot', onOpenBook(e));
     }
@@ -280,14 +296,14 @@ async function boot() {
     pointers.delete(e.pointerId); if (pointers.size < 2) pinch = 0;
     if (drag && drag.id === e.pointerId) {
       const wasClick = !drag.moved; drag = null; canvas.classList.remove('is-drag');
-      if (wasClick && e.type === 'pointerup' && state.phase === 'table') { const id = pick(e); if (id) openBook(id); }
+      if (wasClick && e.type === 'pointerup' && state.phase === 'table') { const id = pick(e); if (id) openBook(id); else if (card) card.click(noteUv(e), e.pointerType); }
       // with a book open: the pages are the way in, anywhere else puts it back down
       else if (wasClick && e.type === 'pointerup' && state.phase === 'open') { if (onOpenBook(e)) enter.querySelector('a').click(); else closeBook(); }
     }
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
-  canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && state.hotBy === 'mouse') setHot(null); });
+  canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && state.hotBy === 'mouse') setHot(null); if (card) { card.leave(); canvas.classList.remove('is-card'); } });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     if (state.phase === 'table') rig.user.zoom = clamp(rig.user.zoom * Math.exp(e.deltaY * 0.0011), 0.5, 1.2);
@@ -301,7 +317,9 @@ async function boot() {
   const gameClock = () => game.t;
   const dice = createDice({ scene, atlas: world.atlas, calm, clock: gameClock, view: () => camera.position });
   const attack = createAttack({ scene, minis: world.minis, calm, lite, clock: gameClock });
-  play = createPlay({ bar, dice, attack, canAct: () => state.phase === 'table' });
+  play = createPlay({ bar, dice, attack, character, canAct: () => state.phase === 'table' });
+  const touchy = lite || matchMedia('(pointer: coarse)').matches;
+  card = character ? createCard({ surfaces, character, state: cardState, touchy, onRoll: (id) => play.rollById(id) }) : null;
 
   // ---------------------------------------------------------------- frame
   const instant = !!hashFlag(/[#&]shot/) || calm;
@@ -400,6 +418,13 @@ async function boot() {
         mvp.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse).multiply(b.lift.matrixWorld).multiply(pixM).premultiply(viewM);
         surfaces.place('cover-' + b.id, mvp);
       }
+      if (card) {
+        // the card's element pixels -> the note's top face (the plane is 2.05 wide, y up, top edge at -z)
+        const nw = 2.05, nd = 2.05 * (NOTE[1] / NOTE[0]);
+        pixM.set(nw / NOTE[0], 0, 0, -nw / 2, 0, 0, 1, 0.02, 0, nd / NOTE[1], 0, -nd / 2, 0, 0, 0, 1);
+        mvp.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse).multiply(world.note.matrixWorld).multiply(pixM).premultiply(viewM);
+        surfaces.place('note', mvp);
+      }
     }
 
     // focus: on the books, or on whichever one has your attention
@@ -430,7 +455,14 @@ async function boot() {
   // handles for testing from the console:  __table.open('core')
   window.__table = { world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
-    timeScale: (k) => { game.scale = k; }, step: (ms) => { game.t += ms; }, game, forceRoll: (hope, fear) => play.forceRoll(hope, fear), log };
+    timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
+    // proofs: where row i (or its dice icon) of the card is on screen, in client pixels
+    cardPoint: (i, part = 'icon') => {
+      const r = cardRows(character.attacks.length)[i], q = part === 'icon' ? cardIcon(r) : r;
+      const nw = 2.05, nd = 2.05 * (NOTE[1] / NOTE[0]), cr = canvas.getBoundingClientRect();
+      const p = new THREE.Vector3(((q.x + q.w / 2) / NOTE[0] - 0.5) * nw, 0.02, ((q.y + q.h / 2) / NOTE[1] - 0.5) * nd).applyMatrix4(world.note.matrixWorld).project(camera);
+      return { x: cr.left + (p.x * 0.5 + 0.5) * cr.width, y: cr.top + (-p.y * 0.5 + 0.5) * cr.height };
+    }, step: (ms) => { game.t += ms; }, game, forceRoll: (hope, fear) => play.forceRoll(hope, fear), log };
   const auto = hashFlag(/[#&]open=(\w+)/);
   if (auto) setTimeout(() => openBook(auto[1]), instant ? 300 : 3600);
   const cam = hashFlag(/[#&]cam=([-\d.,]+)/);

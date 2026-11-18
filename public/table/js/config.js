@@ -63,3 +63,24 @@ export function pickTier() {
   const small = Math.min(screen.width, screen.height) < 820;
   return coarse && small ? 'lite' : 'full';
 }
+
+// The party's attack cards. The note card to the left of the books shows the
+// first character; its rows roll an attack on the monster (see README).
+//   id, name, class   shown on the card
+//   mini              which miniature attacks (an id from MINIS in minis.js)
+//   proficiency       how many damage dice a weapon rolls (d8+2 at Proficiency 2 = 2d8+2)
+//   attacks           { id, name, range: 'Melee' | 'Very Close' | 'Close' | 'Far', trait, mod,
+//                       damage: 'd8+2', type: 'phy' | 'mag',
+//                       style?: 'melee' | 'ranged' | 'magic' (overrides the mini's own attack), bolt?: colour }
+// STAND-INS: every name and number below is a placeholder until Kaden's party arrives.
+export const CHARACTERS = [
+  {
+    id: 'guardian', name: 'Brannoc Vale', class: 'Guardian', mini: 'guardian', proficiency: 1,
+    attacks: [
+      { id: 'longsword', name: 'Longsword', range: 'Melee', trait: 'Agility', mod: 2, damage: 'd8+2', type: 'phy' },
+      { id: 'shield-bash', name: 'Shield Bash', range: 'Melee', trait: 'Strength', mod: 1, damage: 'd4+1', type: 'phy' },
+      { id: 'javelin', name: 'Javelin', range: 'Far', trait: 'Finesse', mod: 1, damage: 'd6+1', type: 'phy', style: 'ranged', bolt: 0xffc46a },
+      { id: 'ember-ward', name: 'Ember Ward', range: 'Close', trait: 'Presence', mod: 0, damage: 'd6+1', type: 'mag', style: 'magic', bolt: 0xff8a4a },
+    ],
+  },
+];

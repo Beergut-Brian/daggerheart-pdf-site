@@ -48,6 +48,22 @@
   --serif: Cinzel, "Trajan Pro", Georgia, serif;
   --sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --hand: Caveat, "Segoe Script", "Bradley Hand", cursive;
+  /* the note card's paper and ink (painted twin: PAPER in js/surfaces.js) */
+  --paper-hi: #f1e6c4;
+  --paper-lo: #dccb9c;
+  --paper-ink: #2a2140;
+  --paper-dim: rgba(42, 33, 64, .62);
+  --paper-red: #7a3a2a;
+  --paper-hot: rgba(122, 58, 42, .13);
+  --paper-hot-line: rgba(122, 58, 42, .5);
+  --paper-rule: rgba(42, 33, 64, .28);
+  /* the phone attack sheet */
+  --sheet-w: 560px;
+  --sheet-pad: 18px;
+  --sheet-radius: 18px;
+  --sheet-row-h: 64px;
+  --chip-h: 34px;
+  --tap: 44px;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--night); color: var(--ink); font: 15px/1.45 var(--sans); overflow: hidden; }
@@ -56,7 +72,7 @@ a { color: inherit; }
 /* ------------------------------------------------------------ the stage */
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; cursor: grab; -webkit-tap-highlight-color: transparent; }
 #gl.is-drag { cursor: grabbing; }
-#gl.is-hot { cursor: pointer; }
+#gl.is-hot, #gl.is-card { cursor: pointer; }
 body.is-open #gl { cursor: default; }
 body.is-open #gl.is-hot { cursor: pointer; }
 
@@ -194,9 +210,62 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 .gm .gm-tag { position: absolute; left: 0; right: 0; top: 79.5%; font: italic 500 26px/1 Georgia, serif; color: rgba(232, 214, 170, .78); }
 
 /* the note */
-.note { color: #2a2140; font-family: var(--hand); padding: 54px 44px 0 50px; }
+.note { color: var(--paper-ink); font-family: var(--hand); padding: 54px 44px 0 50px; }
 .note .nt-a { font-weight: 700; font-size: 50px; line-height: 62px; text-wrap: balance; }
-.note .nt-b { font-weight: 600; font-size: 36px; margin-top: 34px; color: #7a3a2a; }
+.note .nt-b { font-weight: 600; font-size: 36px; margin-top: 34px; color: var(--paper-red); }
+/* the note as an attack card: positions come from CARD in js/surfaces.js */
+.note.card { padding: 0; }
+.card .ct-name { position: absolute; left: 36px; top: 18px; font: 700 46px/56px var(--hand); white-space: nowrap; color: var(--paper-ink); }
+.card .ct-class { position: absolute; right: 36px; top: 46px; font: 700 14px/20px var(--sans); letter-spacing: 2.2px; text-transform: uppercase; color: var(--paper-red); }
+.card .ct-rule { position: absolute; left: 30px; right: 30px; top: 87px; border-top: 1.5px solid var(--paper-rule); }
+.card .ct-row { position: absolute; appearance: none; margin: 0; padding: 0; border: 1.5px solid transparent; border-radius: 12px; background: none; color: var(--paper-ink); font-family: var(--sans); text-align: left; outline: none; }
+.card .ct-row:not(:last-of-type)::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -4.5px; border-top: 1px dashed var(--paper-rule); }
+.card .ct-row.is-hot, .card .ct-row:focus-visible { background: var(--paper-hot); border-color: var(--paper-hot-line); }
+.card .ct-row.is-hot::after, .card .ct-row:focus-visible::after { display: none; }
+.card .ct-row > span { position: absolute; white-space: nowrap; }
+.card .ct-n { top: 8px; font: 700 21px/24px var(--sans); }
+.card .ct-r { top: 37px; font: 500 13px/16px var(--sans); text-transform: uppercase; color: var(--paper-dim); }
+.card .ct-t { top: 18px; font: 600 16px/20px var(--sans); }
+.card .ct-d { top: 18px; font: 700 16px/20px var(--sans); }
+.card .ct-d small, .sheet .ct-d small { font-size: 14px; font-weight: 500; color: var(--paper-red); }
+.card .ct-i { top: 8px; width: 46px; height: 46px; padding: 5px; }
+.ct-i svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.15; stroke-linejoin: round; stroke-linecap: round; }
+.ct-i svg .d20-fill { fill: none; stroke: none; }
+:is(.ct-row.is-hot, .ct-row:focus-visible, .sh-row:hover, .sh-row:focus-visible) .ct-i { color: var(--paper-red); }
+:is(.ct-row.is-hot, .ct-row:focus-visible, .sh-row:hover, .sh-row:focus-visible) .ct-i svg { stroke-width: 1.5; }
+:is(.ct-row.is-hot, .ct-row:focus-visible, .sh-row:hover, .sh-row:focus-visible) .d20-fill { fill: var(--paper-hot); }
+
+/* phones: the card as a flat sheet over the scene, and the chip that opens it */
+#attacks-chip { left: max(var(--bar-inset), calc(50% - var(--bar-w) / 2)); bottom: calc(var(--bar-bottom) + var(--kb) + var(--bar-h) + 10px); height: var(--chip-h); min-width: var(--tap);
+  display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  font: 700 12px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+#attacks-chip[hidden] { display: none; }
+#attacks-chip svg { width: 18px; height: 18px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linejoin: round; }
+#attacks-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+#attacks-chip::after { content: ""; position: absolute; inset: -6px -2px; }
+body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events: none; }
+.sheet { position: fixed; z-index: 6; left: 50%; bottom: calc(var(--bar-bottom) + var(--kb)); transform: translateX(-50%); width: min(var(--sheet-w), calc(100vw - var(--bar-inset) * 2));
+  max-height: calc(100dvh - var(--bar-bottom) * 2); overflow: auto; padding: var(--sheet-pad); border-radius: var(--sheet-radius); color: var(--paper-ink);
+  background: linear-gradient(160deg, var(--paper-hi), var(--paper-lo)); box-shadow: 0 24px 60px var(--shade); }
+.sheet[hidden] { display: none; }
+.sheet header { display: flex; align-items: baseline; gap: 12px; padding: 0 4px 10px; border-bottom: 1.5px solid var(--paper-rule); }
+.sheet .sh-name { flex: 1; min-width: 0; margin: 0; font: 700 34px/1.1 var(--hand); }
+.sheet .sh-class { margin: 0; font: 700 12px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--paper-red); }
+.sheet .sh-close { flex: none; align-self: center; width: var(--tap); height: var(--tap); margin: -6px -8px -6px 0; border: 0; border-radius: 50%; background: none; color: var(--paper-ink); cursor: pointer; }
+.sheet .sh-close svg { width: 18px; height: 18px; display: block; margin: auto; }
+.sheet .sh-close:focus-visible, .sheet .sh-row:focus-visible { outline: 2px solid var(--paper-red); outline-offset: 2px; }
+.sheet .sh-rows { list-style: none; margin: 8px 0 0; padding: 0; }
+.sheet .sh-row { appearance: none; width: 100%; min-height: var(--sheet-row-h); display: grid; grid-template-columns: 1fr auto auto var(--tap); grid-template-rows: auto auto; column-gap: 12px; align-items: center;
+  padding: 8px 4px 8px 12px; border: 1.5px solid transparent; border-radius: 12px; background: none; color: var(--paper-ink); font-family: var(--sans); text-align: left; cursor: pointer; }
+.sheet li + li .sh-row { border-top: 1px dashed var(--paper-rule); border-radius: 0; }
+.sheet .sh-row:hover, .sheet .sh-row:active { background: var(--paper-hot); border-color: var(--paper-hot-line); border-radius: 12px; }
+.sheet .ct-n { grid-column: 1; grid-row: 1; font: 700 18px/1.2 var(--sans); }
+.sheet .ct-r { grid-column: 1; grid-row: 2; font: 500 12px/1.3 var(--sans); text-transform: uppercase; color: var(--paper-dim); }
+.sheet .ct-t { grid-column: 2; grid-row: 1 / 3; font: 600 14px/1 var(--sans); white-space: nowrap; }
+.sheet .ct-d { grid-column: 3; grid-row: 1 / 3; font: 700 14px/1 var(--sans); white-space: nowrap; }
+.sheet .ct-d small { font-size: 12px; }
+.sheet .ct-i { grid-column: 4; grid-row: 1 / 3; width: var(--tap); height: var(--tap); padding: 6px; }
+@media (max-width: 380px) { .sheet .ct-t { display: none; } }
 
 /* the roll log (screen-space; drawn by js/command.js, painted twin in surfaces.js) */
 .rolllog { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
@@ -230,11 +299,18 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 <p id="mode" class="hud hide-open" aria-hidden="true"></p>
 
 <form id="cmd" class="hud" autocomplete="off">
-  <label class="sr" for="cmd-in">Dice command, for example /roll duality, /roll 2d6+1 or /attack +2</label>
-  <input id="cmd-in" type="text" name="cmd" inputmode="text" enterkeyhint="send" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="80" placeholder="/roll duality · /attack +2 · /help">
+  <label class="sr" for="cmd-in">Dice command, for example /roll duality, /roll 2d6+1, /attack longsword or /attack +2</label>
+  <input id="cmd-in" type="text" name="cmd" inputmode="text" enterkeyhint="send" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="80" placeholder="/roll duality · /attack longsword · /help">
   <button type="submit">Roll</button>
 </form>
 <div id="log-live" class="sr" role="log" aria-live="polite" aria-label="Dice rolls"></div>
+
+<button id="attacks-chip" class="hud hide-open" type="button" aria-controls="sheet" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5L21.5 7L21.5 17L12 22.5L2.5 17L2.5 7Z M12 7L17.6 16L6.4 16Z"/></svg>Attacks</button>
+<section id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-name" hidden>
+  <header><h2 id="sheet-name" class="sh-name"></h2><p class="sh-class"></p>
+    <button class="sh-close" type="button" aria-label="Close attacks"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></header>
+  <ul class="sh-rows"></ul>
+</section>
 
 <div id="plate" aria-hidden="true"><div class="box"><h2></h2><p class="sub"></p><p class="meta"></p><span class="pill">Open</span></div></div>
 

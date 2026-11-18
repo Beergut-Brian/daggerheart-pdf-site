@@ -44,13 +44,16 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
 
   const v = new THREE.Vector3(), side = new THREE.Vector3();
 
-  function play({ hit, critical, onImpact }) {
+  // hero: a mini id (a character's attack); otherwise round-robin through the party.
+  // style / bolt: a per-attack override of the mini's own attack ('melee' | 'ranged' | 'magic').
+  function play({ hit, critical, onImpact, hero: heroId = null, style = null, bolt: boltColor = null }) {
     if (cur) finish();
-    const hero = heroes[turn++ % heroes.length];   // round-robin through the party
+    const chosen = heroId ? heroes.findIndex((m) => m.def.id === heroId) : -1;
+    const hero = chosen >= 0 ? heroes[chosen] : heroes[turn++ % heroes.length];
     const to = v.subVectors(target.home, hero.home).setY(0), dist = to.length(), dir = to.clone().normalize();
     side.set(-dir.z, 0, dir.x).multiplyScalar(turn % 2 ? 1 : -1);
     const yaw0 = hero.pivot.rotation.y, face = angleTo(yaw0, Math.atan2(dir.x, dir.z));
-    const ranged = hero.def.attack !== 'melee';
+    const ranged = (style || hero.def.attack) !== 'melee';
     // where the swing or bolt ends: on the monster, or wide of it
     const reach = Math.max(0.3, dist - (target.def.base?.r ?? 0.4) - 0.2);
     const lungeTo = hero.home.clone().addScaledVector(dir, hit ? reach : reach * 0.8).addScaledVector(side, hit ? 0 : 0.5);
@@ -60,7 +63,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
     const impactAt = calm ? 0 : WIND + (ranged ? 0.05 + flight : LUNGE);
     cur = {
       hero, hit, critical, onImpact, ranged, yaw0, face, dir, lungeTo, muzzle, boltTo, impactAt, t0: clock(), impacted: false,
-      color: new THREE.Color(hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.25, 1.0)),
+      color: new THREE.Color(boltColor ?? hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.25, 1.0)),
     };
     if (calm) impact();
     return cur.end * 1000;

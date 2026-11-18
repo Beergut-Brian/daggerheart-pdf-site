@@ -2,7 +2,10 @@
 // same rules can run in tests, a server or a later app. Every roller takes an
 // injectable rng (a function returning [0, 1)) so results can be forced.
 
-/** A total at or above this hits the monster. A critical always hits. */
+/**
+ * Fallback Difficulty, used only when the target has none. The real number is
+ * the `difficulty` on the monster's MINIS entry (js/minis.js).
+ */
 export const HIT_TARGET = 12;
 
 export const DIE_SIDES = [4, 6, 8, 10, 12, 20];
@@ -16,6 +19,50 @@ export const HELP_LINES = [
   '/roll d20, /roll 3d6+2, /roll 1d8+1d6: any d4 to d20',
   `/attack +2: a Duality attack on the golem (${HIT_TARGET}+ hits)`,
 ];
+
+/**
+ * /help for the table: the dice commands, then the character's attacks.
+ * @param {{ character?: Character | null, difficulty?: number }} [o]
+ */
+export function helpLines({ character = null, difficulty = HIT_TARGET } = {}) {
+  const lines = HELP_LINES.slice(0, 3);
+  lines.push(`/attack +2: a Duality attack on the golem (Difficulty ${difficulty})`);
+  if (character) {
+    lines.push(`${character.name}'s attacks (or click the card):`);
+    for (const a of character.attacks) lines.push(`/attack ${a.name.toLowerCase()}: ${a.range}, ${a.trait} ${signedMod(a.mod)}, ${a.damage} ${a.type}`);
+  }
+  return lines;
+}
+
+/** "+2", "+0", "-1" @param {number} m */
+export const signedMod = (m) => (m < 0 ? String(m) : '+' + m);
+
+/**
+ * @typedef {{ id: string, name: string, range: 'Melee' | 'Very Close' | 'Close' | 'Far', trait: string, mod: number,
+ *   damage: string, type: 'phy' | 'mag', style?: 'melee' | 'ranged' | 'magic', bolt?: number }} Attack
+ * @typedef {{ id: string, name: string, class: string, mini: string, proficiency?: number, attacks: Attack[] }} Character
+ */
+
+/**
+ * Finds a character's attack by name: exact (case-insensitive) first, then a
+ * prefix of the name or of any word in it. Ambiguous or unknown -> a hint.
+ * @param {Attack[]} attacks
+ * @param {string} query
+ * @returns {{ ok: true, attack: Attack } | { ok: false, hint: string }}
+ */
+export function findAttack(attacks, query) {
+  const q = String(query ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const names = attacks.map((a) => a.name).join(', ');
+  if (!q) return { ok: false, hint: `Name an attack: ${names}.` };
+  const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ');
+  const exact = attacks.filter((a) => norm(a.name) === q || a.id === q);
+  if (exact.length) return { ok: true, attack: exact[0] };
+  let found = attacks.filter((a) => norm(a.name).startsWith(q));
+  if (!found.length) found = attacks.filter((a) => norm(a.name).split(' ').some((w) => w.startsWith(q)));
+  if (found.length === 1) return { ok: true, attack: found[0] };
+  if (found.length > 1) return { ok: false, hint: `"${query.trim()}" could be ${found.map((a) => a.name).join(' or ')}.` };
+  return { ok: false, hint: attacks.length ? `No attack called "${query.trim()}". Try ${names}, or /attack +2.` : 'Attacks take a modifier only, for example /attack +2.' };
+}
 
 /**
  * @typedef {{ count: number, sides: number, sign: 1 | -1 }} DiceTerm
@@ -80,15 +127,17 @@ function parseMod(s) {
 /**
  * @typedef {{ kind: 'empty' } | { kind: 'help' } | { kind: 'unknown', hint: string, input: string }
  *   | { kind: 'duality', mod: number, attack: false } | { kind: 'attack', mod: number }
+ *   | { kind: 'named-attack', attack: Attack }
  *   | { kind: 'roll', notation: Notation }} Command
  */
 
 /**
  * Reads one line from the command bar.
  * @param {string} text
+ * @param {{ attacks?: Attack[] }} [opts] the active character's attacks, for /attack <name>
  * @returns {Command}
  */
-export function parseCommand(text) {
+export function parseCommand(text, { attacks = [] } = {}) {
   const src = String(text ?? '').trim();
   if (!src) return { kind: 'empty' };
   const slash = src.startsWith('/');
@@ -101,7 +150,10 @@ export function parseCommand(text) {
   if (slash && (cmd === 'attack' || cmd === 'atk' || cmd === 'a')) {
     const rest = restParts.join('');
     const mod = parseMod(rest.replace(/^2d12/i, ''));
-    if (mod == null) return unknown('Attacks take a modifier only, for example /attack +2.');
+    if (mod == null) {
+      const f = findAttack(attacks, restParts.join(' '));
+      return f.ok ? { kind: 'named-attack', attack: f.attack } : unknown(f.hint);
+    }
     return { kind: 'attack', mod };
   }
 
@@ -173,24 +225,89 @@ export function rollNotation(parsed, rng = Math.random) {
   return { kind: 'roll', dice, mod: parsed.mod, total, text: parsed.text };
 }
 
-/** @param {DualityResult} r */
-export const isHit = (r) => r.outcome === 'critical' || r.total >= HIT_TARGET;
+/** Success: total at or above the target's Difficulty; a Critical Success always succeeds. @param {DualityResult} r @param {number} [difficulty] */
+export const isHit = (r, difficulty = HIT_TARGET) => r.outcome === 'critical' || r.total >= difficulty;
+
+/**
+ * @typedef {{ rolls: number[], sides: number, count: number, bonusMax: number, mod: number, total: number, type: 'phy' | 'mag', text: string }} DamageResult
+ * @typedef {{ kind: 'attack', duality: DualityResult, difficulty: number, hit: boolean, crit: boolean, damage?: DamageResult }} AttackResult
+ */
+
+/**
+ * Reads weapon damage such as "d8+2" (or "2d6+1"). The dice count is multiplied by Proficiency.
+ * @param {string} text
+ * @returns {{ ok: true, count: number, sides: number, mod: number } | { ok: false, hint: string }}
+ */
+export function parseDamage(text) {
+  const n = parseNotation(text);
+  if (!n.ok) return n;
+  if (n.terms.length !== 1 || n.terms[0].sign < 0) return { ok: false, hint: `Damage is one kind of die plus a modifier, for example d8+2 (got "${text}").` };
+  return { ok: true, count: n.terms[0].count, sides: n.terms[0].sides, mod: n.mod };
+}
+
+/**
+ * A Daggerheart attack roll, as written: 2d12 Duality (Hope, Fear) + the trait modifier
+ * against the target's Difficulty. Matching dice are a Critical Success, which always
+ * succeeds. On a success, damage = the weapon's dice (count = Proficiency) + modifier;
+ * a Critical Success adds the maximum possible value of those dice on top.
+ * @param {Attack} attack
+ * @param {{ difficulty?: number, proficiency?: number, faces?: [number, number] | null }} [opts] faces: forced Hope/Fear
+ * @param {() => number} [rng]
+ * @returns {AttackResult}
+ */
+export function rollAttack(attack, { difficulty = HIT_TARGET, proficiency = 1, faces = null } = {}, rng = Math.random) {
+  const duality = faces ? dualityFrom(faces[0], faces[1], attack.mod) : rollDuality(attack.mod, rng);
+  const crit = duality.outcome === 'critical', hit = isHit(duality, difficulty);
+  /** @type {AttackResult} */
+  const out = { kind: 'attack', duality, difficulty, hit, crit };
+  if (!hit) return out;
+  const d = parseDamage(attack.damage);
+  if (!d.ok) throw new Error(d.hint);
+  const count = Math.max(1, Math.round(proficiency)) * d.count;
+  const rolls = Array.from({ length: count }, () => rollDie(d.sides, rng));
+  const bonusMax = crit ? count * d.sides : 0;
+  const total = rolls.reduce((a, b) => a + b, 0) + bonusMax + d.mod;
+  out.damage = { rolls, sides: d.sides, count, bonusMax, mod: d.mod, total, type: attack.type, text: `${count}d${d.sides}${modText(d.mod)}` };
+  return out;
+}
+
+/**
+ * Log lines for a named attack: the roll, then (on a hit) the damage.
+ * @param {AttackResult} r
+ * @param {Attack} attack
+ * @returns {{ roll: { text: string, detail: string, tone: 'hope' | 'fear' | 'critical', hit: boolean }, damage: { text: string, detail: string, tone: 'plain' | 'critical', hit: null } | null }}
+ */
+export function formatAttack(r, attack) {
+  const d = r.duality;
+  const how = r.crit ? 'Critical Success' : `${d.total} with ${d.outcome === 'hope' ? 'Hope' : 'Fear'}`;
+  const roll = {
+    text: `${attack.name}: ${how}, ${r.hit ? 'hit' : 'miss'}`,
+    detail: `Hope ${d.hope} · Fear ${d.fear} ${signed(d.mod)}${r.crit ? ' = ' + d.total : ''} vs Difficulty ${r.difficulty}`,
+    tone: d.outcome, hit: r.hit,
+  };
+  if (!r.damage) return { roll, damage: null };
+  const g = r.damage;
+  let detail = `${g.text}: ${g.rolls.join(' + ')}`;
+  if (g.bonusMax) detail += ` + ${g.bonusMax} (critical, max dice)`;
+  if (g.mod) detail += ' ' + signed(g.mod);
+  return { roll, damage: { text: `${attack.name} damage: ${g.total} ${g.type}`, detail, tone: r.crit ? 'critical' : 'plain', hit: null } };
+}
 
 /**
  * The log line for a result.
  * @param {DualityResult | NotationResult} r
- * @param {{ attack?: boolean }} [opts]
+ * @param {{ attack?: boolean, difficulty?: number }} [opts]
  * @returns {{ text: string, detail: string, tone: 'hope' | 'fear' | 'critical' | 'plain', hit: boolean | null }}
  */
-export function formatResult(r, { attack = false } = {}) {
+export function formatResult(r, { attack = false, difficulty = HIT_TARGET } = {}) {
   if (r.kind === 'duality') {
     const text = r.outcome === 'critical' ? 'Critical success' : `${r.total} with ${r.outcome === 'hope' ? 'Hope' : 'Fear'}`;
     let detail = `Hope ${r.hope} · Fear ${r.fear}${r.mod ? ' ' + signed(r.mod) : ''}`;
     if (r.outcome === 'critical') detail += ` = ${r.total}`;
     if (!attack) return { text, detail, tone: r.outcome, hit: null };
-    const hit = isHit(r);
+    const hit = isHit(r, difficulty);
     if (r.outcome === 'critical') return { text: 'Critical hit!', detail: 'Critical success · ' + detail, tone: r.outcome, hit };
-    return { text: text + (hit ? ': hit!' : ': miss'), detail: (hit ? 'Hit' : 'Miss') + ` (${HIT_TARGET}+) · ` + detail, tone: r.outcome, hit };
+    return { text: text + (hit ? ': hit!' : ': miss'), detail: (hit ? 'Hit' : 'Miss') + ` (${difficulty}+) · ` + detail, tone: r.outcome, hit };
   }
   const parts = r.dice.map((d, i) => (d.sign < 0 ? '- ' : i ? '+ ' : '') + d.value).join(' ');
   return { text: `${r.total} on ${r.text}`, detail: parts + (r.mod ? ' ' + signed(r.mod) : ''), tone: 'plain', hit: null };

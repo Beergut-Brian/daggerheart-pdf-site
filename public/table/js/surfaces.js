@@ -360,7 +360,7 @@ export function paintWing(g, W, H, which) {
 
 export const NOTE = [560, 400];
 
-export function paintNote(g, W, H, { text = true } = {}) {
+function paperBg(g, W, H) {
   const gr = g.createLinearGradient(0, 0, W, H);
   gr.addColorStop(0, '#f1e6c4'); gr.addColorStop(1, '#dccb9c');
   g.fillStyle = gr; g.fillRect(0, 0, W, H);
@@ -368,6 +368,11 @@ export function paintNote(g, W, H, { text = true } = {}) {
   const eg = g.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, W * 0.72);
   eg.addColorStop(0, 'rgba(120,80,30,0)'); eg.addColorStop(1, 'rgba(110,70,24,0.4)');
   g.fillStyle = eg; g.fillRect(0, 0, W, H);
+}
+
+// The note with no character in config.js: the old hand-written line.
+export function paintNote(g, W, H, { text = true } = {}) {
+  paperBg(g, W, H);
   if (!text) return;
   g.fillStyle = '#2a2140'; g.textAlign = 'left';
   g.font = `700 50px ${HAND}`;
@@ -375,6 +380,68 @@ export function paintNote(g, W, H, { text = true } = {}) {
   for (const l of ['Our table’s Daggerheart', 'books, searchable', 'on your phone.']) { g.fillText(l, 50, y); y += 62; }
   g.font = `600 36px ${HAND}`; g.fillStyle = '#7a3a2a';
   g.fillText('— pick one up & roll', 50, y + 40);
+}
+
+// ---------------------------------------------------------------- the attack card
+// The note becomes a character's attack card. One layout feeds the painter, the
+// live-HTML rows and the raycast hit-test, so the three always agree.
+// Ink colours match the --paper-* properties in index.html.
+const PAPER = { ink: '#2a2140', dim: 'rgba(42,33,64,0.62)', red: '#7a3a2a', hot: 'rgba(122,58,42,0.13)', hotLine: 'rgba(122,58,42,0.5)', rule: 'rgba(42,33,64,0.28)' };
+export const CARD = { x: 22, w: 516, top: 108, rowH: 68, gap: 6, bottom: 12, icon: 46, cols: { name: 18, trait: 222, damage: 342, icon: 456 } };
+
+/** Row rectangles in card pixels. @param {number} n */
+export function cardRows(n) {
+  const step = Math.min(CARD.rowH, (NOTE[1] - CARD.top - CARD.bottom) / Math.max(1, n));
+  return Array.from({ length: n }, (_, i) => ({ x: CARD.x, y: CARD.top + i * step, w: CARD.w, h: step - CARD.gap }));
+}
+/** Which row a card pixel is on, or -1. */
+export function cardRowAt(n, px, py) {
+  return cardRows(n).findIndex((r) => px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h);
+}
+export const cardIcon = (r) => ({ x: r.x + CARD.cols.icon, y: r.y + (r.h - CARD.icon) / 2, w: CARD.icon, h: CARD.icon });
+
+// our own dice glyph: a d20 outline in a 24-unit box (SVG path, also drawn with Path2D)
+export const D20_HEX = 'M12 1.5L21.5 7L21.5 17L12 22.5L2.5 17L2.5 7Z';
+export const D20_PATH = D20_HEX + ' M12 7L17.6 16L6.4 16Z'
+  + ' M12 7L12 1.5 M12 7L2.5 7 M12 7L21.5 7 M6.4 16L2.5 7 M6.4 16L2.5 17 M6.4 16L12 22.5 M17.6 16L21.5 7 M17.6 16L21.5 17 M17.6 16L12 22.5';
+
+const signedMod = (m) => (m < 0 ? String(m) : '+' + m);
+
+export function paintCard(g, W, H, ch, st, { text = true } = {}) {
+  paperBg(g, W, H);
+  if (!text) return;
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.fillStyle = PAPER.ink; fitFont(g, ch.name, 700, HAND, 46, 330);
+  g.fillText(ch.name, 36, 64);
+  g.fillStyle = PAPER.red; g.font = `700 14px ${SANS}`;
+  const cls = ch.class.toUpperCase(), cw = g.measureText(cls).width + 2.2 * (cls.length - 1);
+  spaced(g, cls, W - 36 - cw / 2, 62, 2.2);
+  g.strokeStyle = PAPER.rule; g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(30, 88); g.bezierCurveTo(W * 0.35, 84, W * 0.65, 92, W - 30, 87); g.stroke();
+  const rows = cardRows(ch.attacks.length), glyph = new Path2D(D20_PATH);
+  ch.attacks.forEach((a, i) => {
+    const r = rows[i], hot = st && st.hot === i, mid = r.y + r.h / 2;
+    if (hot) { roundRect(g, r.x, r.y, r.w, r.h, 12); g.fillStyle = PAPER.hot; g.fill(); g.strokeStyle = PAPER.hotLine; g.lineWidth = 1.5; g.stroke(); }
+    else if (i < rows.length - 1) {
+      g.save(); g.setLineDash([3, 5]); g.strokeStyle = PAPER.rule; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(r.x + 12, r.y + r.h + CARD.gap / 2); g.lineTo(r.x + r.w - 12, r.y + r.h + CARD.gap / 2); g.stroke(); g.restore();
+    }
+    g.fillStyle = PAPER.ink; fitFont(g, a.name, 700, SANS, 21, 196);
+    g.fillText(a.name, r.x + CARD.cols.name, mid - 4);
+    g.fillStyle = PAPER.dim; g.font = `500 13px ${SANS}`;
+    g.fillText(a.range.toUpperCase(), r.x + CARD.cols.name, mid + 17);
+    g.fillStyle = PAPER.ink; g.font = `600 16px ${SANS}`;
+    g.fillText(`${a.trait} ${signedMod(a.mod)}`, r.x + CARD.cols.trait, mid + 6);
+    g.font = `700 16px ${SANS}`; const dw = g.measureText(a.damage).width;
+    g.fillText(a.damage, r.x + CARD.cols.damage, mid + 6);
+    g.fillStyle = PAPER.red; g.font = `500 14px ${SANS}`;
+    g.fillText(a.type, r.x + CARD.cols.damage + dw + 6, mid + 6);
+    const ic = cardIcon(r), k = (ic.w - 10) / 24;
+    g.save(); g.translate(ic.x + 5, ic.y + 5); g.scale(k, k);
+    if (hot) { g.fillStyle = PAPER.hot; g.fill(new Path2D(D20_HEX)); }
+    g.strokeStyle = hot ? PAPER.red : PAPER.ink; g.lineJoin = 'round'; g.lineCap = 'round';
+    g.lineWidth = hot ? 1.5 : 1.15; g.stroke(glyph); g.restore();
+  });
 }
 
 // ---------------------------------------------------------------- HTML builders
@@ -440,6 +507,39 @@ function buildScreenEl(el) {
   const t = h('h1', 'gm-title');
   t.append(h('span', 'gm-a', 'Daggerheart'), h('span', 'gm-b', 'Resources'));
   el.append(t, h('i', 'gm-rule'), h('p', 'gm-tag', 'Our table’s books. Pick one up.'));
+}
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+export function d20Svg() {
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
+  const hex = document.createElementNS(SVGNS, 'path'); hex.setAttribute('class', 'd20-fill'); hex.setAttribute('d', D20_HEX);
+  const p = document.createElementNS(SVGNS, 'path'); p.setAttribute('d', D20_PATH);
+  svg.append(hex, p);
+  return svg;
+}
+
+/** One attack row's contents (card and phone sheet). */
+export function attackRowParts(a, place = false) {
+  const part = (cls, text, col) => { const e = h('span', cls, text); if (place) e.style.left = col + 'px'; return e; };
+  const dmg = part('ct-d', a.damage + ' ', CARD.cols.damage); dmg.append(h('small', null, a.type));
+  const icon = part('ct-i', null, CARD.cols.icon); icon.append(d20Svg());
+  return [part('ct-n', a.name, CARD.cols.name), part('ct-r', a.range, CARD.cols.name), part('ct-t', `${a.trait} ${signedMod(a.mod)}`, CARD.cols.trait), dmg, icon];
+}
+
+function buildCardEl(el, ch, { bg = true } = {}) {
+  const [W, H] = NOTE;
+  el.style.width = W + 'px'; el.style.height = H + 'px';
+  if (bg) el.style.backgroundImage = bgFrom((g) => paintCard(g, W, H, ch, null, { text: false }), W, H);
+  el.append(h('h2', 'ct-name', ch.name), h('p', 'ct-class', ch.class), h('i', 'ct-rule'));
+  cardRows(ch.attacks.length).forEach((r, i) => {
+    const a = ch.attacks[i], b = h('button', 'ct-row');
+    b.type = 'button'; b.dataset.attack = a.id; b.dataset.row = String(i);
+    b.setAttribute('aria-label', `Roll ${a.name} attack`);
+    Object.assign(b.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' });
+    b.append(...attackRowParts(a, true));
+    el.append(b);
+  });
 }
 
 function buildNoteEl(el) {
@@ -698,7 +798,7 @@ export class Surfaces {
 
 // ---------------------------------------------------------------- definitions
 
-export function defineSurfaces(set, books, images) {
+export function defineSurfaces(set, books, images, { character = null, cardState = null } = {}) {
   for (const b of books) {
     const img = images[b.id] || null;
     const [cw, ch] = coverSize(b);
@@ -717,7 +817,14 @@ export function defineSurfaces(set, books, images) {
   }
   set.define({ id: 'screen', cls: 'gm', size: SCREEN, paint: paintScreen, build: buildScreenEl,
     plain: (el) => { el.append(h('h1', null, 'Daggerheart Resources')); } });
-  set.define({ id: 'note', cls: 'note', size: NOTE, attrs: { 'aria-hidden': 'true' }, paint: paintNote, build: buildNoteEl });
+  if (character) {
+    // the attack card: real buttons in the canvas (keyboard, assistive tech, HTML-in-Canvas)
+    set.define({ id: 'note', cls: 'note card', size: NOTE, scale: 2, attrs: { role: 'group', 'aria-label': `${character.name}'s attacks` },
+      paint: (g, W, H, o) => paintCard(g, W, H, character, cardState, o),
+      build: (el) => buildCardEl(el, character), plain: (el) => buildCardEl(el, character, { bg: false }) });
+  } else {
+    set.define({ id: 'note', cls: 'note', size: NOTE, attrs: { 'aria-hidden': 'true' }, paint: paintNote, build: buildNoteEl });
+  }
 }
 
 // Real cover art is only reachable when this page is served by the site itself.
