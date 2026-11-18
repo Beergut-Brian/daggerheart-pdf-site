@@ -1,0 +1,1 @@
+- 2026-11-18 redesign: branch cut, hero image copied, designer task written (design/redesign/TASK-designer.md)
