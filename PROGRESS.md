@@ -4,3 +4,4 @@
 - 2026-11-18 redesign: home-b board (centred on the plume) + renders
 - 2026-11-18 redesign: resources picker board + renders
 - 2026-11-18 redesign: viewer desktop + phone boards + renders
+- 2026-11-18 redesign: GATE.md + polish log; boards ready for Kaden
