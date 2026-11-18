@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>High Sodium Gaming</title>
+<link rel="preload" href="../shared/fonts/inter-tight-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  /* home-b: one vertical axis. Headline at the top of the smoke plume, the fire in the middle, the action beneath it. */
+  .hero {
+    position: relative; min-height: max(100svh, 52rem); overflow: hidden; isolation: isolate;
+    display: grid; grid-template-rows: 1fr auto 1fr; justify-items: center; text-align: center;
+    padding: calc(var(--nav-top) + var(--nav-height) + var(--space-16)) var(--space-5) var(--space-16);
+  }
+  .hero-media { position: absolute; inset: 0; z-index: -2; }
+  .hero-media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 54%; }
+  .hero-shade {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      linear-gradient(180deg, var(--scrim-strong) 0, var(--scrim-mid) 22%, var(--scrim-none) 46%, var(--scrim-none) 64%, var(--scrim-strong) 86%, var(--scrim-solid) 100%),
+      linear-gradient(90deg, var(--scrim-solid) 0, var(--scrim-none) 26%, var(--scrim-none) 74%, var(--scrim-solid) 100%);
+  }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+  .hero-top { align-self: start; display: flex; flex-direction: column; align-items: center; }
+  .hero-top .tag { margin-bottom: var(--space-6); }
+  .hero-fire { height: clamp(10rem, 24vh, 14rem); }  /* keeps the fire clear of copy */
+  .hero-bottom { align-self: end; display: flex; flex-direction: column; align-items: center; gap: var(--space-8); }
+  .hero-bottom .lead { text-align: center; text-wrap: balance; }
+  .site-nav { left: 50%; right: auto; transform: translateX(-50%); }
+
+  @media (max-width: 899px) {
+    .site-nav { left: var(--gutter-tight); right: var(--gutter-tight); transform: none; }
+  }
+  @media (max-width: 699px) {
+    .hero { min-height: max(100svh, 48rem); padding-top: calc(var(--nav-top) + var(--nav-height) + var(--space-10)); padding-bottom: var(--space-10); }
+    .hero-media img { object-position: 50% 52%; }
+    .hero-top .tag { margin-bottom: var(--space-4); }
+    .hero-bottom { gap: var(--space-6); }
+    .hero-shade {
+      background:
+        linear-gradient(180deg, var(--scrim-strong) 0, var(--scrim-mid) 26%, var(--scrim-none) 44%, var(--scrim-none) 62%, var(--scrim-strong) 80%, var(--scrim-solid) 100%);
+    }
+  }
+</style>
+</head>
+<body>
+<header class="site-nav">
+  <nav class="nav-pill" aria-label="Main">
+    <a class="wordmark" href="index.html"><span class="mark" aria-hidden="true">HSG</span>High Sodium Gaming</a>
+    <ul class="nav-links">
+      <li class="nav-home"><a href="index.html" aria-current="page">Home</a></li>
+      <li><a href="../resources/index.html">Daggerheart Resources</a></li>
+      <li class="nav-divider" aria-hidden="true"></li>
+      <li class="nav-books"><a href="../viewer/index.html">Core Rulebook</a></li>
+      <li class="nav-books"><a href="../viewer/index.html">Hope &amp; Fear</a></li>
+    </ul>
+  </nav>
+</header>
+<main>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-media">
+      <picture>
+        <source media="(max-width: 699px)" type="image/avif" srcset="../img/hero-campfire-portrait-900.avif">
+        <source media="(max-width: 699px)" type="image/webp" srcset="../img/hero-campfire-portrait-900.webp">
+        <source media="(max-width: 699px)" srcset="../img/hero-campfire-portrait-900.jpg">
+        <source type="image/avif" srcset="../img/hero-campfire-1200.avif 1200w, ../img/hero-campfire-2400.avif 2400w" sizes="100vw">
+        <source type="image/webp" srcset="../img/hero-campfire-1200.webp 1200w, ../img/hero-campfire-2400.webp 2400w" sizes="100vw">
+        <img id="hero-img" src="../img/hero-campfire-2400.jpg" alt="Seen from above at night: a small campfire in a forest clearing, a ring of people around it, embers and blue smoke rising through the trees." width="2400" height="1345" fetchpriority="high">
+      </picture>
+    </div>
+    <div class="hero-shade"></div>
+    <canvas data-embers="#hero-img" aria-hidden="true"></canvas>
+    <div class="hero-top">
+      <span class="tag">2 books · 601 pages</span>
+      <h1 class="display" id="hero-title"><span class="dim">Rules, close at hand.</span><span class="bright">Stay by the fire.</span></h1>
+    </div>
+    <div class="hero-fire" aria-hidden="true"></div>
+    <div class="hero-bottom">
+      <p class="lead">The Core Rulebook and Hope &amp; Fear. Every page, searchable.</p>
+      <a class="cta" href="../resources/index.html">
+        <span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5.3 8.2 4.75 4 4.75v13.5c4.2 0 6.5.55 8 1.75 1.5-1.2 3.8-1.75 8-1.75V4.75c-4.2 0-6.5.55-8 1.75z"/><path d="M12 6.5V20"/></svg></span>
+        Daggerheart Resources
+      </a>
+    </div>
+  </section>
+</main>
+<script src="../shared/embers.js"></script>
+</body>
+</html>

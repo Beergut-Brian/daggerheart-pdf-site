@@ -1,3 +1,4 @@
 - 2026-11-18 redesign: branch cut, hero image copied, designer task written (design/redesign/TASK-designer.md)
 - 2026-11-18 redesign: shared tokens, fonts (Inter Tight, Geist Mono), web-sized hero + covers, render tools
 - 2026-11-18 redesign: home-a board (reference structure, campfire hero, embers) + renders
+- 2026-11-18 redesign: home-b board (centred on the plume) + renders
