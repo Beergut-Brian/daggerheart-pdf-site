@@ -157,21 +157,23 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
     if (live.length && state !== 'idle') { state = 'swap'; t0 = clock(); pending = list; return; }
     start(list);
   }
-  function start(list) {
+  function start(list, at = clock()) {
     disposeAll();
     spawn(list);
-    state = calm ? 'rest' : 'throw'; t0 = clock(); clearAt = t0 + (calm ? 0 : THROW_MS) + HOLD_MS;
+    state = calm ? 'rest' : 'throw'; t0 = at; clearAt = t0 + (calm ? 0 : THROW_MS) + HOLD_MS;
     if (calm) { live.forEach((L) => pose(L, 1)); rested(); }
   }
-  function rested() { restAt = clock(); if (onRest) { const f = onRest; onRest = null; f(); } }
+  function rested() { restAt = clock(); spareFrames = 3; if (onRest) { const f = onRest; onRest = null; f(); } }
 
   function update(now = clock()) {
-    if (state === 'idle') { if (spareFrames > 0) spareFrames--; return; }
+    if (spareFrames > 0) spareFrames--;     // a few more shadow redraws after anything stops or vanishes
+    if (state === 'idle') return;
     if (state === 'swap') {
       const u = Math.min(1, (now - t0) / SWAP_MS);
       live.forEach((L) => { L.die.scale.setScalar(Math.max(0.001, 1 - u)); });
-      if (u >= 1) start(pending);
-      return;
+      if (u < 1) return;
+      start(pending, t0 + SWAP_MS);           // the throw starts where the swap ended, even across a big step
+      if (state !== 'throw') return;
     }
     if (state === 'throw') {
       let all = true;
@@ -190,7 +192,7 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
     if (state === 'clear') {
       const u = Math.min(1, (now - t0) / CLEAR_MS);
       for (const L of live) { L.tag.material.opacity = 1 - u; L.die.scale.setScalar(Math.max(0.001, 1 - u * u)); L.die.position.y = L.end.y - lowest(L.die.userData.hull, L.qf) * (1 - u) - u * 0.05; }
-      if (u >= 1) { disposeAll(); state = 'idle'; spareFrames = 2; }
+      if (u >= 1) { disposeAll(); state = 'idle'; spareFrames = 3; }
     }
   }
 

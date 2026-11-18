@@ -12,7 +12,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   const heroes = minis.filter((m) => m.def.role === 'hero');
   const target = minis.find((m) => m.def.target) || minis.find((m) => m.def.role === 'monster');
   if (!target || !heroes.length) return null;
-  let turn = 0, cur = null;
+  let turn = 0, cur = null, tail = 0;
 
   // the monster gets its own materials, so its flash does not light the terrain
   const flashMats = [];
@@ -78,7 +78,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   }
 
   function finish() {
-    const c = cur; cur = null;
+    const c = cur; cur = null; tail = 3;      // a few more shadow redraws with everyone home
     c.hero.pivot.position.copy(c.hero.home); c.hero.pivot.rotation.set(0, c.yaw0, 0);
     target.pivot.position.copy(target.home); target.pivot.rotation.set(0, target.yaw, 0, 'YXZ');
     flashMats.forEach((m) => { m.emissive.copy(m.userData.base.c); m.emissiveIntensity = m.userData.base.i; });
@@ -87,6 +87,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   }
 
   function update(now, dt) {
+    if (tail > 0 && !cur) tail--;
     if (!cur) return;
     const c = cur, t = (now - c.t0) / 1000, h = c.hero;
     if (!c.impacted && t >= c.impactAt) impact();
@@ -155,5 +156,5 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
 
   const phase = () => (cur ? { hero: cur.hero.def.id, t: (clock() - cur.t0) / 1000, impactAt: cur.impactAt, end: cur.end, hit: cur.hit } : null);
   const pick = (id) => { const i = heroes.findIndex((h) => h.def.id === id); if (i >= 0) turn = i; };
-  return { play, update, phase, pick, get busy() { return !!cur; }, get target() { return target; }, get heroes() { return heroes; } };
+  return { play, update, phase, pick, get busy() { return !!cur || tail > 0; }, get target() { return target; }, get heroes() { return heroes; } };
 }

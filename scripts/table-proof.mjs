@@ -1,0 +1,187 @@
+// Proof shots, videos, the up-face check and frame timings for /table's dice and attack.
+//   node scripts/table-proof.mjs [stills|videos|perf|all] [baseUrl] [outDir]
+// Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
+// (software GL), so it is slow: videos are rendered frame by frame on the table's game clock
+// (__table.timeScale(0) + __table.step(ms)) and piped to ffmpeg, so they play at real speed.
+import { chromium } from "playwright-core";
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+
+const mode = process.argv[2] || "all";
+const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
+const out = path.resolve(process.argv[4] || "../review/table-1");
+const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
+const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
+fs.mkdirSync(out, { recursive: true });
+
+const browser = await chromium.launch({
+  executablePath: CHROME,
+  args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-blink-features=CanvasDrawElement"],
+});
+const say = (m) => console.log(new Date().toISOString().slice(11, 19), m);
+const upface = [];
+let failures = 0;
+
+async function open(hash, { w = 1440, h = 900, phone = false } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 3 : 1, isMobile: phone, hasTouch: phone });
+  const p = await ctx.newPage();
+  p.setDefaultTimeout(600000);
+  p.on("pageerror", (e) => { console.error("page error:", e.message); failures++; });
+  await p.goto(`${base}/table${hash}`);
+  await p.waitForFunction(() => document.body.classList.contains("is-ready") && window.__table, null, { timeout: 120000 });
+  await frames(p, 3);
+  return { p, ctx };
+}
+// wait for real frames (each can take seconds under SwiftShader)
+const frames = (p, n = 2) => p.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+async function type(p, text, phone = false) {
+  if (phone) await p.tap("#cmd-in"); else await p.click("#cmd-in");
+  await p.keyboard.type(text); await p.keyboard.press("Enter");
+  await frames(p, 1);
+}
+const step = async (p, ms) => { await p.evaluate((m) => window.__table.step(m), ms); await frames(p, 2); };
+// a throw takes up to ~1.45 s (clearing the last one, stagger, tumble); then the result tags fade in
+const settle = async (p) => { await step(p, 1700); await step(p, 400); };
+const camera = (p, zoom, x, z) => p.evaluate(([zz, xx, z2]) => { const t = window.__table; t.rig.user.zoom = zz; t.rig.off.set(xx, 0, z2); }, [zoom, x, z]);
+async function checkUp(p, label) {
+  const dice = await p.evaluate(() => window.__table.dice());
+  const ok = dice.length > 0 && dice.every((d) => d.up === d.rolled && d.tilt < 0.02);
+  if (!ok) failures++;
+  upface.push({ label, ok, dice });
+  const file = path.join(out, "upface-check.json");
+  const prev = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")).filter((r) => r.label !== label) : [];
+  fs.writeFileSync(file, JSON.stringify([...prev, { label, ok, at: new Date().toISOString(), dice }], null, 2) + "\n");
+  say(`${label}: ${ok ? "up faces match" : "MISMATCH"} ${dice.map((d) => `${d.type}=${d.up}/${d.rolled}`).join(" ")}`);
+}
+async function shot(p, name) { await frames(p, 2); await p.screenshot({ path: path.join(out, name) }); say("wrote " + name); }
+
+const only = (process.env.ONLY || "").split(",").filter(Boolean);
+const want = (k) => !only.length || only.includes(k);
+
+async function stills() {
+  let p, ctx;
+  if (want("a")) {
+  // settled duality, close enough to read the faces
+  ({ p, ctx } = await open("#shot&seed=2"));
+  await p.evaluate(() => window.__table.timeScale(0));
+  await camera(p, 0.36, 0.6, 0.15); await frames(p, 4);
+  await type(p, "/roll duality"); await settle(p);
+  await checkUp(p, "duality 1440"); await shot(p, "dice-settled-1440.png");
+  // the log, with Hope, Fear, a plain roll, a hint and a critical
+  await camera(p, 1, 0, 0);
+  await p.evaluate(() => window.__table.forceRoll(3, 9)); await type(p, "/roll duality +1"); await settle(p);
+  await type(p, "/roll 3d6+2"); await settle(p);
+  await type(p, "fireball");
+  await p.evaluate(() => window.__table.forceRoll(8, 8)); await type(p, "/r"); await settle(p);
+  await p.click("#cmd-in"); await frames(p, 4);
+  await shot(p, "roll-log-1440.png");
+  await ctx.close();
+  }
+  if (want("b")) {
+  // every die but the d12, then the attack
+  ({ p, ctx } = await open("#shot&seed=11"));
+  await p.evaluate(() => window.__table.timeScale(0));
+  await camera(p, 0.5, 0.65, 0.1); await frames(p, 4);
+  await type(p, "/roll 1d4+1d6+1d8+1d10+1d20"); await settle(p);
+  await checkUp(p, "general 1440"); await shot(p, "general-dice-1440.png");
+  await camera(p, 1, 0, 0); await frames(p, 4);
+  await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
+  await type(p, "/attack +2"); await step(p, 1700);
+  const a = await p.evaluate(() => window.__table.attackPhase());
+  await step(p, Math.round((a.impactAt + 0.04 - a.t) * 1000));
+  await shot(p, "attack-hit-1440.png");
+  await ctx.close();
+  }
+  if (want("c")) {
+  // painted fallback
+  ({ p, ctx } = await open("#shot&html=off&seed=5"));
+  await p.evaluate(() => window.__table.timeScale(0));
+  await camera(p, 0.6, 0.55, 0.2); await frames(p, 4);
+  await type(p, "/roll duality"); await settle(p);
+  await type(p, "/roll d20+3"); await settle(p);
+  await checkUp(p, "painted 1440"); await shot(p, "painted-dice-1440.png");
+  await ctx.close();
+
+  // phone, lite tier
+  ({ p, ctx } = await open("#shot&tier=lite&seed=3", { w: 390, h: 844, phone: true }));
+  await p.evaluate(() => window.__table.timeScale(0));
+  await type(p, "/roll duality", true); await settle(p);
+  await checkUp(p, "phone 390"); await shot(p, "phone-dice-390.png");
+  await p.tap("#cmd-in"); await p.keyboard.type("/attack +1"); await frames(p, 2);
+  await shot(p, "phone-bar-390.png");
+  await ctx.close();
+  }
+}
+
+// frame-by-frame video on the game clock
+async function record(name, hash, script, { seconds, fps = 12 }) {
+  const { p, ctx } = await open(hash);
+  await p.evaluate(() => window.__table.timeScale(0));
+  const ff = spawn(FFMPEG, ["-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "pipe:0", "-y", "-an",
+    "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-crf", "28", "-b:v", "0", "-deadline", "good", "-cpu-used", "4", "-row-mt", "1", path.join(out, name)], { stdio: ["pipe", "inherit", "inherit"] });
+  let broken = null;
+  ff.on("error", (e) => { broken = e; }); ff.stdin.on("error", (e) => { broken = e; });
+  const n = Math.round(seconds * fps);
+  for (let i = 0; i < n; i++) {
+    await script(p, i / fps);
+    if (broken) throw new Error("ffmpeg: " + broken.message);
+    ff.stdin.write(await p.screenshot({ type: "jpeg", quality: 88 }));
+    await p.evaluate((m) => window.__table.step(m), 1000 / fps); await frames(p, 1);
+    if (i % 15 === 0) say(`${name}: frame ${i}/${n}`);
+  }
+  ff.stdin.end();
+  await new Promise((r) => ff.on("close", r));
+  await ctx.close();
+  say("wrote " + name);
+}
+
+async function videos() {
+  let sent = false;
+  if (want("roll")) await record("roll-duality.webm", "#shot&seed=7", async (p, t) => {
+    if (!sent && t >= 0.4) { sent = true; await type(p, "/roll duality"); }
+  }, { seconds: 2.8 });
+  // a hit, then a miss
+  const plan = [[0.4, 9, 4, "guardian", "/attack +2"], [3.6, 2, 4, "ranger", "/attack +0"]];
+  if (want("attack")) await record("attack.webm", "#shot&seed=9", async (p, t) => {
+    while (plan.length && t >= plan[0][0]) {
+      const [, hope, fear, hero, cmd] = plan.shift();
+      await p.evaluate(([h, f, who]) => { window.__table.forceRoll(h, f); window.__table.nextAttacker(who); }, [hope, fear, hero]);
+      await type(p, cmd);
+    }
+  }, { seconds: 7.2 });
+}
+
+// frame cost: idle (real frames), and while dice or a mini move (stepped 1/30 s per frame)
+async function perf() {
+  const rows = [];
+  for (const [label, hash, opt] of [["1440x900 full", "#shot", {}], ["390x844 lite", "#shot&tier=lite", { w: 390, h: 844, phone: true }]]) {
+    const { p, ctx } = await open(hash, opt);
+    const measure = (n, stepMs) => p.evaluate(([k, s]) => new Promise((r) => {
+      const ts = []; let last = performance.now();
+      const f = (now) => { ts.push(now - last); last = now; if (s) window.__table.step(s); if (ts.length < k) requestAnimationFrame(f); else r(ts); };
+      requestAnimationFrame(f);
+    }), [n, stepMs]);
+    const stat = (ts) => { const s = [...ts].sort((a, b) => a - b); return { frames: s.length, median: +s[Math.floor(s.length / 2)].toFixed(1), p95: +s[Math.min(s.length - 1, Math.floor(s.length * 0.95))].toFixed(1), max: +s[s.length - 1].toFixed(1) }; };
+    await frames(p, 3);
+    const idle = stat(await measure(8, 0));
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.roll("/roll duality"); });
+    await frames(p, 1);
+    const roll = stat(await measure(10, 1000 / 30));
+    await p.evaluate(() => window.__table.step(5000)); await frames(p, 3);
+    await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("ranger"); window.__table.roll("/attack +2"); window.__table.step(1700); });
+    await frames(p, 2);
+    const atk = stat(await measure(10, 1000 / 30));
+    const info = await p.evaluate(() => ({ mode: window.__table.mode, tier: window.__table.tier, px: window.__table.renderer.getPixelRatio() }));
+    rows.push({ label, ...info, idle, roll, attack: atk });
+    say(`${label}: idle ${idle.median} ms, roll ${roll.median} ms, attack ${atk.median} ms`);
+    await ctx.close();
+  }
+  fs.writeFileSync(path.join(out, "perf.json"), JSON.stringify(rows, null, 2) + "\n");
+}
+
+if (mode === "stills" || mode === "all") await stills();
+if (mode === "perf" || mode === "all") await perf();
+if (mode === "videos" || mode === "all") await videos();
+await browser.close();
+if (failures) { console.error(`${failures} failure(s)`); process.exit(1); }
