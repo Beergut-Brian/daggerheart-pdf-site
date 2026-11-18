@@ -1,0 +1,19 @@
+# Gate: home-d (pixel-art splat hero)
+- **What it is:** a depth-displaced pixel splat from one photo, not a Gaussian splat. A real 3DGS scene needs many views or an image-to-3D model. This is 86k hard-edged square points (20k on phone), one per cell, from color.jpg plus the Depth Anything depth map, in a 21-colour posterised palette.
+- **What matches JungleSilicon:** chunky square pixels at the same scale (4.4 px vs ~4-5 px), a posterised palette of one hue family plus a glowing accent, light from inside the scene falling into black, single-pixel motes rising in 3D, a slow orbit with real layered parallax, and no cracks at max angle (dark voxel "skirts" fill the depth cliffs).
+- **What it cannot match from one photo:**
+  - No back or side surfaces and no real diorama silhouette: the scene is a relief seen from above, faded into black by an ellipse.
+  - The orbit has to stay small (±6.5° yaw, ±4.5° pitch) or the relief shows.
+  - The forms are photo-derived (soft canopy) rather than modelled shapes like the squid or windmill.
+- **Fallbacks:** reduced-motion and no-WebGL show still.png (the posterised frame), with no canvas. The loop pauses offscreen and in hidden tabs. Runs from file:// with no outside requests.
+- **Page weight (hero):** 602 KB raw / 185 KB gzip.
+  - splat.bundle.js: 541 / 135 KB. This is three.js's WebGLRenderer; raw WebGL would be about 10 KB.
+  - scene-data.js: 48 / 37 KB.
+  - still.png: 12.5 KB.
+  - home-a's hero image is about 108 KB.
+- **Frame time:** headless SwiftShader (CPU, a lower bound), mean over 3 s.
+  - 1440: 57.7 ms/frame, of which 51 ms is GPU-synced render.
+  - 390: 19.0 ms/frame.
+  - A laptop GPU should hold 60 fps with 86k points in a 325x203 buffer, but that is untested.
+- **Polish:** 3 passes in home-d/polish.md. detect.json shows home-a's two warnings (eyebrow chip, Geist Mono), both from the shared markup.
+- **Verdict vs home-a:** home-d is the more distinctive and game-like hero, clearly "pixel art turning in 3D", and the mouse parallax is real. home-a is the safer and lighter choice: it keeps the photo's ring of people and atmosphere. I'd pick home-d if Kaden wants the JungleSilicon feel, and if so, swap three.js for raw WebGL before build.

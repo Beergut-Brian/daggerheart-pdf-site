@@ -7,3 +7,4 @@
 - 2026-11-18 redesign: GATE.md + polish log; boards ready for Kaden
 - 2026-11-18 redesign pass 2: tasks written (button hover, home-c splat)
 - 2026-11-18 redesign pass 2: primary button hover fill (icon box slides to fill), all boards re-rendered
+- 2026-11-18 redesign pass 2: home-d pixel-art splat board + renders
