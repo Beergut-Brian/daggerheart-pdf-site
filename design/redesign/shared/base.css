@@ -1,0 +1,121 @@
+/* Shared components for the redesign boards. Tokens only. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--color-ember); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Nav: light floating pill ---------- */
+.site-nav {
+  position: absolute; z-index: 20; top: var(--nav-top);
+  left: var(--gutter); right: var(--gutter-tight);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  pointer-events: none;
+}
+.site-nav > * { pointer-events: auto; }
+.nav-pill {
+  display: flex; align-items: center; gap: var(--space-6);
+  height: var(--nav-height);
+  padding: 0 var(--space-6) 0 var(--space-5);
+  background: var(--color-nav-bg); color: var(--color-nav-ink);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-nav);
+}
+.wordmark {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-weight: var(--weight-semibold); font-size: var(--text-body);
+  letter-spacing: -0.01em; white-space: nowrap; color: var(--color-nav-ink);
+}
+.wordmark .mark {
+  width: 1.75rem; height: 1.5rem; border-radius: var(--radius-sm);
+  background: var(--color-nav-ink); color: var(--color-nav-bg);
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: var(--text-tag); font-weight: var(--weight-medium); letter-spacing: 0;
+}
+.nav-links { display: flex; align-items: center; gap: var(--space-6); list-style: none; margin: 0; padding: 0; }
+.nav-links a { color: var(--color-nav-link); font-size: var(--text-body); white-space: nowrap; transition: color var(--dur-fast); }
+.nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--color-nav-ink); }
+.nav-divider { width: 1px; height: 1.125rem; background: var(--color-nav-divider); }
+.nav-books { display: contents; }
+@media (max-width: 899px) {
+  .site-nav { left: var(--gutter-tight); }
+  .nav-books, .nav-divider, .nav-links .nav-home { display: none; }
+  .nav-pill { width: 100%; justify-content: space-between; padding: 0 var(--space-5) 0 var(--space-4); }
+  .nav-links a { font-size: var(--text-small); }
+}
+
+/* round controls that sit outside the pill (viewer only: they must map to something real) */
+.round-control {
+  width: var(--control); height: var(--control); border-radius: var(--radius-full);
+  display: grid; place-items: center; color: var(--color-text-soft);
+  border: 1px solid var(--color-line-strong); background: var(--glass);
+}
+.round-control svg { width: 1.125rem; height: 1.125rem; }
+
+/* ---------- Tag pill ---------- */
+.tag {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  height: var(--tag-height); padding: 0 var(--space-4) 0 var(--space-3);
+  border: 1px solid var(--color-line-strong); border-radius: var(--radius-full);
+  background: var(--scrim-mid);
+  font-family: var(--font-mono); font-size: var(--text-tag); font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tag); text-transform: uppercase; color: var(--color-text-soft);
+  white-space: nowrap;
+}
+.tag::before {
+  content: ""; width: 0.3125rem; height: 0.3125rem; border-radius: var(--radius-full);
+  background: var(--color-ember);
+}
+
+/* ---------- Display headline: dim first line, bright rest ---------- */
+.display {
+  margin: 0; font-weight: var(--weight-medium);
+  font-size: var(--text-display); line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display); color: var(--color-text);
+  text-wrap: balance;
+}
+.display .dim { display: block; color: var(--color-text-dim); }
+.display .bright { display: block; }
+.lead { margin: 0; font-size: var(--text-lead); line-height: var(--leading-body); color: var(--color-text-soft); max-width: var(--measure); text-wrap: pretty; }
+
+/* ---------- Outlined CTA with icon in a white square ---------- */
+.cta {
+  display: inline-flex; align-items: center; gap: var(--space-5);
+  height: var(--cta-height); padding: var(--space-1) var(--space-8) var(--space-1) var(--space-1);
+  border: 1px solid var(--color-cta-border); border-radius: var(--radius-md);
+  background: var(--color-surface-2); color: var(--color-text);
+  font-size: var(--text-lead); font-weight: var(--weight-medium); letter-spacing: -0.005em;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.cta:hover { background: var(--color-surface-3); }
+.cta .cta-icon {
+  width: var(--cta-square); height: var(--cta-square); flex: none;
+  border-radius: var(--radius-sm); background: var(--color-cta-square); color: var(--color-cta-ink);
+  display: grid; place-items: center; transition: transform var(--dur-med) var(--ease-out);
+}
+.cta:hover .cta-icon { transform: translateX(2px); }
+.cta .cta-icon svg { width: 1.375rem; height: 1.375rem; }
+.cta--sm { height: 3rem; gap: var(--space-4); padding-right: var(--space-5); font-size: var(--text-body); }
+.cta--sm .cta-icon { width: 2.5rem; height: 2.5rem; }
+.cta--sm .cta-icon svg { width: 1.125rem; height: 1.125rem; }
+
+/* ---------- Meta (mono small caps) ---------- */
+.meta { font-family: var(--font-mono); font-size: var(--text-tag); letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-dim); }
+
+/* ---------- Board annotation (not part of the design) ---------- */
+.board-note {
+  font-family: var(--font-mono); font-size: var(--text-tag); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--color-text-faint); display: flex; align-items: center; gap: var(--space-3);
+}
+.board-note::after { content: ""; flex: 1; height: 1px; background: var(--color-line); }
