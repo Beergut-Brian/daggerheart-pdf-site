@@ -417,7 +417,7 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   // ---- per-frame
   const tmp = new THREE.Vector3();
   const world = {
-    scene, books, candles, lamp, MAT, intro: 0, lampPower: 330, moving: true, frame: 0, candleShadows: true,
+    scene, books, candles, lamp, MAT, atlas, intro: 0, lampPower: 330, moving: true, frame: 0, candleShadows: true,
     focus: new THREE.Vector3(-0.2, 0.25, 2.2),
     update(time, dt, camera, pxScale) {
       const k = world.intro;                               // 0..1, lights coming up

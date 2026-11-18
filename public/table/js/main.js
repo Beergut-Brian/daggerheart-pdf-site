@@ -5,6 +5,7 @@ import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages } from './s
 import { buildWorld } from './world.js';
 import { createCommandBar } from './command.js';
 import { createPlay } from './play.js';
+import { createDice } from './dice3d.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
 const $ = (s) => document.querySelector(s);
@@ -294,7 +295,8 @@ async function boot() {
   // ---------------------------------------------------------------- dice commands
   let play = null;
   const bar = createCommandBar({ surfaces, log, canvas, onCommand: (text) => play.run(text) });
-  play = createPlay({ bar, canAct: () => state.phase === 'table' });
+  const dice = createDice({ scene, atlas: world.atlas, calm });
+  play = createPlay({ bar, dice, canAct: () => state.phase === 'table' });
 
   // ---------------------------------------------------------------- frame
   const instant = !!hashFlag(/[#&]shot/) || calm;
@@ -336,7 +338,8 @@ async function boot() {
     }
     let moving = state.phase !== 'table';
     for (const b of books) { const to = state.hot === b.id ? 1 : 0; if (Math.abs(to - b.hover) > 0.002 || b.hover > 0.5) moving = true; b.hover += (to - b.hover) * (1 - Math.exp(-dt * 9)); }
-    world.moving = moving;
+    dice.update(now);
+    world.moving = moving || dice.busy;
 
     // camera
     const H = rig.home, U = rig.user;
@@ -418,7 +421,7 @@ async function boot() {
 
   // handles for testing from the console:  __table.open('core')
   window.__table = { world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
-    roll: (text) => play.run(text), forceRoll: (hope, fear) => play.forceRoll(hope, fear), log };
+    roll: (text) => play.run(text), dice: () => dice.readUp(), diceState: () => dice.state, forceRoll: (hope, fear) => play.forceRoll(hope, fear), log };
   const auto = hashFlag(/[#&]open=(\w+)/);
   if (auto) setTimeout(() => openBook(auto[1]), instant ? 300 : 3600);
   const cam = hashFlag(/[#&]cam=([-\d.,]+)/);

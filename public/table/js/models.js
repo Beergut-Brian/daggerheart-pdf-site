@@ -402,12 +402,71 @@ function signs(list) {
   }
   return out.map((v) => new THREE.Vector3(...v).normalize());
 }
+// d4: a tetrahedron; it rests on a face and the value is read at the top vertex,
+// so its "faces" here are the vertex directions, and each face carries three numbers.
+const D4_V = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]].map((v) => new THREE.Vector3(...v).normalize());
+function d4Decals(r, order) {
+  const out = [];
+  D4_V.forEach((vk, k) => {
+    const n = vk.clone().negate(), c = n.clone().multiplyScalar(r / 3);
+    D4_V.forEach((vj, j) => {
+      if (j === k) return;
+      const to = vj.clone().multiplyScalar(r).sub(c);
+      out.push({ n, pos: c.clone().addScaledVector(to, 0.47), up: to.normalize(), num: order[j], size: r * 0.5 });
+    });
+  });
+  return out;
+}
+
+// d10: a pentagonal trapezohedron (ten kites). Apexes at +-1, two rings of five at
+// +-z, the lower ring turned 36 degrees; h = z (1 + cos36) / (1 - cos36) keeps each kite flat.
+const D10 = (() => {
+  const c36 = Math.cos(Math.PI / 5), h = 1, z = h * (1 - c36) / (1 + c36);
+  const U = (k) => new THREE.Vector3(Math.cos(k * 2 * Math.PI / 5), z, Math.sin(k * 2 * Math.PI / 5));
+  const L = (k) => new THREE.Vector3(Math.cos((k + 0.5) * 2 * Math.PI / 5), -z, Math.sin((k + 0.5) * 2 * Math.PI / 5));
+  const T = new THREE.Vector3(0, h, 0), B = new THREE.Vector3(0, -h, 0);
+  const kites = [];
+  for (let k = 0; k < 5; k++) kites.push([T, U(k), L(k), U(k + 1)]);       // apex, side, far tip, side
+  for (let k = 0; k < 5; k++) kites.push([B, L(k), U(k + 1), L(k + 1)]);
+  const n = kites.map(([a, b, , d]) => {
+    const v = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(d, a)).normalize();
+    return v.dot(a.clone().add(b).add(d)) < 0 ? v.negate() : v;
+  });
+  return { kites, n };
+})();
+function d10Geo(r) {
+  const pos = [];
+  D10.kites.forEach(([a, b, c, d], i) => {
+    const tri = (p, q, w) => {
+      const nn = new THREE.Vector3().subVectors(q, p).cross(new THREE.Vector3().subVectors(w, p));
+      const list = nn.dot(D10.n[i]) < 0 ? [p, w, q] : [p, q, w];
+      list.forEach((v) => pos.push(v.x * r, v.y * r, v.z * r));
+    };
+    tri(a, b, c); tri(a, c, d);
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+function d10Decals(r, order) {
+  return D10.kites.map(([a, , c], i) => {
+    const pos = a.clone().lerp(c, 0.6).multiplyScalar(r);
+    const n = D10.n[i];
+    const up = a.clone().sub(c); up.addScaledVector(n, -up.dot(n)).normalize();
+    return { n, pos, up, num: order[i], size: r * 0.5 };
+  });
+}
+
 const FACES = {
+  d4: { n: D4_V, inr: 1 / 3, decal: 0.5, geo: (r) => new THREE.TetrahedronGeometry(r, 0), decals: d4Decals },
+  d10: { n: D10.n, inr: 0, decal: 0.5, geo: d10Geo, decals: d10Decals },
   d12: { n: signs([[1, 0, PHI], [PHI, 1, 0], [0, PHI, 1]]), inr: 0.7947, decal: 0.62, geo: (r) => new THREE.DodecahedronGeometry(r, 0) },
   d20: { n: signs([[1, 1, 1], [0, PHI, 1 / PHI], [1 / PHI, 0, PHI], [PHI, 1 / PHI, 0]]), inr: 0.7947, decal: 0.4, geo: (r) => new THREE.IcosahedronGeometry(r, 0) },
   d8: { n: signs([[1, 1, 1]]), inr: 0.5774, decal: 0.52, geo: (r) => new THREE.OctahedronGeometry(r, 0) },
   d6: { n: signs([[1, 0, 0], [0, 1, 0], [0, 0, 1]]), inr: 0.5774, decal: 0.62, geo: (r) => new THREE.BoxGeometry(r * 1.1547, r * 1.1547, r * 1.1547) },
 };
+export const DIE_TYPES = Object.keys(FACES);
 
 // One die, already "rolled": it sits on a face with `up` showing.
 export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed = 1 } = {}) {
@@ -426,21 +485,35 @@ export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed 
   const sitOn = F.n[Math.floor(rand() * F.n.length)];
   F.n.forEach((n, i) => { const d = -n.dot(sitOn); if (d > best) { best = d; topIdx = i; } });
   if (up != null) { const k = order.indexOf(up); [order[k], order[topIdx]] = [order[topIdx], order[k]]; }
-  const geos = [], q = new THREE.Quaternion(), zAxis = new THREE.Vector3(0, 0, 1), m = new THREE.Matrix4();
-  F.n.forEach((n, i) => {
-    const g = new THREE.PlaneGeometry(r * F.decal, r * F.decal);
-    const num = order[i] - 1, cu = num % 5, cv = Math.floor(num / 5), uv = g.attributes.uv;
+  const geos = [], q = new THREE.Quaternion(), zAxis = new THREE.Vector3(0, 0, 1), yAxis = new THREE.Vector3(0, 1, 0), m = new THREE.Matrix4();
+  const ups = [];
+  const decalAt = (n, pos, num0, size, up) => {
+    const g = new THREE.PlaneGeometry(size, size);
+    const num = num0 - 1, cu = num % 5, cv = Math.floor(num / 5), uv = g.attributes.uv;
     for (let k = 0; k < uv.count; k++) uv.setXY(k, (cu + uv.getX(k)) / 5, 1 - (cv + 1 - uv.getY(k)) / 4);
-    q.setFromUnitVectors(zAxis, n);
-    g.applyMatrix4(m.compose(n.clone().multiplyScalar(r * F.inr + 0.0015), q, new THREE.Vector3(1, 1, 1)));
+    if (up) q.setFromRotationMatrix(m.makeBasis(new THREE.Vector3().crossVectors(up, n), up, n));
+    else q.setFromUnitVectors(zAxis, n);
+    g.applyMatrix4(m.compose(pos.clone().addScaledVector(n, 0.0015), q, new THREE.Vector3(1, 1, 1)));
     geos.push(g);
-  });
+    return yAxis.clone().applyQuaternion(q);
+  };
+  if (F.decals) F.decals(r, order).forEach((d, i) => { const u = decalAt(d.n, d.pos, d.num, d.size, d.up); if (type === 'd10') ups[i] = u; });
+  else F.n.forEach((n, i) => { ups[i] = decalAt(n, n.clone().multiplyScalar(r * F.inr), order[i], r * F.decal, null); });
   const decals = new THREE.Mesh(mergeGeometries(geos), new THREE.MeshBasicMaterial({ map: atlas, color: ink, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   group.add(decals);
   const tilt = new THREE.Quaternion().setFromUnitVectors(sitOn, new THREE.Vector3(0, -1, 0));
   const yaw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spin);
   group.quaternion.copy(yaw.multiply(tilt));
   group.userData.rest = r * F.inr;
+  // for rolling: which direction points up when each value shows, and the hull to keep it on the table
+  group.userData.type = type;
+  group.userData.faces = F.n.map((n, i) => ({ n, value: order[i], up: ups[i] || null }));
+  const pa = body.geometry.attributes.position, seen = new Set(), hull = [];
+  for (let i = 0; i < pa.count; i++) {
+    const key = pa.getX(i).toFixed(4) + ',' + pa.getY(i).toFixed(4) + ',' + pa.getZ(i).toFixed(4);
+    if (!seen.has(key)) { seen.add(key); hull.push(new THREE.Vector3(pa.getX(i), pa.getY(i), pa.getZ(i))); }
+  }
+  group.userData.hull = hull;
   group.position.y = r * F.inr;
   return group;
 }
