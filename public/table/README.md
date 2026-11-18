@@ -39,7 +39,10 @@ The bar at the bottom takes chat-style commands (press `/` anywhere to jump to i
 - `/roll d20`, `/roll 3d6+2`, `/roll 1d8+1d6`: any d4, d6, d8, d10, d12 or d20 with modifiers
   (at most 10 of one kind and 20 dice in all). Plain `d20` without the slash rolls too.
 - `/attack +2` or `/roll 2d12+2 attack`: a Duality roll; then one of the party attacks the golem.
-  A total of 12 or more hits (`HIT_TARGET` in `js/dice-logic.js`); a critical always hits.
+  A total at or above the golem's Difficulty hits (`difficulty` on its entry in `js/minis.js`,
+  stand-in 12; `HIT_TARGET` in `js/dice-logic.js` is only the fallback); matching dice always hit.
+- `/attack longsword` (any case, any prefix such as `/attack long` or `/attack bash`): the character's
+  attack, the same as clicking its row on the card. `/help` lists the attacks.
 - `/help` lists them. Up and Down walk back through what you typed; Escape leaves the bar.
 
 The d10 is numbered 1 to 10 (not 0 to 9), so its face is what you add. The d4 is read at its top point.
@@ -47,6 +50,24 @@ The d10 is numbered 1 to 10 (not 0 to 9), so its face is what you add. The d4 is
 Files: `js/dice-logic.js` (the rules: parser, rolls, log lines; no three.js or DOM, unit-tested
 in `tests/unit/dice.test.ts`), `js/command.js` (bar and roll log), `js/play.js` (what a command
 does), `js/dice3d.js` (thrown dice), `js/attack.js` (the attack), `js/minis.js` (the minis).
+
+## The attack card (the note left of the books)
+
+The note shows the first character in `CHARACTERS` (`js/config.js`). Each row is one attack;
+click its dice icon (or Tab to it and press Enter/Space) to roll: 2d12 Duality + the trait
+modifier against the monster's Difficulty, the character's mini attacks the golem, and on a hit
+the damage dice follow (dice = Proficiency; a Critical Success adds the dice's maximum). On
+phones, tap the card or the **Attacks** chip above the command bar for a flat sheet.
+All names and numbers in `CHARACTERS` and the golem's `difficulty` are STAND-INS.
+
+To add a character, add an entry to `CHARACTERS`: `{ id, name, class, mini, proficiency, attacks }`,
+where `mini` is an id from `MINIS` (the figure that attacks). To add an attack, add
+`{ id, name, range: 'Melee' | 'Very Close' | 'Close' | 'Far', trait: 'Agility', mod: 2, damage: 'd8+2', type: 'phy' | 'mag' }`
+to its `attacks`; add `style: 'ranged' | 'magic'` (and a `bolt` colour) when the attack is not
+how the mini normally fights. The card fits four or five rows. The rules are pure functions in
+`js/dice-logic.js` (`rollAttack`, `formatAttack`, `findAttack`), tested in `tests/unit/attack.test.ts`;
+the card's layout (`CARD`, `cardRows`) in `js/surfaces.js` feeds the painter, the live-HTML
+buttons and the raycast hit-test; `js/card.js` handles hover, focus and the phone sheet.
 
 ## Putting your own minis on the table
 
@@ -88,4 +109,5 @@ Add after `#`, joined with `&`:
 From the console: `__table.open('core')`, `__table.close()`, `__table.roll('/attack +2')`,
 `__table.forceRoll(6, 6)` (the next Duality roll shows Hope 6, Fear 6), `__table.nextAttacker('ranger')`,
 `__table.dice()` (each thrown die's rolled value and the number actually facing up),
-`__table.timeScale(0)` and `__table.step(50)` (freeze, then step, dice and attacks in ms; for stills).
+`__table.timeScale(0)` and `__table.step(50)` (freeze, then step, dice and attacks in ms; for stills),
+`__table.rollAttack('longsword')`, `__table.card().openSheet()`, `__table.cardPoint(0)` (a row's icon on screen).

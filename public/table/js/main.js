@@ -428,7 +428,7 @@ async function boot() {
     }
 
     // focus: on the books, or on whichever one has your attention
-    const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : world.focus;
+    const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : cardState.hot >= 0 && world.note ? world.note.position : world.focus;
     const fd = camera.position.distanceTo(focusOn);
 
     if (usePost) {

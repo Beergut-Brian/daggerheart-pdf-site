@@ -1,5 +1,6 @@
 // Proof shots, videos, the up-face check and frame timings for /table's dice and attack.
-//   node scripts/table-proof.mjs [stills|videos|perf|all] [baseUrl] [outDir]
+//   node scripts/table-proof.mjs [stills|videos|perf|card|all] [baseUrl] [outDir]
+// card: the attack card (pass 2): a row's dice icon rolls, video + stills; not part of "all".
 // Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
 // (software GL), so it is slow: videos are rendered frame by frame on the table's game clock
 // (__table.timeScale(0) + __table.step(ms)) and piped to ffmpeg, so they play at real speed.
@@ -115,7 +116,7 @@ async function stills() {
 }
 
 // frame-by-frame video on the game clock
-async function record(name, hash, script, { seconds, fps = 12 }) {
+async function record(name, hash, script, { seconds, fps = 12, lean = false }) {
   const { p, ctx } = await open(hash);
   await p.evaluate(() => window.__table.timeScale(0));
   const ff = spawn(FFMPEG, ["-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "pipe:0", "-y", "-an",
@@ -127,7 +128,8 @@ async function record(name, hash, script, { seconds, fps = 12 }) {
     await script(p, i / fps);
     if (broken) throw new Error("ffmpeg: " + broken.message);
     ff.stdin.write(await p.screenshot({ type: "jpeg", quality: 88 }));
-    await p.evaluate((m) => window.__table.step(m), 1000 / fps); await frames(p, 1);
+    // lean: the next screenshot renders the stepped frame itself, so skip the extra rAF (halves the cost)
+    await p.evaluate((m) => window.__table.step(m), 1000 / fps); if (!lean) await frames(p, 1);
     if (i % 15 === 0) say(`${name}: frame ${i}/${n}`);
   }
   ff.stdin.end();
@@ -180,6 +182,57 @@ async function perf() {
   fs.writeFileSync(path.join(out, "perf.json"), JSON.stringify(rows, null, 2) + "\n");
 }
 
+// the attack card: click a row's dice icon -> Duality -> log -> the guardian attacks -> damage dice -> log
+// close on the card, and jump the camera there instead of easing (each frame is seconds under SwiftShader)
+const toCard = (p) => p.evaluate(() => {
+  const R = window.__table.rig; R.user.zoom = 0.22; R.off.set(-5.6, 0, 2.9);
+  R.cur.target.copy(R.home.target).add(R.off); R.cur.dist = R.home.dist * 0.22; R.cur.el = R.home.el; R.cur.az = R.home.az;
+});
+const cardPoint = (p, i, part = "icon") => p.evaluate(([k, pt]) => window.__table.cardPoint(k, pt), [i, part]);
+async function card() {
+  let p, ctx;
+  if (want("video")) {
+    let clicked = false;
+    await record("attack-card.webm", "#shot&dof=off&seed=21", async (pg, t) => {
+      if (!clicked && t >= 0.3) {
+        clicked = true;
+        await pg.evaluate(() => window.__table.forceRoll(9, 4));      // a hit: 9 + 4 + Agility 2 = 15 vs 12
+        const pt = await cardPoint(pg, 0);
+        await pg.mouse.move(pt.x, pt.y); await frames(pg, 1); await pg.mouse.click(pt.x, pt.y); await frames(pg, 1);
+      }
+    }, { seconds: 5.0, fps: 8, lean: true });   // 8 fps: SwiftShader takes seconds a frame
+  }
+  if (want("html")) {
+    ({ p, ctx } = await open("#shot&dof=off&seed=21"));
+    await p.evaluate(() => window.__table.timeScale(0));
+    await toCard(p); await frames(p, 3);
+    await p.focus('#surf-note button[data-row="0"]'); await frames(p, 3);
+    say("mode " + (await p.evaluate(() => window.__table.mode)));
+    await shot(p, "attack-card-1440.png");
+    await ctx.close();
+  }
+  if (want("painted")) {
+    ({ p, ctx } = await open("#shot&html=off&dof=off&seed=21"));
+    await p.evaluate(() => window.__table.timeScale(0));
+    await toCard(p); await frames(p, 3);
+    const pt = await cardPoint(p, 1, "row");
+    await p.mouse.move(pt.x, pt.y); await frames(p, 3);
+    const hot = await p.evaluate(() => window.__table.card() && document.querySelector("#gl").classList.contains("is-card"));
+    if (!hot) failures++;
+    say("painted hover via raycast: " + hot);
+    await shot(p, "attack-card-painted-1440.png");
+    await ctx.close();
+  }
+  if (want("phone")) {
+    ({ p, ctx } = await open("#shot&tier=lite&seed=21", { w: 390, h: 844, phone: true }));
+    await p.evaluate(() => window.__table.timeScale(0));
+    await p.tap("#attacks-chip"); await frames(p, 2);
+    await shot(p, "phone-card-sheet-390.png");
+    await ctx.close();
+  }
+}
+
+if (mode === "card") await card();
 if (mode === "stills" || mode === "all") await stills();
 if (mode === "perf" || mode === "all") await perf();
 if (mode === "videos" || mode === "all") await videos();
