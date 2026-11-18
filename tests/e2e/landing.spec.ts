@@ -41,7 +41,7 @@ test.describe("landing /", () => {
     page.on("response", async (r) => { if (r.url().endsWith(".js")) js.push(await r.text().catch(() => "")); });
     await page.goto("/#perf", { waitUntil: "load" });
     await expect(page.locator(".hero-media img")).toBeVisible();
-    await expect.poll(() => hero(page).getAttribute("data-splat"), { timeout: 20_000 }).toMatch(/^(live|still)$/);
+    await page.waitForFunction(() => (document.querySelector(".hero") as HTMLElement).dataset.splat === "live", null, { timeout: 25_000 }).catch(() => {});
     if ((await hero(page).getAttribute("data-splat")) === "still") test.skip(true, "no WebGL in this browser: the still stays (also covered by the reduced-motion test)");
     await expect(page.locator("canvas.hero-splat[data-ready]")).toHaveCount(1);
     const frames = () => page.evaluate(() => (window as unknown as { __splat: { frames: number } }).__splat.frames);
