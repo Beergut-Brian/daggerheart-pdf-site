@@ -1,9 +1,9 @@
 // Screenshots for review: node scripts/review-shots.mjs <outDir>   (needs `next start -p 3100`)
 import { chromium } from "playwright-core";
 import fs from "node:fs";
-const out = process.argv[2] || "../review/build-1";
+const out = process.argv[2] || "../review/redesign-build";
 fs.mkdirSync(out, { recursive: true });
-const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome", args: ["--no-sandbox"] });
+const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome", args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const base = "http://localhost:3100";
 for (const [w, h, dpr, tag] of [[1440, 900, 1, "1440"], [390, 844, 2, "390"]]) {
   const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, hasTouch: w < 800 });
@@ -12,8 +12,8 @@ for (const [w, h, dpr, tag] of [[1440, 900, 1, "1440"], [390, 844, 2, "390"]]) {
   await p.screenshot({ path: `${out}/home-${tag}.png` });
   await p.goto(base + "/resources", { waitUntil: "networkidle" }); await p.waitForTimeout(800);
   await p.screenshot({ path: `${out}/resources-${tag}.png` });
-  await p.goto(base + "/resources/core-rulebook?p=19", { waitUntil: "networkidle" });
-  await p.waitForFunction(() => document.body.dataset.pageReady === "19", null, { timeout: 60000 }); await p.waitForTimeout(1500);
+  await p.goto(base + "/resources/core-rulebook?p=135", { waitUntil: "networkidle" });
+  await p.waitForFunction(() => document.body.dataset.pageReady === "135", null, { timeout: 60000 }); await p.waitForTimeout(1500);
   if (w >= 900) {
     await p.getByRole("searchbox").fill("Hope"); await p.waitForSelector('[role="option"]'); await p.waitForTimeout(2500);
     await p.screenshot({ path: `${out}/viewer-${tag}-search.png` });

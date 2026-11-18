@@ -10,3 +10,5 @@
 - 2026-11-18 redesign pass 2: home-d pixel-art splat board + renders
 - 2026-11-18 redesign pass 2: home-c soft splat board + renders; GATE.md updated; boards ready for Kaden
 - 2026-11-18 build: tokens, fonts, base + button ported; salt engine removed; nav + Cta components
+- 2026-11-18 build: landing (home-d), plain WebGL splat, static scene assets, landing tests
+- 2026-11-18 build: resources/viewer restyled (builder), tests green, PERF.md, review set; ready for review (not pushed)
