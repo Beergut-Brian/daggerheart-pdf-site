@@ -25,6 +25,26 @@
   --ink: #efe8d6;
   --dim: rgba(239, 232, 214, .64);
   --gold: #e7c77c;
+  --fear: #b99cff;
+  --panel: rgba(9, 8, 28, .82);
+  --line: rgba(231, 199, 124, .34);
+  --line-hot: rgba(231, 199, 124, .7);
+  --shade: rgba(0, 0, 0, .55);
+  /* command bar: --kb is set by js/command.js to the height an on-screen keyboard covers */
+  --bar-h: 48px;
+  --bar-w: 560px;
+  --bar-inset: 12px;
+  --bar-bottom: max(18px, env(safe-area-inset-bottom));
+  --kb: 0px;
+  --gold-hi: #f6dc94;
+  --gold-lo: #c9973c;
+  --on-gold: #1b1203;
+  --row-bg: rgba(9, 8, 28, .8);
+  --fear-line: rgba(185, 156, 255, .42);
+  --crit-ink: #fff3d2;
+  --crit-bg: rgba(48, 34, 8, .86);
+  --crit-line: rgba(255, 214, 130, .85);
+  --crit-glow: rgba(255, 200, 90, .9);
   --serif: Cinzel, "Trajan Pro", Georgia, serif;
   --sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --hand: Caveat, "Segoe Script", "Bradley Hand", cursive;
@@ -50,13 +70,28 @@ body.is-open .hud.hide-open, body.is-leaving .hud { opacity: 0; pointer-events: 
 #home:hover { color: var(--ink); }
 #home svg { width: 14px; height: 14px; }
 
-#hint { left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; white-space: nowrap; pointer-events: none;
+#hint { left: 50%; bottom: calc(var(--bar-bottom) + var(--bar-h) + 16px); transform: translateX(-50%); margin: 0; white-space: nowrap; pointer-events: none;
   font: 500 13px/1 var(--sans); letter-spacing: .06em; color: var(--dim); text-shadow: 0 1px 8px rgba(0, 0, 0, .8); transition-delay: 1.6s; }
 #hint b { color: var(--gold); font-weight: 500; }
 body.has-touched #hint { opacity: 0; transition-delay: 0s; }
 
 #mode { right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; pointer-events: none;
   font: 500 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: rgba(239, 232, 214, .34); }
+
+/* command bar: chat-style dice commands */
+#cmd { left: 50%; bottom: calc(var(--bar-bottom) + var(--kb)); transform: translateX(-50%); width: min(var(--bar-w), calc(100vw - var(--bar-inset) * 2)); height: var(--bar-h); margin: 0;
+  display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 18px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line);
+  box-shadow: 0 18px 50px var(--shade); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: opacity .9s ease, border-color .2s ease; }
+#cmd:focus-within { border-color: var(--line-hot); }
+#cmd:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 3px; }
+#cmd input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: none; color: var(--ink); font: 500 16px/1 var(--sans); letter-spacing: .02em; }
+#cmd input::placeholder { color: var(--dim); }
+#cmd button { appearance: none; flex: none; height: 100%; min-width: 64px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(var(--gold-hi), var(--gold-lo)); color: var(--on-gold); font: 700 12px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+#cmd button:hover { filter: brightness(1.08); }
+#cmd button:active { transform: scale(.97); }
+#cmd button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+body.is-open #cmd, body.is-leaving #cmd { visibility: hidden; }
 
 /* floating plate that names the book under the pointer */
 #plate { position: fixed; z-index: 4; left: 0; top: 0; width: max-content; max-width: min(270px, 76vw); pointer-events: none; opacity: 0;
@@ -76,7 +111,7 @@ body.has-touched #hint { opacity: 0; transition-delay: 0s; }
   opacity: 0; pointer-events: none; transition: opacity .5s ease, transform .5s ease; }
 #enter.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 #enter a { display: inline-flex; align-items: center; gap: .6em; min-height: 50px; padding: 0 28px; border-radius: 999px; text-decoration: none; white-space: nowrap;
-  background: linear-gradient(#f6dc94, #c9973c); color: #1b1203; font: 700 14px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase;
+  background: linear-gradient(var(--gold-hi), var(--gold-lo)); color: var(--on-gold); font: 700 14px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase;
   box-shadow: 0 10px 40px rgba(240, 190, 90, .35), inset 0 1px 0 rgba(255, 255, 255, .6); transition: transform .15s ease, filter .15s ease; }
 #enter a:hover { filter: brightness(1.08); }
 #enter a:active { transform: scale(.97); }
@@ -162,8 +197,22 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 .note .nt-a { font-weight: 700; font-size: 50px; line-height: 62px; text-wrap: balance; }
 .note .nt-b { font-weight: 600; font-size: 36px; margin-top: 34px; color: #7a3a2a; }
 
+/* the roll log (screen-space; drawn by js/command.js, painted twin in surfaces.js) */
+.rolllog { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
+.rolllog .lg-row { display: flex; align-items: center; gap: 12px; height: 32px; margin: 3px 0; max-width: calc(100% - 4px); padding: 0 16px; border-radius: 15px; overflow: hidden; white-space: nowrap;
+  background: var(--row-bg); border: 1px solid var(--line); color: var(--ink); }
+.rolllog .lg-row::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.rolllog .lg-row b { font: 700 17px/1 var(--sans); }
+.rolllog .lg-row span { font: 500 13px/1 var(--sans); color: var(--dim); }
+.rolllog .lg-hope { color: var(--gold); }
+.rolllog .lg-fear { color: var(--fear); border-color: var(--fear-line); }
+.rolllog .lg-critical { color: var(--crit-ink); background: var(--crit-bg); border-color: var(--crit-line); }
+.rolllog .lg-critical b { text-shadow: 0 0 10px var(--crit-glow); }
+.rolllog .lg-hint { color: var(--dim); }
+.rolllog .lg-hint::before { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  .hud, #load, #plate, #enter { transition: none; }
+  .hud, #load, #plate, #enter, #cmd { transition: none; }
   .cover.is-hot .cv-sheen, .gm .gm-title span, #load p { animation: none; }
   .spread-right .sp-name .w span, .spread-right :is(.sp-kicker, .sp-rule, .sp-sub, .sp-meta, .sp-go) { opacity: 1; transform: none; filter: none; transition: none; }
 }
@@ -178,6 +227,13 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 <a id="home" class="hud hide-open" href="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4"/></svg>High Sodium Gaming</a>
 <p id="hint" class="hud hide-open"><b>Pick up a book</b> to open it · drag to look around</p>
 <p id="mode" class="hud hide-open" aria-hidden="true"></p>
+
+<form id="cmd" class="hud" autocomplete="off">
+  <label class="sr" for="cmd-in">Dice command, for example /roll duality, /roll 2d6+1 or /attack +2</label>
+  <input id="cmd-in" type="text" name="cmd" inputmode="text" enterkeyhint="send" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="80" placeholder="/roll duality · /attack +2 · /help">
+  <button type="submit">Roll</button>
+</form>
+<div id="log-live" class="sr" role="log" aria-live="polite" aria-label="Dice rolls"></div>
 
 <div id="plate" aria-hidden="true"><div class="box"><h2></h2><p class="sub"></p><p class="meta"></p><span class="pill">Open</span></div></div>
 

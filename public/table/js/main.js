@@ -1,8 +1,10 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
 import { BOOKS, hrefFor, HOME_HREF, ON_SITE, pickTier } from './config.js';
-import { Surfaces, defineSurfaces, loadCoverImages } from './surfaces.js';
+import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages } from './surfaces.js';
 import { buildWorld } from './world.js';
+import { createCommandBar } from './command.js';
+import { createPlay } from './play.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
 const $ = (s) => document.querySelector(s);
@@ -46,6 +48,8 @@ async function boot() {
 
   const surfaces = new Surfaces(renderer);
   defineSurfaces(surfaces, BOOKS, images);
+  const log = { rows: [] };
+  defineLogSurface(surfaces, log);
   const mode = await surfaces.ready();
   $('#mode').textContent = mode === 'html' ? 'Live HTML in canvas' : '';
   if (matchMedia('(pointer: coarse)').matches) $('#hint').innerHTML = '<b>Tap a book</b> to open it · drag to look around';
@@ -287,6 +291,11 @@ async function boot() {
     if (state.phase === 'table') rig.user.zoom = clamp(rig.user.zoom * Math.exp(e.deltaY * 0.0011), 0.5, 1.2);
   }, { passive: false });
 
+  // ---------------------------------------------------------------- dice commands
+  let play = null;
+  const bar = createCommandBar({ surfaces, log, canvas, onCommand: (text) => play.run(text) });
+  play = createPlay({ bar, canAct: () => state.phase === 'table' });
+
   // ---------------------------------------------------------------- frame
   const instant = !!hashFlag(/[#&]shot/) || calm;
   const goal = { target: new THREE.Vector3(), az: 0, el: 0, dist: 0 };
@@ -402,12 +411,14 @@ async function boot() {
     } else {
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     }
+    bar.update(now); bar.render(renderer);
     if (firstFrame) { firstFrame = false; document.body.classList.add('is-ready'); }
   }
   renderer.setAnimationLoop(frame);
 
   // handles for testing from the console:  __table.open('core')
-  window.__table = { world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier };
+  window.__table = { world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
+    roll: (text) => play.run(text), forceRoll: (hope, fear) => play.forceRoll(hope, fear), log };
   const auto = hashFlag(/[#&]open=(\w+)/);
   if (auto) setTimeout(() => openBook(auto[1]), instant ? 300 : 3600);
   const cam = hashFlag(/[#&]cam=([-\d.,]+)/);

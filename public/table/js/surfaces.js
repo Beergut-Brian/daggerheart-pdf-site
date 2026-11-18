@@ -449,6 +449,56 @@ function buildNoteEl(el) {
   el.append(h('p', 'nt-a', 'Our table’s Daggerheart books, searchable on your phone.'), h('p', 'nt-b', '— pick one up & roll'));
 }
 
+// ---------------------------------------------------------------- the roll log
+// Screen-space, under the command bar's control. `log.rows` holds up to six
+// { text, detail, tone: 'hope'|'fear'|'critical'|'plain'|'hint', alpha }, oldest first.
+// Colours match the .rolllog rules in index.html.
+
+export const LOG_SIZE = [600, 240];
+const LOG_ROW = 38, LOG_GAP = 2;
+const LOG_TONE = { hope: '#e7c77c', fear: '#b99cff', critical: '#fff3d2', plain: '#efe8d6', hint: 'rgba(239,232,214,0.64)' };
+
+export function paintLog(g, W, H, rows) {
+  g.textBaseline = 'middle';
+  let y = H - LOG_ROW;
+  for (let i = rows.length - 1; i >= 0 && y >= 0; i--, y -= LOG_ROW + LOG_GAP) {
+    const r = rows[i];
+    if (r.alpha <= 0.01) continue;
+    g.save(); g.globalAlpha = r.alpha;
+    g.font = `700 17px ${SANS}`; const tw = g.measureText(r.text).width;
+    g.font = `500 13px ${SANS}`; const dw = r.detail ? g.measureText(r.detail).width + 12 : 0;
+    const pad = 16, w = Math.min(W - 4, tw + dw + pad * 2 + (r.tone === 'hint' ? 0 : 16)), x = (W - w) / 2;
+    roundRect(g, x, y + 3, w, LOG_ROW - 6, 15);
+    g.fillStyle = r.tone === 'critical' ? 'rgba(48,34,8,0.86)' : 'rgba(9,8,28,0.8)'; g.fill();
+    g.lineWidth = 1; g.strokeStyle = r.tone === 'critical' ? 'rgba(255,214,130,0.85)' : r.tone === 'fear' ? 'rgba(185,156,255,0.42)' : 'rgba(231,199,124,0.34)'; g.stroke();
+    let cx = x + pad;
+    if (r.tone !== 'hint') { g.fillStyle = LOG_TONE[r.tone]; g.beginPath(); g.arc(cx + 4, y + LOG_ROW / 2, 4, 0, 7); g.fill(); cx += 16; }
+    g.save(); g.beginPath(); g.rect(x, y, w - pad / 2, LOG_ROW); g.clip();
+    g.font = `700 17px ${SANS}`; g.fillStyle = LOG_TONE[r.tone];
+    if (r.tone === 'critical') { g.shadowColor = 'rgba(255,200,90,0.9)'; g.shadowBlur = 10; }
+    g.fillText(r.text, cx, y + LOG_ROW / 2 + 1); g.shadowBlur = 0; cx += tw + 12;
+    if (r.detail) { g.font = `500 13px ${SANS}`; g.fillStyle = 'rgba(239,232,214,0.64)'; g.fillText(r.detail, cx, y + LOG_ROW / 2 + 1); }
+    g.restore(); g.restore();
+  }
+}
+
+function buildLogEl(el, rows) {
+  const [W, H] = LOG_SIZE;
+  el.style.width = W + 'px'; el.style.height = H + 'px';
+  for (const r of rows) {
+    const row = h('p', 'lg-row lg-' + r.tone);
+    row.style.opacity = r.alpha.toFixed(2);
+    row.append(h('b', null, r.text));
+    if (r.detail) row.append(h('span', null, r.detail));
+    el.append(row);
+  }
+}
+
+export function defineLogSurface(set, log) {
+  return set.define({ id: 'log', cls: 'rolllog', size: LOG_SIZE, scale: 2, attrs: { 'aria-hidden': 'true' },
+    paint: (g, W, H) => paintLog(g, W, H, log.rows), build: (el) => buildLogEl(el, log.rows) });
+}
+
 // ---------------------------------------------------------------- the set
 
 function detect(gl) {
@@ -509,9 +559,10 @@ export class Surfaces {
 
   _startCanvas() {
     for (const s of this.list) {
-      const [W, H] = s.size;
-      const c = makeCanvas(W, H);
-      s.paint(c.getContext('2d'), W, H, { text: true });
+      const [W, H] = s.size, k = s.scale || 1;
+      const c = makeCanvas(W * k, H * k), g = c.getContext('2d');
+      g.scale(k, k);
+      s.paint(g, W, H, { text: true });
       const t = new THREE.CanvasTexture(c);
       t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = this.maxAniso;
       s.texture = t; s.canvas2d = c;
@@ -623,6 +674,19 @@ export class Surfaces {
         s.el.style.transform = 'matrix3d(' + Array.from(e).map((v) => +v.toFixed(6)).join(',') + ')';
       }
     } catch (err) { this.place = () => {}; }
+  }
+
+  // Redraw a surface whose content changed (the roll log): rebuild its element on
+  // the live path, or repaint its 2D canvas on the painted one.
+  repaint(id) {
+    const s = this.byId[id];
+    if (!s) return;
+    if (this.mode === 'html') { s.el.textContent = ''; s.build(s.el); this.touch(id); return; }
+    if (!s.canvas2d) return;
+    const [W, H] = s.size, k = s.scale || 1, g = s.canvas2d.getContext('2d');
+    g.setTransform(k, 0, 0, k, 0, 0); g.clearRect(0, 0, W, H);
+    s.paint(g, W, H, { text: true });
+    s.texture.needsUpdate = true;
   }
 
   // Called once per frame: keeps animated surfaces flowing.
