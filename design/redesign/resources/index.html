@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daggerheart Resources · High Sodium Gaming</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+  /* Picker: the covers are the objects; everything else is quiet. */
+  .glow { position: absolute; inset: 0 0 auto 0; height: 34rem; z-index: -1; overflow: hidden; pointer-events: none; }
+  .glow img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; opacity: 0.7; }
+  .glow::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, var(--scrim-solid) 0, var(--scrim-strong) 30%, var(--scrim-mid) 70%, var(--scrim-strong) 100%),
+      linear-gradient(180deg, var(--scrim-soft) 0, var(--scrim-mid) 50%, var(--scrim-solid) 100%);
+  }
+  main { position: relative; isolation: isolate; padding: calc(var(--nav-top) + var(--nav-height) + var(--space-24)) var(--gutter) var(--space-24); }
+  .page-head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-6); margin-bottom: var(--space-16); }
+  .page-head .display { font-size: var(--text-h1); }
+
+  .shelf { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-16) var(--space-12); grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 62rem; }
+  .book { display: flex; flex-direction: column; gap: var(--space-6); }
+  .book .cover { position: relative; display: block; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-cover); aspect-ratio: 760 / 984; background: var(--color-surface); transition: transform var(--dur-med) var(--ease-out); }
+  .book .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .book a.cover:hover { transform: translateY(-4px); }
+  .book-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
+  .book h2 { margin: 0; font-size: var(--text-h2); font-weight: var(--weight-medium); letter-spacing: var(--tracking-heading); line-height: var(--leading-tight); }
+  .book p { margin: 0; color: var(--color-text-soft); max-width: 26rem; }
+  .book .meta { margin-top: var(--space-1); }
+  .book .cta { align-self: flex-start; }
+
+  /* states */
+  .states { margin-top: var(--space-24); display: grid; gap: var(--space-16); max-width: 62rem; }
+  .state { display: grid; gap: var(--space-8); }
+  .shelf--one { grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); align-items: end; }
+  .shelf--one .book { display: contents; }
+  .shelf--many { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-10) var(--space-8); }
+  .shelf--many .book h2 { font-size: var(--text-h3); letter-spacing: -0.01em; }
+  .shelf--many .book .cta { display: none; }
+  .shelf--many .book { gap: var(--space-4); }
+  .cover.sample { display: grid; place-items: center; background: var(--color-placeholder); box-shadow: 0 0 0 1px var(--color-line) inset; }
+  .cover.sample span { font-family: var(--font-mono); font-size: var(--text-tag); letter-spacing: var(--tracking-tag); text-transform: uppercase; color: var(--color-text-faint); }
+
+  @media (max-width: 699px) {
+    main { padding: calc(var(--nav-top) + var(--nav-height) + var(--space-12)) var(--space-5) var(--space-16); }
+    .glow { height: 22rem; }
+    .page-head { gap: var(--space-4); margin-bottom: var(--space-10); }
+    .shelf { grid-template-columns: minmax(0, 1fr); gap: var(--space-12); }
+    .book .cover { width: min(100%, 20rem); }
+    .shelf--one { grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+    .shelf--one .cta { display: none; }
+    .shelf--many { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8) var(--space-4); }
+    .shelf--many .book p { display: none; }
+    .shelf--many .book .cover { width: 100%; }
+    .states { margin-top: var(--space-16); gap: var(--space-12); }
+  }
+</style>
+</head>
+<body>
+<header class="site-nav">
+  <nav class="nav-pill" aria-label="Main">
+    <a class="wordmark" href="../home-a/index.html"><span class="mark" aria-hidden="true">HSG</span>High Sodium Gaming</a>
+    <ul class="nav-links">
+      <li class="nav-home"><a href="../home-a/index.html">Home</a></li>
+      <li><a href="index.html" aria-current="page">Daggerheart Resources</a></li>
+      <li class="nav-divider" aria-hidden="true"></li>
+      <li class="nav-books"><a href="../viewer/index.html">Core Rulebook</a></li>
+      <li class="nav-books"><a href="../viewer/index.html">Hope &amp; Fear</a></li>
+    </ul>
+  </nav>
+</header>
+<div class="glow" aria-hidden="true">
+  <picture>
+    <source type="image/avif" srcset="../img/hero-campfire-1200.avif">
+    <img src="../img/hero-campfire-1200.jpg" alt="" width="1200" height="672">
+  </picture>
+</div>
+<main>
+  <header class="page-head">
+    <span class="tag">2 books</span>
+    <h1 class="display"><span class="dim">Daggerheart</span><span class="bright">Resources</span></h1>
+  </header>
+
+  <ul class="shelf" aria-label="Books">
+    <li class="book">
+      <a class="cover" href="../viewer/index.html" aria-label="Open Daggerheart Core Rulebook"><img src="../img/core-rulebook.webp" alt="" width="760" height="984"></a>
+      <div class="book-body">
+        <h2>Daggerheart Core Rulebook</h2>
+        <p>Everything: characters, play, GM tools, adversaries, campaign frames</p>
+        <span class="meta">397 pages · 5 chapters</span>
+      </div>
+      <a class="cta cta--sm" href="../viewer/index.html"><span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>Open</a>
+    </li>
+    <li class="book">
+      <a class="cover" href="../viewer/index.html" aria-label="Open Daggerheart: Hope &amp; Fear"><img src="../img/hope-and-fear.webp" alt="" width="760" height="1001"></a>
+      <div class="book-body">
+        <h2>Daggerheart: Hope &amp; Fear</h2>
+        <p>The expansion</p>
+        <span class="meta">204 pages · Expansion</span>
+      </div>
+      <a class="cta cta--sm" href="../viewer/index.html"><span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>Open</a>
+    </li>
+  </ul>
+
+  <!-- Board only: how the shelf holds other counts. Not part of the page. -->
+  <section class="states" aria-label="Board states">
+    <div class="state">
+      <p class="board-note">Sample state · 1 book</p>
+      <ul class="shelf shelf--one">
+        <li class="book">
+          <span class="cover"><img src="../img/core-rulebook.webp" alt="" width="760" height="984"></span>
+          <div class="book-body">
+            <h2>Daggerheart Core Rulebook</h2>
+            <p>Everything: characters, play, GM tools, adversaries, campaign frames</p>
+            <span class="meta">397 pages · 5 chapters</span>
+            <span class="cta cta--sm"><span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>Open</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="state">
+      <p class="board-note">Sample state · 6 books (3 columns from 3 books up; 4 are placeholders)</p>
+      <ul class="shelf shelf--many">
+        <li class="book"><span class="cover"><img src="../img/core-rulebook.webp" alt="" width="760" height="984"></span><div class="book-body"><h2>Daggerheart Core Rulebook</h2><span class="meta">397 pages · 5 chapters</span></div></li>
+        <li class="book"><span class="cover"><img src="../img/hope-and-fear.webp" alt="" width="760" height="1001"></span><div class="book-body"><h2>Daggerheart: Hope &amp; Fear</h2><span class="meta">204 pages · Expansion</span></div></li>
+        <li class="book"><span class="cover sample"><span>Sample 3</span></span><div class="book-body"><h2>Sample book</h2><span class="meta">— pages</span></div></li>
+        <li class="book"><span class="cover sample"><span>Sample 4</span></span><div class="book-body"><h2>Sample book</h2><span class="meta">— pages</span></div></li>
+        <li class="book"><span class="cover sample"><span>Sample 5</span></span><div class="book-body"><h2>Sample book</h2><span class="meta">— pages</span></div></li>
+        <li class="book"><span class="cover sample"><span>Sample 6</span></span><div class="book-body"><h2>Sample book</h2><span class="meta">— pages</span></div></li>
+      </ul>
+    </div>
+  </section>
+</main>
+</body>
+</html>
