@@ -7,7 +7,7 @@ import { LOG_SIZE } from './surfaces.js';
 
 const SHOW_MS = 8000, FADE_MS = 700, KEEP = 6, HISTORY = 30;
 
-export function createCommandBar({ surfaces, log, canvas, onCommand, renderer = null }) {
+export function createCommandBar({ surfaces, log, canvas, onCommand, renderer = null, clock = () => performance.now() }) {
   const form = document.querySelector('#cmd'), input = document.querySelector('#cmd-in'), live = document.querySelector('#log-live');
   const root = document.documentElement;
   const entries = [];                 // { text, detail, tone, t }
@@ -58,7 +58,7 @@ export function createCommandBar({ surfaces, log, canvas, onCommand, renderer = 
   // ---- the log
   let dirty = true, sig = '';
   function add(line) {
-    entries.push({ ...line, t: performance.now() });
+    entries.push({ ...line, t: clock() });   // game clock, so the log fades in step with the dice (and in paused proofs)
     while (entries.length > KEEP) entries.shift();
     const p = document.createElement('p');
     p.textContent = line.detail ? `${line.text}. ${line.detail}` : line.text;
@@ -83,6 +83,7 @@ export function createCommandBar({ surfaces, log, canvas, onCommand, renderer = 
     const s = log.rows.map((r) => r.alpha).join() + '|' + entries.map((e) => e.t).join();
     if (dirty || s !== sig) { sig = s; dirty = false; surfaces.repaint('log'); }
     quad.visible = log.rows.some((r) => r.alpha > 0) && !document.body.classList.contains('is-open');
+    document.body.classList.toggle('has-log', quad.visible);   // the intro hint makes way for the log
     if (!quad.visible) return;
     // sit just above the bar, scaled down on narrow screens
     const cw = canvas.clientWidth, ch = canvas.clientHeight, br = form.getBoundingClientRect(), cr = canvas.getBoundingClientRect();

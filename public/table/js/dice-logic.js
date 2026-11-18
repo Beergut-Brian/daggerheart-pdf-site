@@ -282,7 +282,7 @@ export function formatAttack(r, attack) {
   const how = r.crit ? 'Critical Success' : `${d.total} with ${d.outcome === 'hope' ? 'Hope' : 'Fear'}`;
   const roll = {
     text: `${attack.name}: ${how}, ${r.hit ? 'hit' : 'miss'}`,
-    detail: `Hope ${d.hope} · Fear ${d.fear} ${signed(d.mod)}${r.crit ? ' = ' + d.total : ''} vs Difficulty ${r.difficulty}`,
+    detail: `Hope ${d.hope} · Fear ${d.fear} ${signed(d.mod)}${r.crit ? ' = ' + d.total : ''} vs ${r.difficulty}`,
     tone: d.outcome, hit: r.hit,
   };
   if (!r.damage) return { roll, damage: null };

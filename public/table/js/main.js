@@ -311,10 +311,10 @@ async function boot() {
 
   // ---------------------------------------------------------------- dice commands
   let play = null;
-  const bar = createCommandBar({ surfaces, log, canvas, renderer, onCommand: (text) => play.run(text) });
   // dice and attacks run on their own clock, so proofs can slow or freeze them: __table.timeScale(0)
   const game = { t: performance.now(), prev: performance.now(), scale: 1 };
   const gameClock = () => game.t;
+  const bar = createCommandBar({ surfaces, log, canvas, renderer, clock: gameClock, onCommand: (text) => play.run(text) });
   const dice = createDice({ scene, atlas: world.atlas, calm, clock: gameClock, view: () => camera.position });
   const attack = createAttack({ scene, minis: world.minis, calm, lite, clock: gameClock });
   play = createPlay({ bar, dice, attack, character, canAct: () => state.phase === 'table' });
@@ -447,7 +447,7 @@ async function boot() {
     } else {
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     }
-    bar.update(now); bar.render(renderer);
+    bar.update(gameClock()); bar.render(renderer);
     if (firstFrame) { firstFrame = false; document.body.classList.add('is-ready'); }
   }
   renderer.setAnimationLoop(frame);

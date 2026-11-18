@@ -223,6 +223,15 @@ async function card() {
     await shot(p, "attack-card-painted-1440.png");
     await ctx.close();
   }
+  if (want("log")) {
+    // the log after a card roll: both lines (roll, then damage) on the game clock
+    ({ p, ctx } = await open("#shot&dof=off&seed=21"));
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); window.__table.rollAttack("longsword"); });
+    for (let i = 0; i < 14; i++) { await p.evaluate(() => window.__table.step(350)); await frames(p, 1); }
+    say("log rows: " + JSON.stringify(await p.evaluate(() => window.__table.log.rows.map((r) => r.text + " " + r.alpha))));
+    await shot(p, "attack-card-log-1440.png");
+    await ctx.close();
+  }
   if (want("phone")) {
     ({ p, ctx } = await open("#shot&tier=lite&seed=21", { w: 390, h: 844, phone: true }));
     await p.evaluate(() => window.__table.timeScale(0));

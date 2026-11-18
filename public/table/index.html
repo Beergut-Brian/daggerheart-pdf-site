@@ -90,6 +90,7 @@ body.is-open .hud.hide-open, body.is-leaving .hud { opacity: 0; pointer-events: 
   font: 500 13px/1 var(--sans); letter-spacing: .06em; color: var(--dim); text-shadow: 0 1px 8px rgba(0, 0, 0, .8); transition-delay: 1.6s; }
 #hint b { color: var(--gold); font-weight: 500; }
 body.has-touched #hint { opacity: 0; transition-delay: 0s; }
+body.has-log #hint { opacity: 0; transition-delay: 0s; }
 body:has(#cmd-in:focus) #hint { opacity: 0; transition: none; }
 
 #mode { right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; pointer-events: none;
