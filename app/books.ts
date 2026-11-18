@@ -1,6 +1,8 @@
 /** The shelf. Adding a book = one entry here + its PDF in R2 + `npm run build:search` (+ an outline file if the PDF has none). */
 export interface Book {
   slug: string;
+  /** short name for the nav */
+  navLabel: string;
   title: string;
   subtitle: string;
   pages: number;
@@ -19,6 +21,7 @@ export interface Book {
 export const books: Book[] = [
   {
     slug: "core-rulebook",
+    navLabel: "Core Rulebook",
     title: "Daggerheart Core Rulebook",
     subtitle: "Everything: characters, play, GM tools, adversaries, campaign frames",
     pages: 397,
@@ -30,6 +33,7 @@ export const books: Book[] = [
   },
   {
     slug: "hope-and-fear",
+    navLabel: "Hope & Fear",
     title: "Daggerheart: Hope & Fear",
     subtitle: "The expansion",
     pages: 204,
@@ -48,3 +52,7 @@ export const bookMeta = (b: Book): string => `${b.pages} pages · ${b.chapters}`
 /** Where the PDFs live. Local dev falls back to /pdfs (git-ignored). */
 export const pdfUrl = (b: Book, base = process.env.NEXT_PUBLIC_PDF_BASE || "/pdfs"): string =>
   `${base.replace(/\/$/, "")}/${b.pdf}`;
+
+/** Landing tag, from the book data: "2 books · 601 pages". */
+export const shelfTag = (list: Book[] = books): string =>
+  `${list.length} ${list.length === 1 ? "book" : "books"} · ${list.reduce((n, b) => n + b.pages, 0)} pages`;

@@ -9,3 +9,4 @@
 - 2026-11-18 redesign pass 2: primary button hover fill (icon box slides to fill), all boards re-rendered
 - 2026-11-18 redesign pass 2: home-d pixel-art splat board + renders
 - 2026-11-18 redesign pass 2: home-c soft splat board + renders; GATE.md updated; boards ready for Kaden
+- 2026-11-18 build: tokens, fonts, base + button ported; salt engine removed; nav + Cta components
