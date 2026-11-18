@@ -484,7 +484,7 @@ export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed 
   F.n.forEach((n, i) => { const d = -n.dot(sitOn); if (d > best) { best = d; topIdx = i; } });
   if (up != null) { const k = order.indexOf(up); [order[k], order[topIdx]] = [order[topIdx], order[k]]; }
   const geos = [], q = new THREE.Quaternion(), zAxis = new THREE.Vector3(0, 0, 1), yAxis = new THREE.Vector3(0, 1, 0), m = new THREE.Matrix4();
-  const ups = [];
+  const ups = [], marks = [];
   const decalAt = (n, pos, num0, size, up) => {
     const g = new THREE.PlaneGeometry(size, size);
     const num = num0 - 1, cu = num % 5, cv = Math.floor(num / 5), uv = g.attributes.uv;
@@ -493,6 +493,7 @@ export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed 
     else q.setFromUnitVectors(zAxis, n);
     g.applyMatrix4(m.compose(pos.clone().addScaledVector(n, 0.0015), q, new THREE.Vector3(1, 1, 1)));
     geos.push(g);
+    marks.push({ num: num0, n, pos: pos.clone(), q: q.clone(), size });
     return yAxis.clone().applyQuaternion(q);
   };
   if (F.decals) F.decals(r, order).forEach((d, i) => { const u = decalAt(d.n, d.pos, d.num, d.size, d.up); if (type === 'd10') ups[i] = u; });
@@ -506,6 +507,7 @@ export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed 
   // for rolling: which direction points up when each value shows, and the hull to keep it on the table
   group.userData.type = type;
   group.userData.faces = F.n.map((n, i) => ({ n, value: order[i], up: ups[i] || null }));
+  group.userData.marks = marks;      // every printed number: where it sits and which way it faces
   const pa = body.geometry.attributes.position, seen = new Set(), hull = [];
   for (let i = 0; i < pa.count; i++) {
     const key = pa.getX(i).toFixed(4) + ',' + pa.getY(i).toFixed(4) + ',' + pa.getZ(i).toFixed(4);

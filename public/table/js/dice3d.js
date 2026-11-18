@@ -36,9 +36,37 @@ function hop(t, h0) {
   return 0;
 }
 
-export function createDice({ scene, atlas, calm, clock = () => performance.now() }) {
+// the rolled number lights up once the die is still, so it reads at a glance even when a
+// side face is turned more toward the viewer than the top one
+const GLOW = { hope: new THREE.Color(1.9, 1.45, 0.75), fear: new THREE.Color(1.5, 1.15, 2.4), bone: new THREE.Color(1.8, 1.35, 0.6) };
+
+function glowMarks(die, value, style, atlas) {
+  const out = [];
+  for (const mk of die.userData.marks) {
+    if (mk.num !== value) continue;
+    const g = new THREE.PlaneGeometry(mk.size * 1.04, mk.size * 1.04);
+    const num = value - 1, cu = num % 5, cv = Math.floor(num / 5), uv = g.attributes.uv;
+    for (let k = 0; k < uv.count; k++) uv.setXY(k, (cu + uv.getX(k)) / 5, 1 - (cv + 1 - uv.getY(k)) / 4);
+    const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: atlas, color: GLOW[style] || GLOW.bone, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }));
+    m.position.copy(mk.pos).addScaledVector(mk.n, 0.003); m.quaternion.copy(mk.q);
+    die.add(m); out.push(m);
+  }
+  return out;
+}
+
+// and a small number floats above each die once it is still, facing the viewer
+function badge(value, style, atlas) {
+  const t = atlas.clone();
+  const num = value - 1;
+  t.repeat.set(1 / 5, 1 / 4); t.offset.set((num % 5) / 5, 1 - (Math.floor(num / 5) + 1) / 4);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, color: GLOW[style] || GLOW.bone, transparent: true, opacity: 0, depthTest: false, depthWrite: false }));
+  s.renderOrder = 5; s.scale.setScalar(0.3);
+  return s;
+}
+
+export function createDice({ scene, atlas, calm, clock = () => performance.now(), view = null }) {
   const group = new THREE.Group(); scene.add(group);
-  let live = [], state = 'idle', t0 = 0, clearAt = 0, pending = null, seed = 1, spareFrames = 0, onRest = null;
+  let live = [], state = 'idle', t0 = 0, clearAt = 0, pending = null, seed = 1, spareFrames = 0, onRest = null, restAt = 0;
   const r = seededRng(9001);
 
   function place(list) {
@@ -72,15 +100,30 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
       const ud = die.userData, face = ud.faces.find((f) => f.value === d.value);
       // final orientation: rolled value up, its number upright for the viewer (pointing away, -z)
       const tilt = new THREE.Quaternion().setFromUnitVectors(face.n, UP);
-      let yaw = (r() - 0.5) * 0.5;
-      if (face.up) { _v.copy(face.up).applyQuaternion(tilt); yaw += Math.PI - Math.atan2(_v.x, _v.z); } else yaw += r() * 6.28;
-      const qf = new THREE.Quaternion().setFromAxisAngle(UP, yaw).multiply(tilt);
       const end = new THREE.Vector3(spots[i].x, AREA.y, spots[i].z);
+      let yaw = r() * 6.28;
+      if (face.up) {
+        // the number upright for the viewer (within 30 degrees), turned so no side face looks at them square on
+        _v.copy(face.up).applyQuaternion(tilt);
+        const upright = Math.PI - Math.atan2(_v.x, _v.z);
+        const eye = view ? view().clone().sub(end).normalize() : new THREE.Vector3(0, 0.7, 0.7).normalize();
+        let best = Infinity;
+        for (let k = -6; k <= 6; k++) {
+          const y = upright + (k / 6) * 0.52;
+          _q.setFromAxisAngle(UP, y).multiply(tilt);
+          let side = -1;
+          for (const f of ud.faces) if (f !== face) side = Math.max(side, _v.copy(f.n).applyQuaternion(_q).dot(eye));
+          const cost = side + Math.abs(k) * 0.004;
+          if (cost < best) { best = cost; yaw = y; }
+        }
+      }
+      const qf = new THREE.Quaternion().setFromAxisAngle(UP, yaw).multiply(tilt);
       const start = end.clone().add(new THREE.Vector3((r() - 0.5) * 1.0 + (end.x - 0.6) * 0.25, 0, 2.1 + r() * 0.5));
       const axis = new THREE.Vector3(1, (r() - 0.5) * 0.6, (r() - 0.5) * 0.8).normalize();
       const wob = new THREE.Vector3(r() - 0.5, 0, r() - 0.5).normalize();
       group.add(die);
-      return { die, spec: d, qf, end, start, axis, wob, spin: Math.PI * 2 * (1.4 + r() * 1.1), h0: 1.25 + r() * 0.5, delay: i * 35 + r() * 60, scale: 1 };
+      const tag = badge(d.value, d.style || 'bone', atlas); tag.position.copy(end); group.add(tag);
+      return { die, tag, rad, spec: d, glow: glowMarks(die, d.value, d.style || 'bone', atlas), qf, end, start, axis, wob, spin: Math.PI * 2 * (1.4 + r() * 1.1), h0: 1.25 + r() * 0.5, delay: i * 35 + r() * 60, scale: 1 };
     });
   }
 
@@ -101,7 +144,7 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
 
   function disposeAll() {
     for (const L of live) {
-      group.remove(L.die);
+      group.remove(L.die, L.tag); L.tag.material.map.dispose(); L.tag.material.dispose();
       L.die.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
     }
     live = [];
@@ -120,7 +163,7 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
     state = calm ? 'rest' : 'throw'; t0 = clock(); clearAt = t0 + (calm ? 0 : THROW_MS) + HOLD_MS;
     if (calm) { live.forEach((L) => pose(L, 1)); rested(); }
   }
-  function rested() { if (onRest) { const f = onRest; onRest = null; f(); } }
+  function rested() { restAt = clock(); if (onRest) { const f = onRest; onRest = null; f(); } }
 
   function update(now = clock()) {
     if (state === 'idle') { if (spareFrames > 0) spareFrames--; return; }
@@ -136,10 +179,17 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
       if (all) { state = 'rest'; rested(); }
       return;
     }
-    if (state === 'rest' && now >= clearAt) { state = 'clear'; t0 = now; }
+    if (state === 'rest') {
+      const k = calm ? 1 : Math.min(1, (now - restAt) / 350);
+      for (const L of live) {
+        for (const m of L.glow) m.material.opacity = k * 0.85;
+        L.tag.material.opacity = k; L.tag.position.copy(L.end).setY(L.end.y + L.rad * 2.1 + 0.12 + 0.06 * k);
+      }
+      if (now >= clearAt) { state = 'clear'; t0 = now; }
+    }
     if (state === 'clear') {
       const u = Math.min(1, (now - t0) / CLEAR_MS);
-      for (const L of live) { L.die.scale.setScalar(Math.max(0.001, 1 - u * u)); L.die.position.y = L.end.y - lowest(L.die.userData.hull, L.qf) * (1 - u) - u * 0.05; }
+      for (const L of live) { L.tag.material.opacity = 1 - u; L.die.scale.setScalar(Math.max(0.001, 1 - u * u)); L.die.position.y = L.end.y - lowest(L.die.userData.hull, L.qf) * (1 - u) - u * 0.05; }
       if (u >= 1) { disposeAll(); state = 'idle'; spareFrames = 2; }
     }
   }

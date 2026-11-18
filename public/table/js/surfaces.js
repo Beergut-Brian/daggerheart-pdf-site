@@ -454,7 +454,7 @@ function buildNoteEl(el) {
 // { text, detail, tone: 'hope'|'fear'|'critical'|'plain'|'hint', alpha }, oldest first.
 // Colours match the .rolllog rules in index.html.
 
-export const LOG_SIZE = [600, 240];
+export const LOG_SIZE = [460, 240];
 const LOG_ROW = 38, LOG_GAP = 2;
 const LOG_TONE = { hope: '#e7c77c', fear: '#b99cff', critical: '#fff3d2', plain: '#efe8d6', hint: 'rgba(239,232,214,0.64)' };
 
