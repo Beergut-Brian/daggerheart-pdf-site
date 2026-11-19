@@ -62,6 +62,9 @@
   --sheet-pad: 18px;
   --sheet-radius: 18px;
   --sheet-row-h: 64px;
+  --sheet-gap: 12px;
+  --sheet-name: 18px;
+  --sheet-meta: 14px;
   --chip-h: 34px;
   --tap: 44px;
 }
@@ -256,20 +259,22 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 .sheet .sh-close svg { width: 18px; height: 18px; display: block; margin: auto; }
 .sheet .sh-close:focus-visible, .sheet .sh-row:focus-visible { outline: 2px solid var(--paper-red); outline-offset: 2px; }
 .sheet .sh-rows { list-style: none; margin: 8px 0 0; padding: 0; }
-.sheet .sh-row { appearance: none; width: 100%; min-height: var(--sheet-row-h); display: grid; grid-template-columns: 1fr auto auto var(--tap); grid-template-rows: auto auto; column-gap: 12px; align-items: center;
+.sheet .sh-row { appearance: none; width: 100%; min-height: var(--sheet-row-h); display: grid; grid-template-columns: minmax(0, 1fr) auto auto var(--tap); grid-template-rows: auto auto; column-gap: var(--sheet-gap); align-items: center;
   padding: 8px 4px 8px 12px; border: 1.5px solid transparent; border-radius: 12px; background: none; color: var(--paper-ink); font-family: var(--sans); text-align: left; cursor: pointer; }
 .sheet li + li .sh-row { border-top: 1px dashed var(--paper-rule); border-radius: 0; }
 .sheet .sh-row:hover, .sheet .sh-row:active { background: var(--paper-hot); border-color: var(--paper-hot-line); border-radius: 12px; }
-.sheet .ct-n { grid-column: 1; grid-row: 1; font: 700 18px/1.2 var(--sans); }
+.sheet .ct-n { grid-column: 1; grid-row: 1; font: 700 var(--sheet-name)/1.2 var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sheet .ct-r { grid-column: 1; grid-row: 2; font: 500 12px/1.3 var(--sans); text-transform: uppercase; color: var(--paper-dim); }
-.sheet .ct-t { grid-column: 2; grid-row: 1 / 3; font: 600 14px/1 var(--sans); white-space: nowrap; }
-.sheet .ct-d { grid-column: 3; grid-row: 1 / 3; font: 700 14px/1 var(--sans); white-space: nowrap; }
+.sheet .ct-t { grid-column: 2; grid-row: 1 / 3; font: 600 var(--sheet-meta)/1 var(--sans); white-space: nowrap; }
+.sheet .ct-d { grid-column: 3; grid-row: 1 / 3; font: 700 var(--sheet-meta)/1 var(--sans); white-space: nowrap; }
 .sheet .ct-d small { font-size: 12px; }
 .sheet .ct-i { grid-column: 4; grid-row: 1 / 3; width: var(--tap); height: var(--tap); padding: 6px; }
 @media (max-width: 380px) { .sheet .ct-t { display: none; } }
 
 /* the roll log (screen-space; drawn by js/command.js, painted twin in surfaces.js) */
 .rolllog { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
+.rolllog.is-top { justify-content: flex-start; }
+.rolllog.is-left { align-items: flex-start; }
 .rolllog .lg-row { display: flex; align-items: center; gap: 12px; height: 32px; margin: 3px 0; max-width: calc(100% - 4px); padding: 0 16px; border-radius: 15px; overflow: hidden; white-space: nowrap;
   background: var(--row-bg); border: 1px solid var(--line); color: var(--ink); }
 .rolllog .lg-row::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
@@ -287,7 +292,13 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
   .cover.is-hot .cv-sheen, .gm .gm-title span, #load p { animation: none; }
   .spread-right .sp-name .w span, .spread-right :is(.sp-kicker, .sp-rule, .sp-sub, .sp-meta, .sp-go) { opacity: 1; transform: none; filter: none; transition: none; }
 }
-@media (max-width: 560px) { #mode { display: none; } #hint { font-size: 12px; } }
+@media (max-width: 560px) {
+  #mode { display: none; } #hint { font-size: 12px; }
+  /* phones: a slimmer bar, and a sheet whose attack rows each fit on one line */
+  :root { --bar-h: 42px; --sheet-pad: 14px; --sheet-gap: 8px; --sheet-name: 16px; --sheet-meta: 13px; }
+  #cmd { padding-left: 16px; }
+  #cmd button { min-width: 56px; padding: 0 14px; }
+}
 </style>
 </head>
 <body>

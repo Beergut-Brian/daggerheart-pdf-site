@@ -6,7 +6,7 @@ import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, NOTE, card
 import { buildWorld } from './world.js';
 import { createCommandBar } from './command.js';
 import { createPlay } from './play.js';
-import { createDice } from './dice3d.js';
+import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { createAttack } from './attack.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
@@ -316,7 +316,9 @@ async function boot() {
   const game = { t: performance.now(), prev: performance.now(), scale: 1 };
   const gameClock = () => game.t;
   const bar = createCommandBar({ surfaces, log, canvas, renderer, clock: gameClock, onCommand: (text) => play.run(text) });
-  const dice = createDice({ scene, atlas: world.atlas, calm, lite, clock: gameClock, view: () => camera.position });
+  // tall phones get bigger dice and a wider throw
+  const dice = createDice({ scene, atlas: world.atlas, calm, lite, clock: gameClock, view: () => camera.position,
+    scale: () => (canvas.clientHeight / Math.max(1, canvas.clientWidth) > TALL_ASPECT ? TALL_SCALE : 1) });
   const attack = createAttack({ scene, minis: world.minis, calm, lite, clock: gameClock });
   play = createPlay({ bar, dice, attack, character, canAct: () => state.phase === 'table' });
   const touchy = lite || matchMedia('(pointer: coarse)').matches;

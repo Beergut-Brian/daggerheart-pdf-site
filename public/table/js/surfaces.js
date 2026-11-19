@@ -558,16 +558,18 @@ export const LOG_SIZE = [460, 240];
 const LOG_ROW = 38, LOG_GAP = 2;
 const LOG_TONE = { hope: '#e7c77c', fear: '#b99cff', critical: '#fff3d2', plain: '#efe8d6', hint: 'rgba(239,232,214,0.64)' };
 
-export function paintLog(g, W, H, rows) {
+// layout: { anchor: 'top' | 'bottom', align: 'left' | 'center' } (set by js/command.js)
+export function paintLog(g, W, H, rows, layout = {}) {
   g.textBaseline = 'middle';
-  let y = H - LOG_ROW;
-  for (let i = rows.length - 1; i >= 0 && y >= 0; i--, y -= LOG_ROW + LOG_GAP) {
-    const r = rows[i];
+  const top = layout.anchor === 'top', left = layout.align === 'left';
+  let y = top ? 0 : H - LOG_ROW;
+  for (let j = 0; j < rows.length && y >= 0 && y <= H - LOG_ROW; j++, y += top ? LOG_ROW + LOG_GAP : -(LOG_ROW + LOG_GAP)) {
+    const r = rows[top ? j : rows.length - 1 - j];
     if (r.alpha <= 0.01) continue;
     g.save(); g.globalAlpha = r.alpha;
     g.font = `700 17px ${SANS}`; const tw = g.measureText(r.text).width;
     g.font = `500 13px ${SANS}`; const dw = r.detail ? g.measureText(r.detail).width + 12 : 0;
-    const pad = 16, w = Math.min(W - 4, tw + dw + pad * 2 + (r.tone === 'hint' ? 0 : 16)), x = (W - w) / 2;
+    const pad = 16, w = Math.min(W - 4, tw + dw + pad * 2 + (r.tone === 'hint' ? 0 : 16)), x = left ? 2 : (W - w) / 2;
     roundRect(g, x, y + 3, w, LOG_ROW - 6, 15);
     g.fillStyle = r.tone === 'critical' ? 'rgba(48,34,8,0.86)' : 'rgba(9,8,28,0.8)'; g.fill();
     g.lineWidth = 1; g.strokeStyle = r.tone === 'critical' ? 'rgba(255,214,130,0.85)' : r.tone === 'fear' ? 'rgba(185,156,255,0.42)' : 'rgba(231,199,124,0.34)'; g.stroke();
@@ -582,9 +584,10 @@ export function paintLog(g, W, H, rows) {
   }
 }
 
-function buildLogEl(el, rows) {
+function buildLogEl(el, rows, layout = {}) {
   const [W, H] = LOG_SIZE;
   el.style.width = W + 'px'; el.style.height = H + 'px';
+  el.classList.toggle('is-top', layout.anchor === 'top'); el.classList.toggle('is-left', layout.align === 'left');
   for (const r of rows) {
     const row = h('p', 'lg-row lg-' + r.tone);
     row.style.opacity = r.alpha.toFixed(2);
@@ -596,7 +599,7 @@ function buildLogEl(el, rows) {
 
 export function defineLogSurface(set, log) {
   return set.define({ id: 'log', cls: 'rolllog', size: LOG_SIZE, scale: 2, attrs: { 'aria-hidden': 'true' },
-    paint: (g, W, H) => paintLog(g, W, H, log.rows), build: (el) => buildLogEl(el, log.rows) });
+    paint: (g, W, H) => paintLog(g, W, H, log.rows, log.layout), build: (el) => buildLogEl(el, log.rows, log.layout) });
 }
 
 // ---------------------------------------------------------------- the set
