@@ -1,6 +1,8 @@
 // Proof shots, videos, the up-face check and frame timings for /table's dice and attack.
 //   node scripts/table-proof.mjs [stills|videos|perf|card|all] [baseUrl] [outDir]
 // card: the attack card (pass 2): a row's dice icon rolls, video + stills; not part of "all".
+// extras: loading screen with its button (#hold-load), the scene with no corner label, the GM screen
+//   (default camera and straight on) into ../review/table-look; not part of "all".
 // look: the look pass (resin dice, impact, phone layout) into ../review/table-look; not part of "all".
 // Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
 // (software GL), so it is slow: videos are rendered frame by frame on the table's game clock
@@ -12,7 +14,7 @@ import path from "node:path";
 
 const mode = process.argv[2] || "all";
 const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
-const out = path.resolve(process.argv[4] || (mode === "look" ? "../review/table-look" : "../review/table-1"));
+const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" ? "../review/table-look" : "../review/table-1"));
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
 const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
 fs.mkdirSync(out, { recursive: true });
@@ -244,6 +246,41 @@ async function card() {
 
 // the look pass: every die type in resin, the impact, the phone layout, reduced motion
 const ALL_DICE = "/roll 1d4+1d6+1d8+1d10+1d12+1d20";
+async function extras() {
+  // the loading screen, held up by #hold-load (the scene renders behind it but the loader never fades)
+  for (const [name, w, h, phone] of [["load-1440.png", 1440, 900, false], ["load-390.png", 390, 844, true]]) {
+    if (!want("load")) break;
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 3 : 1, isMobile: phone, hasTouch: phone });
+    const p = await ctx.newPage();
+    p.on("pageerror", (e) => { console.error("page error:", e.message); failures++; });
+    await p.goto(`${base}/table#shot&hold-load`);
+    await p.waitForFunction(() => window.__table, null, { timeout: 120000 });
+    await p.keyboard.press("Tab");          // the button is the first stop: show its focus ring and fill
+    const info = await p.evaluate(() => ({ ready: document.body.classList.contains("is-ready"), focus: document.activeElement && document.activeElement.textContent, href: document.activeElement && document.activeElement.getAttribute("href"), surfaces: document.documentElement.dataset.surfaces, label: !!document.querySelector("#mode") }));
+    say(`${name}: ${JSON.stringify(info)}`);
+    if (info.ready || info.focus !== "Go to Daggerheart Resources" || info.label) failures++;
+    await p.waitForTimeout(2000); await frames(p, 2);   // let the focus fill finish sliding
+    await p.screenshot({ path: path.join(out, name) }); say("wrote " + name);
+    await ctx.close();
+  }
+  let p, ctx;
+  if (want("scene")) {
+    ({ p, ctx } = await open("#shot"));
+    await p.waitForTimeout(1500);
+    await shot(p, "scene-nolabel-1440.png");
+    if (want("screen")) await shot(p, "gm-screen-1440.png");
+    await ctx.close();
+  }
+  if (want("front")) {
+    // straight on to the GM screen (depth of field off, it focuses on the books): aim at its centre, low
+    ({ p, ctx } = await open("#shot&dof=off"));
+    await p.evaluate(() => { const t = window.__table; t.rig.user.az = 0; t.rig.user.el = 0.12 - t.rig.home.el; t.rig.user.zoom = 0.62; t.rig.off.set(0.25, 0.68, -5.9); });
+    await p.waitForTimeout(4000); await frames(p, 6);
+    await shot(p, "gm-screen-front-1440.png");
+    await ctx.close();
+  }
+}
+
 async function look() {
   let p, ctx;
   for (const [name, hash] of [["dice-1440.png", "#shot&seed=11"], ["dice-painted-1440.png", "#shot&html=off&seed=11"]]) {
@@ -294,6 +331,7 @@ async function look() {
   }
 }
 
+if (mode === "extras") await extras();
 if (mode === "look") await look();
 if (mode === "card") await card();
 if (mode === "stills" || mode === "all") await stills();

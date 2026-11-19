@@ -9,11 +9,13 @@
 //            HTML-in-Canvas (phones, Safari, Firefox).
 import * as THREE from '../vendor/three.bundle.js';
 import { makeCanvas, rng } from './textures.js';
-import { hrefFor, ON_SITE } from './config.js';
+import { hrefFor, ON_SITE, GM_SCREEN } from './config.js';
+import { panelSlices } from './screen-art.js';
 
 const SERIF = 'Cinzel, "Trajan Pro", Georgia, serif';
 const SANS = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif';
 const HAND = 'Caveat, "Segoe Script", "Bradley Hand", cursive';
+const SCRIPT = '"Great Vibes", "Segoe Script", cursive';
 
 // ---------------------------------------------------------------- helpers
 
@@ -294,7 +296,50 @@ export function paintSpreadRight(g, W, H, book, { text = true } = {}) {
 
 export const SCREEN = [1280, 760];
 
+// ---- GM screen art (GM_SCREEN in config.js): one picture split across the three panels
+let screenArt = null;
+export function loadScreenArt() {
+  if (!GM_SCREEN || !GM_SCREEN.image) return Promise.resolve(null);
+  return new Promise((res) => {
+    // a picture that arrives after the timeout is ignored, so all three panels always agree
+    let late = false;
+    const im = new Image();
+    im.onload = () => { if (!late) { screenArt = im; res(im); } };
+    im.onerror = () => res(null);
+    im.src = GM_SCREEN.image;
+    setTimeout(() => { late = true; res(screenArt); }, 4000);
+  });
+}
+// panel 0 = left wing, 1 = centre, 2 = right wing
+function paintArt(g, W, H, panel) {
+  const s = panelSlices(screenArt.naturalWidth, screenArt.naturalHeight, GM_SCREEN.focusX ?? 0.5, GM_SCREEN.focusY ?? 0.5)[panel];
+  g.drawImage(screenArt, s.x, s.y, s.w, s.h, 0, 0, W, H);
+  // a soft darkening toward the edges so the gold frame reads
+  const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+  v.addColorStop(0, 'rgba(5,4,18,0)'); v.addColorStop(1, 'rgba(5,4,18,0.45)');
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+// where the script title sits on the centre panel (fractions of its height), shared by CSS and paint
+const TITLE_Y = 0.2, TITLE_PX = 118;
+
 export function paintScreen(g, W, H, { text = true } = {}) {
+  if (screenArt) {
+    paintArt(g, W, H, 1);
+    // soft dark glow behind the script title (not a box), kept off the castle below it
+    g.save(); g.translate(W / 2, H * TITLE_Y); g.scale(1, 0.3);
+    const gl = g.createRadialGradient(0, 0, 0, 0, 0, W * 0.4);
+    gl.addColorStop(0, 'rgba(6,4,20,0.62)'); gl.addColorStop(0.55, 'rgba(6,4,20,0.4)'); gl.addColorStop(1, 'rgba(6,4,20,0)');
+    g.fillStyle = gl; g.fillRect(-W / 2, -W * 0.4, W, W * 0.8); g.restore();
+    frame(g, W, H, 34, '#d9b565');
+    if (!text) return;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = `400 ${TITLE_PX}px ${SCRIPT}`;
+    g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = 26;
+    g.fillStyle = '#f3dc9a'; g.fillText('High Sodium Gaming', W / 2, H * TITLE_Y);
+    g.shadowBlur = 6; g.shadowOffsetY = 3; g.fillText('High Sodium Gaming', W / 2, H * TITLE_Y);
+    g.shadowColor = 'transparent';
+    return;
+  }
   const bg = g.createLinearGradient(0, 0, 0, H);
   bg.addColorStop(0, '#12123a'); bg.addColorStop(0.55, '#0b0a26'); bg.addColorStop(1, '#07061a');
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
@@ -323,6 +368,7 @@ export function paintScreen(g, W, H, { text = true } = {}) {
 }
 
 export function paintWing(g, W, H, which) {
+  if (screenArt) { paintArt(g, W, H, which === 'hope' ? 0 : 2); frame(g, W, H, 34, '#d9b565'); return; }
   const bg = g.createLinearGradient(0, 0, 0, H);
   bg.addColorStop(0, '#12123a'); bg.addColorStop(1, '#07061a');
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
@@ -503,6 +549,13 @@ function buildScreenEl(el) {
   const [W, H] = SCREEN;
   el.style.width = W + 'px'; el.style.height = H + 'px';
   el.style.backgroundImage = bgFrom((g) => paintScreen(g, W, H, { text: false }), W, H);
+  if (screenArt) {
+    // the picture carries the screen: the house name in script; the page's heading stays for assistive tech
+    el.classList.add('has-art');
+    el.style.setProperty('--title-y', TITLE_Y * 100 + '%');
+    el.append(h('p', 'gm-script', 'High Sodium Gaming'), h('h1', 'sr', 'Daggerheart Resources'));
+    return;
+  }
   el.append(h('p', 'gm-house', 'High Sodium Gaming'));
   const t = h('h1', 'gm-title');
   t.append(h('span', 'gm-a', 'Daggerheart'), h('span', 'gm-b', 'Resources'));

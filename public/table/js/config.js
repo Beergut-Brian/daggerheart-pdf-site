@@ -53,6 +53,13 @@ export function hrefFor(book) {
   return ON_SITE ? book.path : SITE + book.path;
 }
 
+// The GM screen picture: one image across the three panels, on the players' side.
+// Make the file with `node scripts/gm-screen.mjs <image> [focusX focusY]` (see README,
+// "Changing the GM screen image"). focusX/focusY (0..1) only matter for a file that
+// was not made by that script: the page crops it to the screen's shape around that point.
+// Set image to null to go back to the plain painted screen.
+export const GM_SCREEN = { image: 'art/gm-screen.jpg', focusX: 0.5, focusY: 0.5 };
+
 export const HOME_HREF = ON_SITE ? '/' : SITE + '/';
 
 // Quality tier. "lite" is for phones and small tablets.

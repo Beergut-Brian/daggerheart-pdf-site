@@ -2,7 +2,7 @@
 import * as THREE from '../vendor/three.bundle.js';
 import { BOOKS, CHARACTERS, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
 import { createCard } from './card.js';
-import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, NOTE, cardRows, cardIcon } from './surfaces.js';
+import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, loadScreenArt, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
 import { createCommandBar } from './command.js';
 import { createPlay } from './play.js';
@@ -48,9 +48,9 @@ async function boot() {
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
   // words need their typefaces before they are painted
-  const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat'];
+  const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 118px "Great Vibes"'];
   await Promise.race([Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => 0))), new Promise((r) => setTimeout(r, 3000))]);
-  const images = await loadCoverImages(BOOKS);
+  const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt()]);
 
   const surfaces = new Surfaces(renderer);
   const character = CHARACTERS[0] || null, cardState = { hot: -1 };

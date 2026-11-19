@@ -95,6 +95,35 @@ the scene is otherwise identical. Nothing on the page says which path runs;
 the `<html>` element carries `data-surfaces="html"` or `data-surfaces="painted"`
 and the console logs one `[table] surfaces: ...` line.
 
+## Changing the GM screen image
+
+One picture runs across all three panels of the GM screen (left wing, centre,
+right wing), split at the folds so it reads as one scene. It is on the front of
+the screen, the side facing the camera (the players' side); the back stays the
+plain dark board it has always been. "High Sodium Gaming" in script (Great
+Vibes) sits over the upper part of the centre panel as real text, so it stays
+when you swap the picture.
+
+1. Pick a wide landscape image, ideally at least 2560 px wide. The screen is
+   very wide (about 3.4 : 1), so only a horizontal band of the picture shows.
+2. From the `site` folder run
+   `node scripts/gm-screen.mjs path/to/picture.jpg 0.5 0.33`
+   The two numbers are the focus point, across and down (0 to 1): the band is
+   cut around it. The centre panel shows the middle half of the band, so put
+   the subject there; keep the top fifth of the centre calm, the title sits
+   there. The script writes `public/table/art/gm-screen.jpg` (under 250 KB).
+3. Reload `/table` (add `#shot` to skip the intro). Not right? Run step 2 again
+   with a different focus point.
+4. Commit `public/table/art/gm-screen.jpg`.
+
+The file name and focus point live in `GM_SCREEN` in `js/config.js`. The focus
+there only matters for a picture copied in by hand without the script; set
+`image: null` to go back to the plain painted screen. The current picture
+came from `design/table/gm-screen/source-2026-11-18.jpg` with focus `0.5 0.33`.
+Where HTML-in-Canvas runs the title is real text (the screen also carries an
+invisible "Daggerheart Resources" heading for screen readers); elsewhere the
+same title is painted in the same face.
+
 ## The loading screen
 
 While the scene loads, a "Go to Daggerheart Resources" button sits under
