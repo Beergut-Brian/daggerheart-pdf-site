@@ -717,6 +717,11 @@ function detect(gl) {
   return markup && call && paint ? { markup, call } : null;
 }
 
+// Focus surfaces (the covers and the attack card) are made at a texel density of their own, not the canvas's:
+// the screen's device pixel ratio, held so the long side stays within FOCUS_MAX texels. Everything else follows the canvas.
+export const FOCUS_MAX = 2048;
+export const focusDensity = (size, dpr = window.devicePixelRatio || 1) => Math.max(1, Math.min(dpr, FOCUS_MAX / Math.max(size[0], size[1])));
+
 export class Surfaces {
   constructor(renderer) {
     this.renderer = renderer;
@@ -727,11 +732,12 @@ export class Surfaces {
     this.list = [];
     this.byId = {};
     this.maxAniso = renderer.capabilities.getMaxAnisotropy();
+    this.noFocus = /[#&]focus=off/.test(location.hash);   // test switch: focus surfaces follow the canvas's ratio as before
   }
 
   // def: { id, size:[w,h], paint(g,w,h,opts), build(el), tag, attrs }
   define(def) {
-    const s = { ...def, texture: null, el: null, glTex: null, dirty: true, live: false, aw: 0, ah: 0, uploads: 0 };
+    const s = { ...def, zoom: 1, texture: null, el: null, glTex: null, dirty: true, live: false, aw: 0, ah: 0, uploads: 0 };
     const el = document.createElement(def.tag || 'div');
     el.id = 'surf-' + def.id;
     el.className = 'surf ' + (def.cls || '');
@@ -766,8 +772,8 @@ export class Surfaces {
 
   _startCanvas() {
     for (const s of this.list) {
-      const [W, H] = s.size, k = s.scale || 1;
-      const c = makeCanvas(W * k, H * k), g = c.getContext('2d');
+      const [W, H] = s.size, k = s.k = s.focus ? focusDensity(s.size) : s.scale || 1;
+      const c = makeCanvas(Math.round(W * k), Math.round(H * k)), g = c.getContext('2d');
       g.scale(k, k);
       s.paint(g, W, H, { text: true });
       const t = new THREE.CanvasTexture(c);
@@ -779,6 +785,7 @@ export class Surfaces {
   _startHtml() {
     const gl = this.gl, canvas = this.canvas;
     for (const s of this.list) {
+      this._zoom(s);
       s.glTex = gl.createTexture();
       this._bind(s);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([20, 18, 40, 255]));
@@ -850,7 +857,18 @@ export class Surfaces {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     const ext = this.renderer.extensions.get('EXT_texture_filter_anisotropic');
-    if (ext) gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, this.maxAniso));
+    if (ext) gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, s.focus ? this.maxAniso : Math.min(8, this.maxAniso));
+  }
+
+  // A focus surface's snapshot is its CSS box times the canvas's pixel ratio, so its element is zoomed by
+  // (wanted density / ratio): the texture comes out at the wanted density whatever the canvas's ratio is now.
+  // Set at start, on a window resize and when the surface changes anyway (touch); a ratio step alone never
+  // changes it, so it never retakes a focus surface.
+  _zoom(s) {
+    if (!s.focus || this.noFocus) return;
+    const k = this.canvas.width / Math.max(1, this.canvas.clientWidth);
+    const z = +(focusDensity(s.size) / k).toFixed(3);
+    if (Math.abs(z - s.zoom) > 0.005) { s.zoom = z; s.el.style.zoom = z === 1 ? '' : String(z); }
   }
 
   // The element's snapshot size in texels: what the browser reports, else its CSS box at the canvas's pixel ratio.
@@ -859,7 +877,7 @@ export class Surfaces {
     if (this.canvas.captureElementImage) {
       try { const im = this.canvas.captureElementImage(s.el); w = Math.ceil(im.width); hgt = Math.ceil(im.height); if (im.close) im.close(); } catch (e) { /* older shape */ }
     }
-    if (!w || !hgt) { const k = this.canvas.width / Math.max(1, this.canvas.clientWidth); w = Math.ceil(s.el.offsetWidth * k); hgt = Math.ceil(s.el.offsetHeight * k); }
+    if (!w || !hgt) { const k = this.canvas.width / Math.max(1, this.canvas.clientWidth); w = Math.ceil(s.size[0] * s.zoom * k); hgt = Math.ceil(s.size[1] * s.zoom * k); }
     return [w, hgt];
   }
 
@@ -885,9 +903,10 @@ export class Surfaces {
   }
 
   // After the canvas's pixel ratio changes, every snapshot is retaken at the new size.
-  refresh() {
+  // focus: false leaves the focus surfaces alone (their size does not depend on the ratio)
+  refresh({ focus = true } = {}) {
     if (this.mode !== 'html') return;
-    for (const s of this.list) s.dirty = true;
+    for (const s of this.list) { if (focus || !s.focus) { if (focus) this._zoom(s); s.dirty = true; } }
     if (this.canvas.requestPaint) this.canvas.requestPaint();
   }
 
@@ -895,6 +914,7 @@ export class Surfaces {
   touch(id) {
     const s = this.byId[id];
     if (!s || this.mode !== 'html') return;
+    this._zoom(s);
     s.dirty = true;
     if (this.canvas.requestPaint) this.canvas.requestPaint();
   }
@@ -918,7 +938,7 @@ export class Surfaces {
       s.placed = key;
       if (this.canvas.updateElementGeometry) {
         const k = this.canvas.width / Math.max(1, this.canvas.clientWidth);
-        const d = new DOMMatrix([e[0] * k, e[1] * k, e[2], e[3], e[4] * k, e[5] * k, e[6], e[7], e[8], e[9], e[10], e[11], e[12] * k, e[13] * k, e[14], e[15]]);
+        const z = 1 / s.zoom, d = new DOMMatrix([e[0] * k * z, e[1] * k * z, e[2], e[3], e[4] * k * z, e[5] * k * z, e[6], e[7], e[8], e[9], e[10], e[11], e[12] * k, e[13] * k, e[14], e[15]]);
         this.canvas.updateElementGeometry(s.el, { canvasTransform: d });
       } else {
         // older builds: a CSS transform does the same job, but it also counts as a
@@ -937,7 +957,7 @@ export class Surfaces {
     if (!s) return;
     if (this.mode === 'html') { s.el.textContent = ''; s.build(s.el); this.touch(id); return; }
     if (!s.canvas2d) return;
-    const [W, H] = s.size, k = s.scale || 1, g = s.canvas2d.getContext('2d');
+    const [W, H] = s.size, k = s.k || s.scale || 1, g = s.canvas2d.getContext('2d');
     g.setTransform(k, 0, 0, k, 0, 0); g.clearRect(0, 0, W, H);
     s.paint(g, W, H, { text: true });
     s.texture.needsUpdate = true;
@@ -958,7 +978,7 @@ export function defineSurfaces(set, books, images, { character = null, cardState
     const [cw, ch] = coverSize(b);
     const link = (el) => { el.textContent = 'Open ' + b.title + ', ' + b.pages + ' pages'; };
     set.define({
-      id: 'cover-' + b.id, tag: 'a', cls: 'cover cover-' + b.id, size: [cw, ch],
+      id: 'cover-' + b.id, focus: true, tag: 'a', cls: 'cover cover-' + b.id, size: [cw, ch],
       attrs: { href: hrefFor(b), 'aria-label': 'Open ' + b.title + ', ' + b.pages + ' pages', 'data-book': b.id, ...(ON_SITE ? {} : { target: '_blank', rel: 'noopener' }) },
       paint: (g, W, H, o) => paintCover(g, W, H, b, { ...o, image: img }),
       build: (el) => buildCoverEl(el, b, img),
@@ -973,7 +993,7 @@ export function defineSurfaces(set, books, images, { character = null, cardState
     plain: (el) => { el.append(h('h1', null, 'Daggerheart Resources')); } });
   if (character) {
     // the attack card: real buttons in the canvas (keyboard, assistive tech, HTML-in-Canvas)
-    set.define({ id: 'note', cls: 'note card', size: NOTE, scale: 2, attrs: { role: 'group', 'aria-label': `${character.name}'s attacks` },
+    set.define({ id: 'note', focus: true, cls: 'note card', size: NOTE, attrs: { role: 'group', 'aria-label': `${character.name}'s attacks` },
       paint: (g, W, H, o) => paintCard(g, W, H, character, cardState, o),
       build: (el) => buildCardEl(el, character), plain: (el) => buildCardEl(el, character, { bg: false }) });
   } else {
@@ -987,7 +1007,7 @@ export function loadCoverImages(books) {
   if (!ON_SITE) return Promise.resolve(out);
   return Promise.all(books.map((b) => new Promise((res) => {
     if (!b.cover) return res();
-    const im = new Image();
+    const im = new Image(); im.fetchPriority = 'high'; im.decoding = 'async';
     im.onload = () => { out[b.id] = im; res(); };
     im.onerror = () => res();
     im.src = b.cover;
