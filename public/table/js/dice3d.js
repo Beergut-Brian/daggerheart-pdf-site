@@ -2,11 +2,11 @@
 // hand-tuned throw (arc, bounces, damped spin) that ends with the rolled value up.
 import * as THREE from '../vendor/three.bundle.js';
 import { makeDie } from './models.js';
-import { rng as seededRng } from './textures.js';
+import { rng as seededRng, contactShadowTexture } from './textures.js';
 
 export const DIE_STYLE = {
   hope: { color: 0xf0a820, ink: 0x2a1400 },
-  fear: { color: 0x5a23c8, ink: 0xf1e4ff },
+  fear: { color: 0x5a23c8, ink: 0xf3cf72 },     // gold ink on the violet resin
   bone: { color: 0xe6e0d0, ink: 0x1a1a22 },
 };
 const RADIUS = { d4: 0.33, d6: 0.25, d8: 0.27, d10: 0.28, d12: 0.27, d20: 0.3 };
@@ -14,6 +14,10 @@ const RADIUS = { d4: 0.33, d6: 0.25, d8: 0.27, d10: 0.28, d12: 0.27, d20: 0.3 };
 // Open table in front of the party, on the battle map (top at y = 0.03), clear of minis and boulders.
 const AREA = { x0: -1.25, x1: 2.55, z0: -0.3, z1: 0.72, y: 0.03 };
 const AVOID = [[0.9, 0.2, 0.2], [1.9, 0.3, 0.32], [3.3, -0.2, 0.3]];
+// contact shadow: a soft dark blob on the table under each die, wider and fainter as it lifts
+const SHADOW = { size: 2.7, opacity: 0.62, fadeH: 0.9, spreadK: 0.9 };
+// tall phones (height / width above TALL_ASPECT): bigger dice and a wider throw
+export const TALL_ASPECT = 1.8, TALL_SCALE = 1.3;
 const THROW_MS = 1150, HOLD_MS = 4000, CLEAR_MS = 450, SWAP_MS = 200;
 
 const UP = new THREE.Vector3(0, 1, 0), _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
@@ -64,19 +68,21 @@ function badge(value, style, atlas) {
   return s;
 }
 
-export function createDice({ scene, atlas, calm, clock = () => performance.now(), view = null }) {
+export function createDice({ scene, atlas, calm, lite = false, clock = () => performance.now(), view = null, scale = () => 1 }) {
   const group = new THREE.Group(); scene.add(group);
   let live = [], state = 'idle', t0 = 0, clearAt = 0, pending = null, seed = 1, spareFrames = 0, onRest = null, restAt = 0;
   const r = seededRng(9001);
+  const shadowTex = contactShadowTexture(), shadowGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+  let big = 1;
 
   function place(list) {
     const out = [], n = list.length;
     const cx = n <= 2 ? 0.55 : (AREA.x0 + AREA.x1) / 2, cz = 0.28;
     for (const d of list) {
-      const rad = RADIUS[d.type] * (n > 8 ? 0.85 : 1);
+      const rad = RADIUS[d.type] * (n > 8 ? 0.85 : 1) * big;
       let best = null, bestScore = Infinity;
       for (let i = 0; i < 160; i++) {
-        const spread = n <= 2 ? 0.55 : 1;
+        const spread = (n <= 2 ? 0.55 : 1) * big;
         const x = cx + (r() - 0.5) * (AREA.x1 - AREA.x0) * spread, z = cz + (r() - 0.5) * (AREA.z1 - AREA.z0);
         if (x < AREA.x0 || x > AREA.x1 || z < AREA.z0 || z > AREA.z1) continue;
         let clash = 0;
@@ -93,10 +99,11 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
   }
 
   function spawn(list) {
+    big = scale();
     const spots = place(list);
     live = list.map((d, i) => {
       const st = DIE_STYLE[d.style || 'bone'], rad = spots[i].rad;
-      const die = makeDie(d.type, rad, st.color, st.ink, atlas, { seed: seed++ });
+      const die = makeDie(d.type, rad, st.color, st.ink, atlas, { seed: seed++, resin: lite ? 'lite' : 'full' });
       const ud = die.userData, face = ud.faces.find((f) => f.value === d.value);
       // final orientation: rolled value up, its number upright for the viewer (pointing away, -z)
       const tilt = new THREE.Quaternion().setFromUnitVectors(face.n, UP);
@@ -122,8 +129,10 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
       const axis = new THREE.Vector3(1, (r() - 0.5) * 0.6, (r() - 0.5) * 0.8).normalize();
       const wob = new THREE.Vector3(r() - 0.5, 0, r() - 0.5).normalize();
       group.add(die);
+      const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x000000, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 }));
+      shadow.renderOrder = 1; group.add(shadow);
       const tag = badge(d.value, d.style || 'bone', atlas); tag.position.copy(end); group.add(tag);
-      return { die, tag, rad, spec: d, glow: glowMarks(die, d.value, d.style || 'bone', atlas), qf, end, start, axis, wob, spin: Math.PI * 2 * (1.4 + r() * 1.1), h0: 1.25 + r() * 0.5, delay: i * 35 + r() * 60, scale: 1 };
+      return { die, tag, shadow, rad, spec: d, glow: glowMarks(die, d.value, d.style || 'bone', atlas), qf, end, start, axis, wob, spin: Math.PI * 2 * (1.4 + r() * 1.1), h0: 1.25 + r() * 0.5, delay: i * 35 + r() * 60, scale: 1 };
     });
   }
 
@@ -144,7 +153,7 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
 
   function disposeAll() {
     for (const L of live) {
-      group.remove(L.die, L.tag); L.tag.material.map.dispose(); L.tag.material.dispose();
+      group.remove(L.die, L.tag, L.shadow); L.tag.material.map.dispose(); L.tag.material.dispose(); L.shadow.material.dispose();
       L.die.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
     }
     live = [];
@@ -161,11 +170,21 @@ export function createDice({ scene, atlas, calm, clock = () => performance.now()
     disposeAll();
     spawn(list);
     state = calm ? 'rest' : 'throw'; t0 = at; clearAt = t0 + (calm ? 0 : THROW_MS) + HOLD_MS;
-    if (calm) { live.forEach((L) => pose(L, 1)); rested(); }
+    if (calm) { live.forEach((L) => pose(L, 1)); shade(); rested(); }
   }
   function rested() { restAt = clock(); spareFrames = 3; if (onRest) { const f = onRest; onRest = null; f(); } }
 
-  function update(now = clock()) {
+  // the shadow follows the die across the table, fading as it rises
+  function shade() {
+    for (const L of live) {
+      const h = Math.max(0, L.die.position.y - AREA.y - L.rad * 0.55), k = Math.max(0, 1 - h / SHADOW.fadeH), sc = L.die.scale.x;
+      L.shadow.position.set(L.die.position.x, AREA.y + 0.004, L.die.position.z);
+      L.shadow.scale.setScalar(L.rad * SHADOW.size * (1 + h * SHADOW.spreadK) * sc);
+      L.shadow.material.opacity = SHADOW.opacity * k * k * Math.min(1, sc * 1.5);
+    }
+  }
+  function update(now = clock()) { step(now); shade(); }
+  function step(now) {
     if (spareFrames > 0) spareFrames--;     // a few more shadow redraws after anything stops or vanishes
     if (state === 'idle') return;
     if (state === 'swap') {

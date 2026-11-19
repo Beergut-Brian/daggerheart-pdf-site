@@ -206,6 +206,40 @@ export function diceAtlas(font = '900 86px Cinzel, Georgia, serif') {
   return t;
 }
 
+// --- engraved numbers: the same 5 x 4 layout, as a cut into the resin ---------------------
+// map: the ink (white, tinted by the material) with a dark groove wall along the top edge of
+// each stroke, so the number reads as sunk into the face; bump: high face, low glyph, soft walls.
+export function diceInkAtlas(font = '900 86px Cinzel, Georgia, serif') {
+  const cell = 128, W = cell * 5, H = cell * 4;
+  const map = makeCanvas(W, H), g = map.getContext('2d');
+  const bump = makeCanvas(W, H), b = bump.getContext('2d');
+  b.fillStyle = '#fff'; b.fillRect(0, 0, W, H);
+  for (const c of [g, b]) { c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = font; c.lineJoin = 'round'; }
+  const glyph = (c, n, x, y, how) => {
+    if (how === 'stroke') c.strokeText(String(n), x, y); else c.fillText(String(n), x, y);
+    if (n === 6 || n === 9) { if (how === 'stroke') c.strokeRect(x - 22, y + 40, 44, 6); else c.fillRect(x - 22, y + 40, 44, 6); }
+  };
+  for (let n = 1; n <= 20; n++) {
+    const x = ((n - 1) % 5) * cell + cell / 2, y = Math.floor((n - 1) / 5) * cell + cell / 2 + 6;
+    // groove: a dark rim, heavier on the top edge (the wall in shadow)
+    g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 7; glyph(g, n, x, y - 2, 'stroke');
+    g.fillStyle = 'rgba(0,0,0,0.7)'; glyph(g, n, x, y - 3, 'fill');
+    g.fillStyle = '#fff'; glyph(g, n, x, y + 1, 'fill');
+    b.filter = 'blur(2px)'; b.fillStyle = '#000'; b.strokeStyle = '#555'; b.lineWidth = 5; glyph(b, n, x, y, 'stroke'); glyph(b, n, x, y, 'fill'); b.filter = 'none';
+  }
+  return { map: tex(map, { srgb: false, aniso: 4 }), bump: tex(bump, { srgb: false, aniso: 4 }) };
+}
+
+// --- a soft contact shadow under each die -------------------------------------------
+export function contactShadowTexture(size = 64) {
+  const c = makeCanvas(size, size), g = c.getContext('2d');
+  const gr = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  gr.addColorStop(0, 'rgba(255,255,255,0.95)'); gr.addColorStop(0.45, 'rgba(255,255,255,0.55)');
+  gr.addColorStop(0.75, 'rgba(255,255,255,0.15)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, size, size);
+  return tex(c, { srgb: false, aniso: 1 });
+}
+
 // --- wax: bright near the flame, cool at the foot (fake subsurface) -------------------
 export function waxGlowTexture() {
   const c = makeCanvas(8, 128), g = c.getContext('2d');

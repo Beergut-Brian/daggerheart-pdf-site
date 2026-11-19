@@ -2,7 +2,7 @@
 // Everything is assembled from primitives and merged, so a whole warband
 // costs a handful of draw calls.
 import * as THREE from '../vendor/three.bundle.js';
-import { rng } from './textures.js';
+import { rng, diceInkAtlas } from './textures.js';
 
 const { mergeGeometries } = THREE;
 
@@ -466,14 +466,34 @@ const FACES = {
 };
 export const DIE_TYPES = Object.keys(FACES);
 
+// Resin dice. Full tier: real transmission with a tinted attenuation (light passes through and
+// picks up the colour); lite tier: no transmission, a clearcoat over a sheen and an inner glow.
+export const RESIN = {
+  full: { transmission: 0.62, thicknessK: 1.6, attenuationK: 0.9, ior: 1.5, roughness: 0.1, emissive: 0.05 },
+  lite: { sheen: 0.7, sheenRoughness: 0.35, roughness: 0.18, emissive: 0.16 },
+  clearcoat: 1, clearcoatRoughness: 0.05,
+};
+export const GLYPH_SCALE = 1.2;          // numbers on the faces, against the old printed size
+let INK = null;                           // the engraved number atlas, shared by every die
+
+function resinMaterial(color, r, tier) {
+  const c = new THREE.Color(color), base = { color: c, metalness: 0, clearcoat: RESIN.clearcoat, clearcoatRoughness: RESIN.clearcoatRoughness, flatShading: true, envMapIntensity: 2.2, emissive: c };
+  if (tier === 'full') {
+    const F = RESIN.full;
+    return new THREE.MeshPhysicalMaterial({ ...base, roughness: F.roughness, transmission: F.transmission, thickness: r * F.thicknessK, ior: F.ior,
+      attenuationColor: c, attenuationDistance: r * F.attenuationK, emissiveIntensity: F.emissive });
+  }
+  const L = RESIN.lite;
+  return new THREE.MeshPhysicalMaterial({ ...base, roughness: L.roughness, sheen: L.sheen, sheenRoughness: L.sheenRoughness,
+    sheenColor: c.clone().lerp(new THREE.Color(1, 1, 1), 0.55), emissiveIntensity: L.emissive });
+}
+
 // One die, already "rolled": it sits on a face with `up` showing.
-export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed = 1 } = {}) {
+// resin: 'full' | 'lite' (see RESIN); the tray dice stay on 'lite'.
+export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed = 1, resin = 'lite' } = {}) {
   const F = FACES[type], rand = rng(seed);
   const group = new THREE.Group();
-  const body = new THREE.Mesh(F.geo(r), new THREE.MeshPhysicalMaterial({
-    color, roughness: 0.14, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.06, flatShading: true,
-    emissive: color, emissiveIntensity: 0.06, envMapIntensity: 2.2,
-  }));
+  const body = new THREE.Mesh(F.geo(r), resinMaterial(color, r, resin));
   body.castShadow = true; body.receiveShadow = true;
   group.add(body);
   // numbers
@@ -486,6 +506,7 @@ export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed 
   const geos = [], q = new THREE.Quaternion(), zAxis = new THREE.Vector3(0, 0, 1), yAxis = new THREE.Vector3(0, 1, 0), m = new THREE.Matrix4();
   const ups = [], marks = [];
   const decalAt = (n, pos, num0, size, up) => {
+    size *= GLYPH_SCALE;
     const g = new THREE.PlaneGeometry(size, size);
     const num = num0 - 1, cu = num % 5, cv = Math.floor(num / 5), uv = g.attributes.uv;
     for (let k = 0; k < uv.count; k++) uv.setXY(k, (cu + uv.getX(k)) / 5, 1 - (cv + 1 - uv.getY(k)) / 4);
@@ -498,7 +519,12 @@ export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed 
   };
   if (F.decals) F.decals(r, order).forEach((d, i) => { const u = decalAt(d.n, d.pos, d.num, d.size, d.up); if (type === 'd10') ups[i] = u; });
   else F.n.forEach((n, i) => { ups[i] = decalAt(n, n.clone().multiplyScalar(r * F.inr), order[i], r * F.decal, null); });
-  const decals = new THREE.Mesh(mergeGeometries(geos), new THREE.MeshBasicMaterial({ map: atlas, color: ink, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  // engraved: lit ink with a groove and a bump, so the face catches the candlelight around each number
+  if (!INK) INK = diceInkAtlas();
+  const inkC = new THREE.Color(ink), light = inkC.getHSL({}).l > 0.5;
+  const decals = new THREE.Mesh(mergeGeometries(geos), new THREE.MeshStandardMaterial({ map: INK.map, bumpMap: INK.bump, bumpScale: -2.2, color: inkC,
+    emissive: inkC, emissiveMap: INK.map, emissiveIntensity: light ? 0.45 : 0, roughness: 0.55, metalness: light ? 0.35 : 0,
+    transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   group.add(decals);
   const tilt = new THREE.Quaternion().setFromUnitVectors(sitOn, new THREE.Vector3(0, -1, 0));
   const yaw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spin);
