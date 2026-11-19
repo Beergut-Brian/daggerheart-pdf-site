@@ -476,7 +476,7 @@ export const RESIN = {
 export const GLYPH_SCALE = 1.2;          // numbers on the faces, against the old printed size
 let INK = null;                           // the engraved number atlas, shared by every die
 
-function resinMaterial(color, r, tier, depth = 1, glow = null) {
+export function resinMaterial(color, r, tier, depth = 1, glow = null) {
   const c = new THREE.Color(color), base = { color: c, metalness: 0, clearcoat: RESIN.clearcoat, clearcoatRoughness: RESIN.clearcoatRoughness, flatShading: true, envMapIntensity: 2.2, emissive: c };
   if (tier === 'full') {
     const F = RESIN.full;
@@ -488,13 +488,22 @@ function resinMaterial(color, r, tier, depth = 1, glow = null) {
     sheenColor: c.clone().lerp(new THREE.Color(1, 1, 1), 0.55), emissiveIntensity: L.emissive });
 }
 
+// Swaps a die's resin material ('full' | 'lite'): the opening runs on lite, the transmission pass starts once settled.
+export function swapResin(group, tier) {
+  const body = group.children.find((c) => c.userData.resin);
+  if (!body || body.userData.tier === tier) return;
+  const a = body.userData.resin; body.material.dispose();
+  body.material = resinMaterial(a.color, a.r, tier, a.depth, a.glow); body.userData.tier = tier;
+}
+
 // One die, already "rolled": it sits on a face with `up` showing.
 // resin: 'full' | 'lite' (see RESIN); the tray dice stay on 'lite'.
 export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed = 1, resin = 'lite', depth = 1, glow = null } = {}) {
   const F = FACES[type], rand = rng(seed);
   const group = new THREE.Group();
-  const body = new THREE.Mesh(F.geo(r), resinMaterial(color, r, resin, depth, glow));
+  const body = new THREE.Mesh(F.geo(r), resinMaterial(color, r, resin, depth, glow)); body.userData.tier = resin;
   body.castShadow = true; body.receiveShadow = true;
+  body.userData.resin = { color, r, depth, glow };   // so the material can be swapped (swapResin)
   group.add(body);
   // numbers
   const order = F.n.map((_, i) => i + 1);

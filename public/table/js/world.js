@@ -383,10 +383,10 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
 
   // ---- candles
   const candleDefs = [
-    { x: -6.55, z: -1.15, h: 1.55, r: 0.21, seed: 1, shadow: lite ? 0 : 1024, power: 6 },
+    { x: -6.55, z: -1.15, h: 1.55, r: 0.21, seed: 1, power: 6 },
     { x: -5.9, z: -0.6, h: 0.95, r: 0.24, seed: 2, power: 4.5 },
     { x: -6.75, z: -0.25, h: 0.58, r: 0.19, seed: 3, power: 3 },
-    { x: -4.55, z: 1.95, h: 0.42, r: 0.26, seed: 4, shadow: lite ? 0 : 512, power: 4.5 },
+    { x: -4.55, z: 1.95, h: 0.42, r: 0.26, seed: 4, power: 4.5 },
     { x: 7.0, z: -1.9, h: 1.25, r: 0.22, seed: 5, power: 6 },
     { x: 6.45, z: -2.55, h: 0.7, r: 0.2, seed: 6, power: 3.5 },
     { x: 3.45, z: 4.95, h: 0.36, r: 0.25, seed: 7, power: 3.2 },

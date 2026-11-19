@@ -359,7 +359,7 @@ async function boot() {
   const goal = { target: new THREE.Vector3(), az: 0, el: 0, dist: 0 };
   const v = new THREE.Vector3(), clock = { last: performance.now(), t: 0 };
   const viewM = new THREE.Matrix4(), pixM = new THREE.Matrix4(), mvp = new THREE.Matrix4();
-  let started = 0, firstFrame = true;
+  let started = 0, firstFrame = true, settled = false;
   const OPEN_MS = 2500, CLOSE_MS = 1500;
   const fp = hashFlag(/[#&]p=([\d.]+)/), fixedP = fp ? +fp[1] : null;   // freeze the opening at a point, for screenshots
 
@@ -406,10 +406,46 @@ async function boot() {
     quality.acc = 0; quality.n = 0;
   }
 
+  // the scene through the whole final-image pipeline (the frame, and the warm-up below)
+  function drawScene(dt) {
+    if (usePost) {
+      const u = finalQuad.material.uniforms;
+      renderer.setRenderTarget(rtScene); renderer.render(scene, camera);
+      copyQuad.material.uniforms.tColor.value = rtScene.texture;
+      renderer.setRenderTarget(rtFlat); copyQuad.render(renderer);
+      bloom.render(renderer, null, rtFlat, dt, false);
+      u.tColor.value = rtFlat.texture; u.tDepth.value = rtScene.depthTexture;
+      renderer.setRenderTarget(null); finalQuad.render(renderer);
+    } else {
+      renderer.setRenderTarget(null); renderer.render(scene, camera);
+    }
+  }
+
+  // Warm-up, behind the loading screen: every program the table will use is compiled before the opening
+  // starts (in parallel where KHR_parallel_shader_compile exists), the full resin's too, then the whole image
+  // pipeline draws once into a tiny buffer, so nothing compiles during the opening or the first roll.
+  async function warmUp() {
+    camera.position.set(0, 12, 16); camera.lookAt(0, 0, 0); camera.updateMatrixWorld();
+    dice.setResin('full');
+    const hidden = []; scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
+    try { await renderer.compileAsync(scene, camera); } catch (e) { console.warn('[table] compileAsync', e); }
+    for (const o of hidden) o.visible = false;
+    if (!instant) dice.setResin('lite');
+    const pr = renderer.getPixelRatio(), cw = canvas.clientWidth, chh = canvas.clientHeight;
+    renderer.setPixelRatio(1); renderer.setSize(128, 72, false); renderer.getDrawingBufferSize(size);
+    if (usePost) { rtScene.setSize(size.x, size.y); rtFlat.setSize(size.x, size.y); bloom.setSize(64, 36); finalQuad.material.uniforms.uRes.value.copy(size); }
+    camera.aspect = 128 / 72; camera.updateProjectionMatrix();
+    drawScene(0.016);
+    renderer.setPixelRatio(pr); renderer.setSize(cw, chh, false);
+    resize(true);
+    if (perf) perf.mark('warm');
+  }
+
   function frame(now) {
     const raw = (now - clock.last) / 1000;
     const dt = Math.min(0.05, raw); clock.last = now; clock.t += dt;
     if (!instant && !firstFrame && raw < 0.25) guard(raw, now);
+    if (perf && firstFrame) perf.mark('frame0start');
     const time = clock.t;
     if (!started) started = now;
     const since = (now - started) / 1000;
@@ -510,20 +546,15 @@ async function boot() {
       u.uTime.value = time;
       u.uFade.value = instant ? 1 : ease(since / 1.6);
       u.uFlash.value = state.phase === 'leaving' ? ease((now - state.t0) / 480) : 0;
-      renderer.setRenderTarget(rtScene); renderer.render(scene, camera);
-      copyQuad.material.uniforms.tColor.value = rtScene.texture;
-      renderer.setRenderTarget(rtFlat); copyQuad.render(renderer);
-      bloom.render(renderer, null, rtFlat, dt, false);
-      u.tColor.value = rtFlat.texture; u.tDepth.value = rtScene.depthTexture;
-      renderer.setRenderTarget(null); finalQuad.render(renderer);
-    } else {
-      renderer.setRenderTarget(null); renderer.render(scene, camera);
     }
+    drawScene(dt);
     gpuTime.end();
     bar.update(gameClock()); bar.render(renderer);
-    if (perf) perf.frame(now, scene, since >= 3.8 || instant);
+    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); }
+    if (perf) perf.frame(now, scene, settled);
     if (firstFrame) { firstFrame = false; if (!holdLoad) document.body.classList.add('is-ready'); }
   }
+  await warmUp();
   renderer.setAnimationLoop(frame);
 
   // handles for testing from the console:  __table.open('core')

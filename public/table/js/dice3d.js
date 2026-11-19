@@ -5,7 +5,7 @@
 // then extra teal dice) and go back into it once the result has shown. Which die a roll uses and
 // where it may land: dice-table.js (pure, unit-tested).
 import * as THREE from '../vendor/three.bundle.js';
-import { makeDie } from './models.js';
+import { makeDie, swapResin } from './models.js';
 import { rng as seededRng, contactShadowTexture } from './textures.js';
 import { assignDice, clampSpot, clash, bounceInto } from './dice-table.js';
 
@@ -102,9 +102,14 @@ export function createDice({ scene, atlas, table = null, area: AREA = { x0: -3.2
     : FLOOR);
   const restY = (D, x, z, q, s) => floorAt(x, z) - lowest(D.die.userData.hull, q, s);
 
+  // the opening runs on the lite resin (no transmission pass); setResin('full') once the table is ready
+  let resinTier = 'lite';
+  function setResin(tier) { resinTier = tier; for (const D of all) if (D.die.userData.wantFull) swapResin(D.die, tier); }
   function addDie({ type, r: baseR = RADIUS[type], color, ink, style = 'bone', kind, role = null, x, z, up = null, spin = 0, s = 1, resin }) {
     const st = DIE_STYLE[style] || DIE_STYLE.bone;
-    const die = makeDie(type, baseR, color ?? st.color, ink ?? st.ink, atlas, { up, spin, seed: seed++, resin: resin || (lite ? 'lite' : 'full'), depth: st.depth, glow: st.glow });
+    const wantFull = !resin && !lite;      // dice made without a say take the full transmission resin, once settled
+    const die = makeDie(type, baseR, color ?? st.color, ink ?? st.ink, atlas, { up, spin, seed: seed++, resin: resin || (wantFull && resinTier === 'full' ? 'full' : 'lite'), depth: st.depth, glow: st.glow });
+    die.userData.wantFull = wantFull;
     die.scale.setScalar(s);
     die.position.set(x, 0, z); die.position.y = restY({ die }, x, z, die.quaternion, s);
     const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x000000, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4 }));
@@ -374,7 +379,7 @@ export function createDice({ scene, atlas, table = null, area: AREA = { x0: -3.2
 
   const moving = () => all.some((D) => D.phase === 'lift' || D.phase === 'throw' || D.phase === 'return');
   return {
-    group, throwDice, update, readUp, focus, where,
+    group, setResin, throwDice, update, readUp, focus, where,
     get busy() { return moving() || (!!roll && !roll.over && roll.restAt != null && now() - roll.restAt < HOLD_MS + TAG_OUT_MS + TAG_IN_MS) || spareFrames > 0; },
     get state() {
       if (all.some((D) => D.phase === 'lift' || D.phase === 'throw')) return 'throw';
