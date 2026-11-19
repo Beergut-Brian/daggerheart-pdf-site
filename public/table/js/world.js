@@ -224,7 +224,7 @@ function poseBook(b, time) {
 
 // ---------------------------------------------------------------- world
 
-export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = false }) {
+export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = false, progressive = false }) {
   const lite = tier === 'lite';
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x04040c);
@@ -247,7 +247,8 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   };
 
   // ---- table
-  const wood = TX.woodTextures(lite ? 768 : 1024);
+  const small = lite || progressive;   // progressive: start on the small bakes, main.js swaps the full ones in when the table is idle
+  const wood = TX.woodTextures(small ? 768 : 1024);
   const tableMat = new THREE.MeshPhysicalMaterial({ map: wood.map, bumpMap: wood.bump, bumpScale: 1.4, roughness: 0.46, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.35, envMapIntensity: 1.6 });
   const table = new THREE.Mesh(new RoundedBoxGeometry(18, 0.7, 12, 3, 0.09), tableMat);
   table.position.y = -0.35; table.receiveShadow = true; scene.add(table);
@@ -255,7 +256,7 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   floor.position.y = -7.4; scene.add(floor);
 
   // ---- battle map
-  const matTex = TX.battleMatTexture(lite ? 1024 : 1536, lite ? 598 : 896);
+  const matTex = TX.battleMatTexture(small ? 1024 : 1536, small ? 598 : 896);
   const cloth = new THREE.MeshStandardMaterial({ color: 0x0b0b0e, roughness: 1 });
   const mat = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.03, 5.6), [cloth, cloth, new THREE.MeshStandardMaterial({ map: matTex, roughness: 0.94 }), cloth, cloth, cloth]);
   const MAT = new THREE.Vector3(0.3, 0, -1.9);

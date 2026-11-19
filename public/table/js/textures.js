@@ -64,8 +64,22 @@ export async function loadBaked(names, base = new URL('../tex/', import.meta.url
   }));
 }
 
-function tex(canvas, { srgb = true, repeat = null, aniso = 8 } = {}) {
+// The small baked sizes the table starts with, and the full ones that replace them once it is idle (upgradeBaked)
+export const BAKED_SMALL = ['wood-768', 'wood-768-bump', 'mat-1024x598'];
+export const BAKED_FULL = ['wood-1024', 'wood-1024-bump', 'mat-1536x896'];
+const UPGRADE = { 'wood-768': 'wood-1024', 'wood-768-bump': 'wood-1024-bump', 'mat-1024x598': 'mat-1536x896' };
+const upgradable = [];   // [texture, name of the full size]
+// Swap every texture made from a small bake for its full-size twin (same picture and aspect, more texels); returns how many.
+export function upgradeBaked() {
+  let n = 0;
+  for (const [t, full] of upgradable) if (BAKED[full] && t.image !== BAKED[full]) { t.image = BAKED[full]; t.dispose(); t.needsUpdate = true; n++; }
+  upgradable.length = 0;
+  return n;
+}
+
+function tex(canvas, { srgb = true, repeat = null, aniso = 8, bake = null } = {}) {
   const t = new THREE.CanvasTexture(canvas);
+  if (bake && UPGRADE[bake]) upgradable.push([t, UPGRADE[bake]]);
   if (srgb) t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = aniso;
   if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat[0], repeat[1]); }
@@ -74,7 +88,7 @@ function tex(canvas, { srgb = true, repeat = null, aniso = 8 } = {}) {
 
 // --- oak table top -----------------------------------------------------------
 export function woodTextures(size = 1024) {
-  if (BAKED['wood-' + size] && BAKED['wood-' + size + '-bump']) return { map: tex(BAKED['wood-' + size], { aniso: 16 }), bump: tex(BAKED['wood-' + size + '-bump'], { srgb: false, aniso: 4 }) };
+  if (BAKED['wood-' + size] && BAKED['wood-' + size + '-bump']) return { map: tex(BAKED['wood-' + size], { aniso: 16, bake: 'wood-' + size }), bump: tex(BAKED['wood-' + size + '-bump'], { srgb: false, aniso: 4, bake: 'wood-' + size + '-bump' }) };
   const W = size, H = size;
   const col = makeCanvas(W, H), bmp = makeCanvas(W, H);
   const cc = col.getContext('2d'), bc = bmp.getContext('2d');
@@ -136,7 +150,7 @@ export function woodTextures(size = 1024) {
 
 // --- battle map: painted ground with a road and a 1-inch grid -------------------
 export function battleMatTexture(W = 1536, H = 896) {
-  if (BAKED['mat-' + W + 'x' + H]) return tex(BAKED['mat-' + W + 'x' + H], { aniso: 16 });
+  if (BAKED['mat-' + W + 'x' + H]) return tex(BAKED['mat-' + W + 'x' + H], { aniso: 16, bake: 'mat-' + W + 'x' + H });
   const c = makeCanvas(W, H), g = c.getContext('2d');
   const img = g.createImageData(W, H);
   const moss = [44, 62, 34], grass = [78, 98, 46], dry = [124, 116, 62];

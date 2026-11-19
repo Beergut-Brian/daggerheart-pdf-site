@@ -9,9 +9,9 @@ import { createPlay } from './play.js';
 import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
-import { loadBaked, BAKED_FILES } from './textures.js';
+import { loadBaked, upgradeBaked, BAKED, BAKED_SMALL, BAKED_FULL } from './textures.js';
 import { createPerf } from './perf.js';
-import { startRatio, decide } from './quality.js';
+import { startRatio, decide, createRamp } from './quality.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
 const FOCUS_EASE = 6;      // how fast the depth-of-field focus follows (per second)
@@ -39,6 +39,9 @@ for (const b of BOOKS) {
 }
 function fail(err) { console.error('[table]', err); document.body.classList.add('no-gl'); }
 
+// the two cover images are the first thing the table needs from the network: ask for them at high priority before anything else is set up
+if (ON_SITE) for (const b of BOOKS) if (b.cover) { const l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.href = b.cover; l.fetchPriority = 'high'; document.head.append(l); }
+
 boot().catch(fail);
 
 async function boot() {
@@ -64,10 +67,16 @@ async function boot() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality.ratio));
   renderer.setSize(Math.max(1, canvas.clientWidth), Math.max(1, canvas.clientHeight), false);
 
+  // Load order: the focus assets first (the two cover images at high priority, the typefaces the covers and the card use),
+  // then the GM-screen art and the small baked wood and mat; the full-size wood and mat come once the table is idle (see `settled` below).
+  const bakeOn = !hashFlag(/[#&]bake=off/);
+  const coversP = loadCoverImages(BOOKS);
   // words need their typefaces before they are painted
   const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 80px "HSG Title"'];
   await Promise.race([Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => 0))), new Promise((r) => setTimeout(r, 3000))]);
-  const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt(), hashFlag(/[#&]bake=off/) ? 0 : loadBaked(BAKED_FILES)]);
+  const images = await coversP;
+  const bakedP = bakeOn ? loadBaked(BAKED_SMALL) : Promise.resolve();   // starts now, is awaited only when the world is built
+  await loadScreenArt();
 
   if (perf) perf.mark('assets');
   const surfaces = new Surfaces(renderer);
@@ -86,7 +95,9 @@ async function boot() {
   // an upright phone gets a tighter arrangement, so both books fit across the screen
   const tall = innerWidth / innerHeight < 0.8;
   const defs = BOOKS.map((b) => (tall && b.placeTall ? { ...b, place: b.placeTall } : b));
-  const world = buildWorld({ renderer, surfaces, tier, books: defs, tall });
+  await bakedP;
+  const progressive = bakeOn && !lite && BAKED_SMALL.every((n) => BAKED[n]);   // the table starts on the small bakes and swaps to full ones when idle
+  const world = buildWorld({ renderer, surfaces, tier, books: defs, tall, progressive });
   const { scene, books } = world;
   if (perf) perf.mark('world');
   const camera = new THREE.PerspectiveCamera(30, 1, 0.5, 90);
@@ -173,7 +184,7 @@ async function boot() {
     renderer.setSize(w, h, false);
     // the HTML surfaces' snapshots follow the canvas's pixel ratio. Retaking them is a stall, so guard steps
     // leave them be and one retake follows once the ratio has settled (frame loop); a window resize retakes at once.
-    if (!fromGuard && Math.abs(pixelK() - quality.snapRatio) > 0.01) { surfaces.refresh(); quality.snapRatio = pixelK(); }
+    if (!fromGuard && Math.abs(pixelK() - quality.snapRatio) > 0.01) { surfaces.refresh(); quality.snapRatio = pixelK(); }   // a window resize retakes every surface, focus ones included (their zoom is re-fitted)
     renderer.getDrawingBufferSize(size);
     const aspect = w / h;
     camera.aspect = aspect;
@@ -362,7 +373,8 @@ async function boot() {
   const goal = { target: new THREE.Vector3(), az: 0, el: 0, dist: 0 };
   const v = new THREE.Vector3(), clock = { last: performance.now(), t: 0 };
   const viewM = new THREE.Matrix4(), pixM = new THREE.Matrix4(), mvp = new THREE.Matrix4();
-  let started = 0, firstFrame = true, settled = false;
+  let started = 0, firstFrame = true, settled = false, swapFull = false;
+  const idleThen = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 1500));
   const OPEN_MS = 2500, CLOSE_MS = 1500;
   const fp = hashFlag(/[#&]p=([\d.]+)/), fixedP = fp ? +fp[1] : null;   // freeze the opening at a point, for screenshots
 
@@ -382,9 +394,19 @@ async function boot() {
       }
     },
   };
+  // The step-up ramp (quality.js): after the opening, frame times from requestAnimationFrame alone lift the ratio toward the
+  // tier's cap, about one 15% step a second; a step that pushes the median over ~18 ms is undone and becomes the ceiling.
+  // The GPU timer, where there is one, can still veto a step. #ramp=off turns it off; window.__frameMs (a test hook) replaces the measured interval.
+  const ramp = createRamp({
+    cap: () => ratioCap(canvas.clientWidth, canvas.clientHeight), getRatio: () => quality.ratio, getCeiling: () => quality.ceiling, setCeiling: (c) => { quality.ceiling = c; },
+    apply: (r) => setRatio(r, performance.now()), gpu: () => (tq && quality.gpuMs ? quality.gpuMs : 0),
+    log: (t, r, why) => console.info(`[table] ratio ${r.toFixed(3)} (${why})`),
+  });
+  const rampOn = !hashFlag(/[#&]ramp=off/);
   function setRatio(r, now) {
     (quality.history ||= []).push([Math.round(performance.now()), +r.toFixed(3), quality.gpuMs ? +quality.gpuMs.toFixed(1) : null]);
     quality.ratio = r; quality.lastChange = now; quality.acc = 0; quality.n = 0; quality.skip = 3; quality.gpuMs = 0;
+    ramp.reset();
     resize(true);
   }
   function guard(raw, now) {
@@ -442,7 +464,10 @@ async function boot() {
   function frame(now) {
     const raw = (now - clock.last) / 1000;
     const dt = Math.min(0.05, raw); clock.last = now; clock.t += dt;
-    if (!instant && !firstFrame && raw < 1) guard(Math.min(raw, 0.25), now);   // a long pause (hidden tab) is not a slow frame
+    if (!instant && !firstFrame && raw < 1) {   // a long pause (hidden tab) is not a slow frame
+      guard(Math.min(raw, 0.25), now);
+      if (settled && rampOn && state.phase === 'table') ramp.feed(window.__frameMs ? window.__frameMs() : raw * 1000);
+    }
     if (perf && firstFrame) perf.mark('frame0start');
     const ft = hashFlag(/[#&]t=([\d.]+)/), time = ft ? +ft[1] : clock.t;   // #t=N: freeze the animation clock, for before/after stills
     if (!started) started = now;
@@ -490,7 +515,7 @@ async function boot() {
     world.update(time, dt, camera, pxScale);
     surfaces.tick();
     // one retake of the surfaces once the guard has stopped moving the ratio
-    if (quality.lastChange && now - quality.lastChange > 2000 && Math.abs(pixelK() - quality.snapRatio) > 0.01) { surfaces.refresh(); quality.snapRatio = pixelK(); quality.lastChange = 0; }
+    if (quality.lastChange && now - quality.lastChange > 2000 && Math.abs(pixelK() - quality.snapRatio) > 0.01) { surfaces.refresh({ focus: false }); quality.snapRatio = pixelK(); quality.lastChange = 0; }
 
     // name plate follows the book
     if (state.hot) {
@@ -548,7 +573,9 @@ async function boot() {
     drawScene(dt);
     gpuTime.end();
     bar.update(gameClock()); bar.render(renderer);
-    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); }
+    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); if (progressive) idleThen(() => loadBaked(BAKED_FULL).then(() => { swapFull = true; })); }
+    // the full-size wood and mat go in at a moment nothing moves: same picture, more texels, so there is nothing to see but sharpness
+    if (swapFull && !world.moving && !world.stirring && state.phase === 'table') { swapFull = false; const n = upgradeBaked(); console.info('[table] full-size wood and mat in: ' + n + ' textures'); if (perf) perf.mark('full-tex'); }
     if (perf) perf.frame(now, scene, settled);
     if (firstFrame) { firstFrame = false; if (!holdLoad) document.body.classList.add('is-ready'); }
   }
@@ -556,7 +583,7 @@ async function boot() {
   renderer.setAnimationLoop(frame);
 
   // handles for testing from the console:  __table.open('core')
-  window.__table = { area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier, quality, perf,
+  window.__table = { ramp, setRatio: (r) => setRatio(r, performance.now()), area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier, quality, perf,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels
