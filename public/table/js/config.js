@@ -60,6 +60,16 @@ export function hrefFor(book) {
 // Set image to null to go back to the plain painted screen.
 export const GM_SCREEN = { image: 'art/gm-screen.jpg', focusX: 0.5, focusY: 0.5 };
 
+// Where thrown dice land: an invisible bound on the open wood in front of the books (nothing is drawn).
+// Centre x / z, width (x) and depth (z), in table units. Every throw aims inside it, dice bounce off
+// its edges and come to rest in it, clear of the books, tokens, battle map and GM screen. The Duality
+// d12s lie here between rolls. `tall` is the layout for phones held upright (books closer together).
+// The camera's default view (main.js, FRAME) is set so this stays on screen above the command bar.
+export const ROLL_AREA = {
+  wide: { x: 0, z: 5.2, w: 6.4, d: 1.3 },
+  tall: { x: 0.35, z: 6.15, w: 3.6, d: 1.2 },
+};
+
 export const HOME_HREF = ON_SITE ? '/' : SITE + '/';
 
 // Quality tier. "lite" is for phones and small tablets.

@@ -36,3 +36,22 @@ export function clash(x, z, rad, avoid) {
   for (const [ax, az, ar] of avoid) c += Math.max(0, ar + rad - Math.hypot(x - ax, z - az));
   return c;
 }
+
+// { x, z, w, d } (centre, width, depth) -> { x0, x1, z0, z1 }
+export function areaBounds(a) {
+  return { x0: a.x - a.w / 2, x1: a.x + a.w / 2, z0: a.z - a.d / 2, z1: a.z + a.d / 2 };
+}
+
+// Fold a point back into the area (inset by the die's radius) the way a ball bounces off walls:
+// past an edge by d means d back inside. Used for the throw's path so dice rebound off the edges.
+export function bounceInto(p, rad, area) {
+  const fold = (v, lo, hi) => {
+    lo += rad; hi -= rad;
+    const span = hi - lo;
+    if (span <= 0) return (lo + hi) / 2;
+    let u = (v - lo) % (2 * span);
+    if (u < 0) u += 2 * span;
+    return lo + (u > span ? 2 * span - u : u);
+  };
+  return { x: fold(p.x, area.x0, area.x1), z: fold(p.z, area.z0, area.z1) };
+}

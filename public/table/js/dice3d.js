@@ -7,11 +7,11 @@
 import * as THREE from '../vendor/three.bundle.js';
 import { makeDie } from './models.js';
 import { rng as seededRng, contactShadowTexture } from './textures.js';
-import { assignDice, clampSpot, clash } from './dice-table.js';
+import { assignDice, clampSpot, clash, bounceInto } from './dice-table.js';
 
 // ---- tunables (times are on the game clock, ms)
 const LIFT_MS = 420;          // pick-up: rise from where the die lies to the throwing hand
-const LIFT = { back: 1.6, backRand: 0.5, toward: 0.2, shake: 0.045, shakeTurn: 0.22, shakeHz: 11, riseUntil: 0.45 };   // back: hand this far toward the viewer from the landing spot
+const LIFT = { back: 0.45, backRand: 0.25, toward: 0.2, shake: 0.045, shakeTurn: 0.22, shakeHz: 11, riseUntil: 0.45 };   // back: hand this far toward the viewer from the landing spot (kept inside the rolling area)
 const THROW_MS = 1150;        // the throw: tumble, bounces, settle
 const STAGGER_MS = 35, JITTER_MS = 60;    // per-die start offsets so they do not move as one
 const HOLD_MS = 2600;         // result showing (tags lit) before the tray's dice go back and the tags fade
@@ -26,9 +26,10 @@ export const DIE_STYLE = {
 };
 const RADIUS = { d4: 0.33, d6: 0.25, d8: 0.27, d10: 0.28, d12: 0.27, d20: 0.3 };
 
-// Open table in front of the party, on the battle map (top at y = 0.03), clear of minis and boulders.
-const AREA = { x0: -1.25, x1: 2.55, z0: -0.3, z1: 0.72, y: 0.03 };
-const AVOID = [[0.9, 0.2, 0.2], [1.9, 0.3, 0.32], [3.3, -0.2, 0.3]];
+// The rolling area (config.js ROLL_AREA, as bounds): open wood in front of the books. It is only a bound,
+// nothing is drawn. Throws aim into it, dice rebound off its edges and rest inside it.
+const WALL_BOUNCE = 0.55;     // share of throws that hit an edge on the way (when one is close enough)
+const WALL_NEAR = 1.0;        // ... and the landing spot is at most this far from that edge
 // contact shadow: a soft dark blob on the table under each die, wider and fainter as it lifts
 const SHADOW = { size: 3.6, opacity: 0.95, fadeH: 0.9, spreadK: 0.9, toCamera: 0.45, lift: 0.008 };   // toCamera: offset (x radius) so it shows past the die
 // tall phones (height / width above TALL_ASPECT): bigger dice and a wider throw
@@ -88,7 +89,7 @@ function badge(value, style, atlas) {
 }
 
 // table: world.tableDice ({ duality: [{ role, x, z, up, spin, seed }], floor, tray: { x, z, y, r, dice: [...] } })
-export function createDice({ scene, atlas, table = null, calm, lite = false, clock = () => performance.now(), view = null, scale = () => 1 }) {
+export function createDice({ scene, atlas, table = null, area: AREA = { x0: -3.2, x1: 3.2, z0: 4.55, z1: 5.85 }, calm, lite = false, clock = () => performance.now(), view = null, scale = () => 1 }) {
   const group = new THREE.Group(); scene.add(group);
   const r = seededRng(9001);
   const shadowTex = contactShadowTexture(), shadowGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
@@ -96,9 +97,9 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
   const FLOOR = table?.floor ?? 0;
   let all = [], roll = null, seed = 1, nextId = 1, spareFrames = 0, onRest = null;
 
-  // the table top under a point: the tray's floor, the battle map, or the bare table
+  // the table top under a point: the tray's floor or the bare table
   const floorAt = (x, z) => (Math.hypot(x - TRAY.x, z - TRAY.z) < TRAY.r * 1.1 ? TRAY.y
-    : x >= AREA.x0 && x <= AREA.x1 && z >= AREA.z0 && z <= AREA.z1 ? AREA.y : FLOOR);
+    : FLOOR);
   const restY = (D, x, z, q, s) => floorAt(x, z) - lowest(D.die.userData.hull, q, s);
 
   function addDie({ type, r: baseR = RADIUS[type], color, ink, style = 'bone', kind, role = null, x, z, up = null, spin = 0, s = 1, resin }) {
@@ -127,18 +128,18 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
     D.phase = 'gone'; all = all.filter((o) => o !== D);
   }
 
-  // where each die of a roll lands: in the open throw zone, clear of the minis and boulders,
-  // of the dice already lying there and of each other
+  // where each die of a roll lands: inside the rolling area, clear of the dice already lying there
+  // and of each other
   function place(list, others) {
     const out = [], n = list.length;
-    const cx = n <= 2 ? 0.55 : (AREA.x0 + AREA.x1) / 2, cz = 0.28;
+    const cx = (AREA.x0 + AREA.x1) / 2, cz = (AREA.z0 + AREA.z1) / 2;
     for (const D of list) {
       const rad = D.rad;
       let best = null, bestScore = Infinity;
       for (let i = 0; i < 160; i++) {
-        const spread = (n <= 2 ? 0.55 : 1) * D.big;
-        const c = clampSpot({ x: cx + (r() - 0.5) * (AREA.x1 - AREA.x0) * spread, z: cz + (r() - 0.5) * (AREA.z1 - AREA.z0) }, rad * 0.5, AREA);
-        const sc = clash(c.x, c.z, rad, AVOID) + clash(c.x, c.z, rad + 0.04, others)
+        const spread = n <= 2 ? 0.45 : 1;
+        const c = clampSpot({ x: cx + (r() - 0.5) * (AREA.x1 - AREA.x0) * spread, z: cz + (r() - 0.5) * (AREA.z1 - AREA.z0) }, rad, AREA);
+        const sc = clash(c.x, c.z, rad + 0.04, others)
           + clash(c.x, c.z, rad + 0.08, out.map((o) => [o.x, o.z, o.rad])) * 4;
         const score = sc * 100 + Math.hypot(c.x - cx, (c.z - cz) * 1.6) * 0.3;
         if (score < bestScore) { bestScore = score; best = { x: c.x, z: c.z, rad }; }
@@ -223,12 +224,25 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
     const spots = place(dice, others);
     dice.forEach((D, i) => {
       const end = new THREE.Vector3(spots[i].x, 0, spots[i].z);
-      D.qf = facing(D, D.spec.value, end.clone().setY(AREA.y));
-      end.y = AREA.y;
+      D.qf = facing(D, D.spec.value, end.clone().setY(FLOOR));
+      end.y = FLOOR;
       const p0 = D.die.position;
       D.p0 = p0.clone(); D.q0 = D.die.quaternion.clone(); D.s0 = D.die.scale.x;
       D.end = end; D.h0 = 1.25 + r() * 0.5;
-      D.start = new THREE.Vector3(p0.x + (end.x - p0.x) * LIFT.toward + (r() - 0.5) * 0.3, 0, Math.max(p0.z, end.z + LIFT.back + r() * LIFT.backRand));
+      // the hand is inside the area too (a die lying elsewhere rises toward it)
+      const hand = clampSpot({ x: p0.x + (end.x - p0.x) * LIFT.toward + (r() - 0.5) * 0.3, z: end.z + LIFT.back + r() * LIFT.backRand }, D.rad, AREA);
+      D.start = new THREE.Vector3(hand.x, 0, hand.z);
+      // some throws carry on past the landing spot into the nearest edge and rebound off it (pose() folds the path back in)
+      D.via = end.clone();
+      const lx = AREA.x0 + D.rad, hx = AREA.x1 - D.rad, lz = AREA.z0 + D.rad, hz = AREA.z1 - D.rad;
+      if (r() < WALL_BOUNCE) {
+        const wx = end.x >= D.start.x ? hx : lx;
+        if (Math.abs(end.x - wx) < WALL_NEAR) D.via.x = 2 * wx - end.x;
+      }
+      if (r() < WALL_BOUNCE * 0.6) {
+        const wz = end.z >= D.start.z ? hz : lz;
+        if (Math.abs(end.z - wz) < WALL_NEAR * 0.5) D.via.z = 2 * wz - end.z;
+      }
       D.axis = new THREE.Vector3(1, (r() - 0.5) * 0.6, (r() - 0.5) * 0.8).normalize();
       D.wob = new THREE.Vector3(r() - 0.5, 0, r() - 0.5).normalize();
       D.spin = Math.PI * 2 * (1.4 + r() * 1.1);
@@ -263,7 +277,7 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
     die.quaternion.slerpQuaternions(D.q0, D.qs, e);
     const shake = Math.sin(Math.PI * smooth(LIFT.riseUntil, 1, t)) * (t > LIFT.riseUntil ? 1 : 0), w = Math.sin(t * LIFT_MS / 1000 * LIFT.shakeHz * 6.283);
     if (shake) die.quaternion.premultiply(_q2.setFromAxisAngle(D.wob, w * LIFT.shakeTurn * shake));
-    const topY = AREA.y + D.h0 - lowest(die.userData.hull, D.qs, D.sc);
+    const topY = FLOOR + D.h0 - lowest(die.userData.hull, D.qs, D.sc);
     die.position.set(D.p0.x + (D.start.x - D.p0.x) * e + w * LIFT.shake * shake, D.p0.y + (topY - D.p0.y) * easeOut3(Math.min(1, t / LIFT.riseUntil)), D.p0.z + (D.start.z - D.p0.z) * e);
   }
   function pose(D, t) {
@@ -271,7 +285,8 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
     die.scale.setScalar(D.sc);
     if (t >= 1) { die.quaternion.copy(D.qf); die.position.copy(D.end); die.position.y = restY(D, D.end.x, D.end.z, D.qf, D.sc); return; }
     const s = easeOut3(t);
-    die.position.lerpVectors(D.start, D.end, s);
+    die.position.lerpVectors(D.start, D.via, s);
+    const f = bounceInto(die.position, D.rad, AREA); die.position.x = f.x; die.position.z = f.z;
     const ts = Math.min(1, t / 0.8), theta = D.spin * Math.pow(1 - ts, 2.2);
     _q.setFromAxisAngle(D.axis, theta).multiply(D.qf);
     if (t > 0.72) {                                   // settle: rock on an edge and come to rest
@@ -279,7 +294,7 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
       _q.premultiply(_q2.setFromAxisAngle(D.wob, a));
     }
     die.quaternion.copy(_q);
-    die.position.y = AREA.y + hop(t, D.h0) - lowest(die.userData.hull, _q, D.sc);
+    die.position.y = FLOOR + hop(t, D.h0) - lowest(die.userData.hull, _q, D.sc);
   }
   // back into the tray: a hop, rolled face still up; extras fade as they drop in
   function back(D, u) {
@@ -366,7 +381,7 @@ export function createDice({ scene, atlas, table = null, calm, lite = false, clo
       if (all.some((D) => D.phase === 'return')) return 'return';
       return roll && !roll.over ? 'rest' : 'idle';
     },
-    get centre() { return new THREE.Vector3(roll && roll.dice.length > 2 ? (AREA.x0 + AREA.x1) / 2 : 0.55, 0.2, 0.28); },
+    get centre() { return new THREE.Vector3((AREA.x0 + AREA.x1) / 2, 0.2, (AREA.z0 + AREA.z1) / 2); },
   };
   function now() { return clock(); }
 }

@@ -1,12 +1,13 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
-import { BOOKS, CHARACTERS, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
+import { BOOKS, CHARACTERS, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
 import { createCard } from './card.js';
 import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, loadScreenArt, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
 import { createCommandBar } from './command.js';
 import { createPlay } from './play.js';
 import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
+import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
@@ -132,6 +133,9 @@ async function boot() {
   }
 
   // ---------------------------------------------------------------- camera rig
+  // the default view is a little wider and further toward the viewer than the table alone needs, so the
+  // rolling area (config.js ROLL_AREA) is on screen above the command bar: zoom out by `zoom`, aim `dz` further front
+  const FRAME = { wide: { zoom: 1.12, dz: 0.9 }, tall: { zoom: 1.1, dz: 1.5 } };
   const rig = {
     home: { target: new THREE.Vector3(0.05, 0.35, 0.75), az: 0, el: 0.7, dist: 16 },
     cur: { target: new THREE.Vector3(), az: 0, el: 0.9, dist: 22 },
@@ -155,9 +159,10 @@ async function boot() {
     camera.updateProjectionMatrix();
     const th = Math.tan((camera.fov * Math.PI) / 360);
     const needW = tall ? 5.9 : lerp(9.4, 14.4, clamp((aspect - 0.6) / 0.75, 0, 1));
-    rig.home.dist = Math.max(needW / 2 / (th * aspect), 4.45 / th);
+    const fr = FRAME[tall ? 'tall' : 'wide'];
+    rig.home.dist = Math.max(needW / 2 / (th * aspect), 4.45 / th) * fr.zoom;
     rig.home.el = tall ? 0.98 : lerp(0.92, 0.7, clamp((aspect - 0.6) / 0.75, 0, 1));
-    rig.home.target.z = tall ? 0.1 : lerp(1.5, 0.75, clamp((aspect - 0.6) / 0.75, 0, 1));
+    rig.home.target.z = (tall ? 0.1 : lerp(1.5, 0.75, clamp((aspect - 0.6) / 0.75, 0, 1))) + fr.dz;
     rig.openDist = Math.max(5.7 / 2 / (th * aspect), 3.9 / 2 / th) * 1.04;
     if (usePost) {
       rtScene.setSize(size.x, size.y); rtFlat.setSize(size.x, size.y);
@@ -321,7 +326,7 @@ async function boot() {
   const gameClock = () => game.t;
   const bar = createCommandBar({ surfaces, log, canvas, renderer, clock: gameClock, onCommand: (text) => play.run(text) });
   // tall phones get bigger dice and a wider throw
-  const dice = createDice({ scene, atlas: world.atlas, table: world.tableDice, calm, lite, clock: gameClock, view: () => camera.position,
+  const dice = createDice({ scene, atlas: world.atlas, table: world.tableDice, area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), calm, lite, clock: gameClock, view: () => camera.position,
     scale: () => (canvas.clientHeight / Math.max(1, canvas.clientWidth) > TALL_ASPECT ? TALL_SCALE : 1) });
   const attack = createAttack({ scene, minis: world.minis, calm, lite, clock: gameClock });
   play = createPlay({ bar, dice, attack, character, canAct: () => state.phase === 'table' });
@@ -464,7 +469,7 @@ async function boot() {
   renderer.setAnimationLoop(frame);
 
   // handles for testing from the console:  __table.open('core')
-  window.__table = { world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
+  window.__table = { area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels

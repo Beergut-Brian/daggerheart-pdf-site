@@ -1,9 +1,11 @@
 // Proof shots, videos, the up-face check and frame timings for /table's dice and attack.
 //   node scripts/table-proof.mjs [stills|videos|perf|card|all] [baseUrl] [outDir]
 // card: the attack card (pass 2): a row's dice icon rolls, video + stills; not part of "all".
-// extras: loading screen with its button (#hold-load), the scene with no corner label, the GM screen
+// extras: loading screen with its link (#hold-load), the scene with no corner label, the GM screen
 //   (default camera and straight on) into ../review/table-look; not part of "all".
 // look: the look pass (resin dice, impact, phone layout) into ../review/table-look; not part of "all".
+// fix: loading-screen link, then the rolling area: a Duality roll and /roll 3d6 at 1440 and 390 (dice must
+//   rest inside __table.area), and a recording of two rolls; into ../review/table-fix. ONLY=load,still,video
 // pickup: the table's own dice get rolled (two Duality rolls, then 3d6 borrowing from the tray), the
 //   landed d12s, reduced motion; into ../review/table-look; not part of "all". ONLY=still,reduced,video
 // Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
@@ -16,7 +18,7 @@ import path from "node:path";
 
 const mode = process.argv[2] || "all";
 const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
-const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : "../review/table-1"));
+const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : mode === "fix" ? "../review/table-fix" : "../review/table-1"));
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
 const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
 fs.mkdirSync(out, { recursive: true });
@@ -257,10 +259,10 @@ async function extras() {
     p.on("pageerror", (e) => { console.error("page error:", e.message); failures++; });
     await p.goto(`${base}/table#shot&hold-load`);
     await p.waitForFunction(() => window.__table, null, { timeout: 120000 });
-    await p.keyboard.press("Tab");          // the button is the first stop: show its focus ring and fill
+    await p.keyboard.press("Tab");          // the link is the first stop: show its focus ring
     const info = await p.evaluate(() => ({ ready: document.body.classList.contains("is-ready"), focus: document.activeElement && document.activeElement.textContent, href: document.activeElement && document.activeElement.getAttribute("href"), surfaces: document.documentElement.dataset.surfaces, label: !!document.querySelector("#mode") }));
     say(`${name}: ${JSON.stringify(info)}`);
-    if (info.ready || info.focus !== "Go to Daggerheart Resources" || info.label) failures++;
+    if (info.ready || info.focus !== "Click here for resources" || info.label) failures++;
     await p.waitForTimeout(2000); await frames(p, 2);   // let the focus fill finish sliding
     await p.screenshot({ path: path.join(out, name) }); say("wrote " + name);
     await ctx.close();
@@ -382,6 +384,47 @@ async function pickup() {
   }
 }
 
+
+// the dice of the last roll rest inside the rolling area and do not overlap each other
+async function checkArea(p, label) {
+  const { area, at } = await p.evaluate(() => ({ area: window.__table.area, at: window.__table.diceAt() }));
+  const out = at.filter((d) => d.out && d.phase === "rest");
+  const inside = out.every((d) => d.x >= area.x0 && d.x <= area.x1 && d.z >= area.z0 && d.z <= area.z1);
+  let apart = true;
+  for (let i = 0; i < out.length; i++) for (let j = i + 1; j < out.length; j++) if (Math.hypot(out[i].x - out[j].x, out[i].z - out[j].z) < 0.35) apart = false;
+  if (!inside || !apart) failures++;
+  say(`${label}: ${out.length} dice out, ${inside ? "inside the rolling area" : "OUTSIDE"}, ${apart ? "apart" : "OVERLAP"} ${out.map((d) => `${d.type}@${d.x},${d.z}`).join(" ")}`);
+}
+
+async function fix() {
+  let p, ctx;
+  if (want("load")) await extras();
+  for (const [tag, w, h, phone] of [["1440", 1440, 900, false], ["390", 390, 844, true]]) {
+    if (!want("still")) break;
+    ({ p, ctx } = await open("#shot&seed=7", { w, h, phone }));
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); });
+    await shot(p, `table-default-${tag}.png`);
+    await type(p, "/roll duality", phone); await settle(p);
+    await checkUp(p, `fix: duality ${tag}`); await checkArea(p, `duality ${tag}`);
+    await shot(p, `roll-duality-${tag}.png`);
+    await type(p, "/roll 3d6", phone); await settle(p);
+    await checkUp(p, `fix: 3d6 ${tag}`); await checkArea(p, `3d6 ${tag}`);
+    await shot(p, `roll-3d6-${tag}.png`);
+    await ctx.close();
+  }
+  if (want("video")) {
+    const plan = [[0.3, "/roll duality", [9, 4]], [3.6, "/roll duality", [6, 11]]];
+    await record("rolls.webm", "#shot&seed=7", async (pg, t) => {
+      while (plan.length && t >= plan[0][0]) {
+        const [, cmd, f] = plan.shift();
+        await pg.evaluate(([h, fe]) => window.__table.forceRoll(h, fe), f);
+        await type(pg, cmd);
+      }
+    }, { seconds: 7, fps: 12, lean: true });
+  }
+}
+
+if (mode === "fix") await fix();
 if (mode === "pickup") await pickup();
 if (mode === "extras") await extras();
 if (mode === "look") await look();

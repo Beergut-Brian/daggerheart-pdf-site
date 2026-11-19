@@ -5,6 +5,7 @@ import { Builder, makeMaterials, buildTerrain } from './models.js';
 import { makeCanvas, rng } from './textures.js';
 import { paintSpine, paintWing } from './surfaces.js';
 import { MINIS } from './minis.js';
+import { ROLL_AREA } from './config.js';
 
 const { RoundedBoxGeometry, RoomEnvironment } = THREE;
 const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
@@ -295,13 +296,13 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
 
   // ---- the duality dice and their tokens, between the books
   // The dice themselves are made and moved by dice3d.js (they are the ones that get rolled);
-  // this only says where they start: the Duality d12s here, the rest in the tray (below).
+  // this only says where they start: the Duality d12s in the rolling area, the rest in the tray (below).
   const atlas = TX.diceAtlas();
-  const dz = tall ? 2.55 : 0, dx = tall ? -0.1 : 0;      // upright phones: the dice and tokens move in front of the books
+  const ra = ROLL_AREA[tall ? 'tall' : 'wide'];       // they lie in the rolling area between rolls
   const tableDice = {
     duality: [
-      { role: 'hope', x: -0.42 + dx, z: 2.25 + dz, up: 11, spin: 0.5, seed: 3 },
-      { role: 'fear', x: 0.14 + dx, z: 2.7 + dz * 0.9, up: 7, spin: 2.2, seed: 9 },
+      { role: 'hope', x: ra.x - 0.6, z: ra.z - 0.1, up: 11, spin: 0.5, seed: 3 },
+      { role: 'fear', x: ra.x + 0.55, z: ra.z + 0.12, up: 7, spin: 2.2, seed: 9 },
     ],
     floor: 0,
   };

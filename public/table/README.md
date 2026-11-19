@@ -49,18 +49,23 @@ The d10 is numbered 1 to 10 (not 0 to 9), so its face is what you add. The d4 is
 
 The dice on the table are the ones that get rolled; no new dice appear for a Duality roll:
 
-- The gold Hope and violet Fear d12s start between the books. A Duality roll (and an attack) picks
-  them up from wherever they lie (a short rise and a shake in the air), throws them into the open
-  part of the battle map, and they land with the rolled number up and stay there. The next roll
-  picks them up from there. They never go into the tray, and plain `d12` rolls leave them alone.
+- The gold Hope and violet Fear d12s lie in the rolling area (below). A Duality roll (and an attack)
+  picks them up from wherever they lie (a short rise and a shake in the air), throws them into the
+  area, and they land with the rolled number up and stay there. The next roll picks them up from
+  there. They never go into the tray, and plain `d12` rolls leave them alone.
 - Other dice (`3d6`, `d20`, damage dice) use the dice already lying out of that type first, then
   the tray's own dice of that type (one d20, two d8s, two d6s); only the missing ones are new teal
   dice, and they rise out of the tray. About 2.6 s after the result shows (on the game clock) the
   tray's dice hop back into the tray, rolled face still up, and the new ones drop in and fade, so
   the table never fills up. A new roll before then picks them up from where they lie.
-- Landing spots stay inside the throw zone (`AREA`), clear of the minis and boulders (`AVOID`) and
-  of the dice already lying there. Which die a roll uses and the clamping are in `js/dice-table.js`
-  (pure, unit-tested in `tests/unit/dice-table.test.ts`); where the dice start is `tableDice` in `js/world.js`.
+- Landing spots stay inside the rolling area (`ROLL_AREA` in `js/config.js`), clear of the dice already
+  lying there. The area is an invisible bound on the open wood in front of the books: centre x / z,
+  width and depth, one entry for the wide layout and one for `tall` (phones held upright). Nothing is
+  drawn for it. Throws aim into it, some rebound off its edges (`WALL_BOUNCE` in `js/dice3d.js`,
+  `bounceInto` in `js/dice-table.js`), and every die rests inside it. To move it, edit `ROLL_AREA`
+  and check `FRAME` at the top of the camera rig in `js/main.js` (the default view zooms out a little
+  and aims toward the viewer so the area is on screen above the command bar). `__table.area` shows the bounds. Which die a roll uses and the clamping are in `js/dice-table.js`
+  (pure, unit-tested in `tests/unit/dice-table.test.ts`); where the Duality dice start (inside the area) is `tableDice` in `js/world.js`.
 - Reduced motion: the dice turn to their result where they lie (extras appear in the tray), no
   lift or throw.
 - Tunables at the top of `js/dice3d.js`: `LIFT_MS` and `LIFT` (pick-up), `THROW_MS`,
@@ -184,4 +189,5 @@ From the console: `__table.open('core')`, `__table.close()`, `__table.roll('/att
   (phones taller than 1.8 x their width get 1.3x dice and throw), `FOCUS_HOLD_MS` (depth of field follows the dice).
 - `js/attack.js` `WIND`, `LUNGE`, `HOLD`, `HITSTOP`, `LEAN`, `KNOCK`, `FLASH`, `BURST`, `SPARK`, `CRYSTAL_DIM`.
 - `js/command.js` `PHONE_W`, `LOG_ROWS`: the roll log sits under the home link (centred on phones, left on wider screens).
-- Proofs for this pass: `node scripts/table-proof.mjs look http://localhost:3123` writes to `../review/table-look/`.
+- Proofs for the rolling-area pass: `node scripts/table-proof.mjs fix http://localhost:3123` writes to `../review/table-fix/`.
+- Proofs for the look pass: `node scripts/table-proof.mjs look http://localhost:3123` writes to `../review/table-look/`.

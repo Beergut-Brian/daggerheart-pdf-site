@@ -43,3 +43,21 @@ describe("clampSpot", () => {
     expect(clash(0, 0, 0.2, [[0.3, 0, 0.2]])).toBeCloseTo(0.1);
   });
 });
+
+describe("rolling area", () => {
+  it("turns centre, width and depth into bounds", async () => {
+    const { areaBounds } = await import("../../public/table/js/dice-table.js");
+    expect(areaBounds({ x: 1, z: 5, w: 4, d: 1 })).toEqual({ x0: -1, x1: 3, z0: 4.5, z1: 5.5 });
+  });
+  it("folds a path point back inside, like a bounce off the edge", async () => {
+    const { bounceInto } = await import("../../public/table/js/dice-table.js");
+    const area = { x0: -3, x1: 3, z0: 4, z1: 6 };
+    expect(bounceInto({ x: 0, z: 5 }, 0.5, area)).toEqual({ x: 0, z: 5 });
+    expect(bounceInto({ x: 3.5, z: 5 }, 0.5, area)).toEqual({ x: 1.5, z: 5 });   // wall at 2.5, 1.0 past it
+    for (const x of [-9, -3, 0, 2.6, 7.3]) for (const z of [3, 4.2, 6.9, 12]) {
+      const p = bounceInto({ x, z }, 0.3, area);
+      expect(p.x).toBeGreaterThanOrEqual(-2.7); expect(p.x).toBeLessThanOrEqual(2.7);
+      expect(p.z).toBeGreaterThanOrEqual(4.3); expect(p.z).toBeLessThanOrEqual(5.7);
+    }
+  });
+});
