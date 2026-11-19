@@ -476,12 +476,12 @@ export const RESIN = {
 export const GLYPH_SCALE = 1.2;          // numbers on the faces, against the old printed size
 let INK = null;                           // the engraved number atlas, shared by every die
 
-function resinMaterial(color, r, tier) {
+function resinMaterial(color, r, tier, depth = 1, glow = null) {
   const c = new THREE.Color(color), base = { color: c, metalness: 0, clearcoat: RESIN.clearcoat, clearcoatRoughness: RESIN.clearcoatRoughness, flatShading: true, envMapIntensity: 2.2, emissive: c };
   if (tier === 'full') {
     const F = RESIN.full;
     return new THREE.MeshPhysicalMaterial({ ...base, roughness: F.roughness, transmission: F.transmission, thickness: r * F.thicknessK, ior: F.ior,
-      attenuationColor: c, attenuationDistance: r * F.attenuationK, emissiveIntensity: F.emissive, envMapIntensity: F.env });
+      attenuationColor: c, attenuationDistance: r * F.attenuationK * depth, emissiveIntensity: glow ?? F.emissive, envMapIntensity: F.env });
   }
   const L = RESIN.lite;
   return new THREE.MeshPhysicalMaterial({ ...base, roughness: L.roughness, sheen: L.sheen, sheenRoughness: L.sheenRoughness,
@@ -490,10 +490,10 @@ function resinMaterial(color, r, tier) {
 
 // One die, already "rolled": it sits on a face with `up` showing.
 // resin: 'full' | 'lite' (see RESIN); the tray dice stay on 'lite'.
-export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed = 1, resin = 'lite' } = {}) {
+export function makeDie(type, r, color, ink, atlas, { up = null, spin = 0, seed = 1, resin = 'lite', depth = 1, glow = null } = {}) {
   const F = FACES[type], rand = rng(seed);
   const group = new THREE.Group();
-  const body = new THREE.Mesh(F.geo(r), resinMaterial(color, r, resin));
+  const body = new THREE.Mesh(F.geo(r), resinMaterial(color, r, resin, depth, glow));
   body.castShadow = true; body.receiveShadow = true;
   group.add(body);
   // numbers

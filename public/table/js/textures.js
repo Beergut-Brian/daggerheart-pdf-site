@@ -234,8 +234,8 @@ export function diceInkAtlas(font = '900 86px Cinzel, Georgia, serif') {
 export function contactShadowTexture(size = 64) {
   const c = makeCanvas(size, size), g = c.getContext('2d');
   const gr = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.4, 'rgba(255,255,255,0.75)');
-  gr.addColorStop(0.72, 'rgba(255,255,255,0.25)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.45, 'rgba(255,255,255,0.9)');
+  gr.addColorStop(0.75, 'rgba(255,255,255,0.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = gr; g.fillRect(0, 0, size, size);
   return tex(c, { srgb: false, aniso: 1 });
 }

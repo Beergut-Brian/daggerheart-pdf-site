@@ -278,8 +278,10 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 .rolllog .lg-row { display: flex; align-items: center; gap: 12px; height: 32px; margin: 3px 0; max-width: calc(100% - 4px); padding: 0 16px; border-radius: 15px; overflow: hidden; white-space: nowrap;
   background: var(--row-bg); border: 1px solid var(--line); color: var(--ink); }
 .rolllog .lg-row::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.rolllog .lg-row b { font: 700 17px/1 var(--sans); }
-.rolllog .lg-row span { font: 500 13px/1 var(--sans); color: var(--dim); }
+.rolllog .lg-row b { flex: none; font: 700 17px/1 var(--sans); }
+.rolllog .lg-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: 500 13px/1 var(--sans); color: var(--dim); }
+/* a long detail gives way first, so the total always shows */
+.rolllog .lg-row.is-long span { font-size: 11px; }
 .rolllog .lg-hope { color: var(--gold); }
 .rolllog .lg-fear { color: var(--fear); border-color: var(--fear-line); }
 .rolllog .lg-critical { color: var(--crit-ink); background: var(--crit-bg); border-color: var(--crit-line); }

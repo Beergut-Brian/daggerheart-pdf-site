@@ -5,9 +5,9 @@ import { makeDie } from './models.js';
 import { rng as seededRng, contactShadowTexture } from './textures.js';
 
 export const DIE_STYLE = {
-  hope: { color: 0xf0a820, ink: 0x2a1400 },
+  hope: { color: 0xf4b62a, ink: 0x2a1400, depth: 3.2, glow: 0.12 },   // depth: a longer light path keeps it gold, not amber
   fear: { color: 0x5a23c8, ink: 0xf3cf72 },     // gold ink on the violet resin
-  bone: { color: 0xe6e0d0, ink: 0x1a1a22 },
+  bone: { color: 0x1d8f8a, ink: 0xf3cf72, depth: 1.4 },      // plain dice: smoky teal resin, gold ink
 };
 const RADIUS = { d4: 0.33, d6: 0.25, d8: 0.27, d10: 0.28, d12: 0.27, d20: 0.3 };
 
@@ -15,13 +15,14 @@ const RADIUS = { d4: 0.33, d6: 0.25, d8: 0.27, d10: 0.28, d12: 0.27, d20: 0.3 };
 const AREA = { x0: -1.25, x1: 2.55, z0: -0.3, z1: 0.72, y: 0.03 };
 const AVOID = [[0.9, 0.2, 0.2], [1.9, 0.3, 0.32], [3.3, -0.2, 0.3]];
 // contact shadow: a soft dark blob on the table under each die, wider and fainter as it lifts
-const SHADOW = { size: 3.8, opacity: 0.78, fadeH: 0.9, spreadK: 0.9 };
+const SHADOW = { size: 3.6, opacity: 0.95, fadeH: 0.9, spreadK: 0.9, toCamera: 0.45, lift: 0.008 };   // toCamera: offset (x radius) so it shows past the die
 // tall phones (height / width above TALL_ASPECT): bigger dice and a wider throw
 export const TALL_ASPECT = 1.8, TALL_SCALE = 1.3;
 // depth of field: focus follows the dice from the throw until this long after they settle
 const FOCUS_HOLD_MS = 1600;
 const THROW_MS = 1150, HOLD_MS = 4000, CLEAR_MS = 450, SWAP_MS = 200;
 
+const _s = new THREE.Vector3();
 const UP = new THREE.Vector3(0, 1, 0), _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
 const easeOut3 = (t) => 1 - Math.pow(1 - t, 3);
 
@@ -105,7 +106,7 @@ export function createDice({ scene, atlas, calm, lite = false, clock = () => per
     const spots = place(list);
     live = list.map((d, i) => {
       const st = DIE_STYLE[d.style || 'bone'], rad = spots[i].rad;
-      const die = makeDie(d.type, rad, st.color, st.ink, atlas, { seed: seed++, resin: lite ? 'lite' : 'full' });
+      const die = makeDie(d.type, rad, st.color, st.ink, atlas, { seed: seed++, resin: lite ? 'lite' : 'full', depth: st.depth, glow: st.glow });
       const ud = die.userData, face = ud.faces.find((f) => f.value === d.value);
       // final orientation: rolled value up, its number upright for the viewer (pointing away, -z)
       const tilt = new THREE.Quaternion().setFromUnitVectors(face.n, UP);
@@ -131,7 +132,7 @@ export function createDice({ scene, atlas, calm, lite = false, clock = () => per
       const axis = new THREE.Vector3(1, (r() - 0.5) * 0.6, (r() - 0.5) * 0.8).normalize();
       const wob = new THREE.Vector3(r() - 0.5, 0, r() - 0.5).normalize();
       group.add(die);
-      const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x000000, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 }));
+      const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ map: shadowTex, color: 0x000000, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4 }));
       shadow.renderOrder = 1; group.add(shadow);
       const tag = badge(d.value, d.style || 'bone', atlas); tag.position.copy(end); group.add(tag);
       return { die, tag, shadow, rad, spec: d, glow: glowMarks(die, d.value, d.style || 'bone', atlas), qf, end, start, axis, wob, spin: Math.PI * 2 * (1.4 + r() * 1.1), h0: 1.25 + r() * 0.5, delay: i * 35 + r() * 60, scale: 1 };
@@ -180,7 +181,8 @@ export function createDice({ scene, atlas, calm, lite = false, clock = () => per
   function shade() {
     for (const L of live) {
       const h = Math.max(0, L.die.position.y - AREA.y - L.rad * 0.55), k = Math.max(0, 1 - h / SHADOW.fadeH), sc = L.die.scale.x;
-      L.shadow.position.set(L.die.position.x, AREA.y + 0.004, L.die.position.z);
+      L.shadow.position.set(L.die.position.x, AREA.y + SHADOW.lift, L.die.position.z);
+      if (view) { _s.copy(view()).sub(L.shadow.position).setY(0); if (_s.lengthSq() > 1e-6) L.shadow.position.addScaledVector(_s.normalize(), L.rad * SHADOW.toCamera); }
       L.shadow.scale.setScalar(L.rad * SHADOW.size * (1 + h * SHADOW.spreadK) * sc);
       L.shadow.material.opacity = SHADOW.opacity * k * k * Math.min(1, sc * 1.5);
     }

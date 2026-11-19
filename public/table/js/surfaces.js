@@ -568,8 +568,14 @@ export function paintLog(g, W, H, rows, layout = {}) {
     if (r.alpha <= 0.01) continue;
     g.save(); g.globalAlpha = r.alpha;
     g.font = `700 17px ${SANS}`; const tw = g.measureText(r.text).width;
-    g.font = `500 13px ${SANS}`; const dw = r.detail ? g.measureText(r.detail).width + 12 : 0;
-    const pad = 16, w = Math.min(W - 4, tw + dw + pad * 2 + (r.tone === 'hint' ? 0 : 16)), x = left ? 2 : (W - w) / 2;
+    // the detail gives way first: it shrinks to 11px, then ends in an ellipsis, so the total always shows
+    const pad = 16, room = W - 4 - tw - pad * 2 - (r.tone === 'hint' ? 0 : 16) - 12;
+    let detail = r.detail || '', dsize = 13;
+    g.font = `500 ${dsize}px ${SANS}`;
+    if (detail && g.measureText(detail).width > room) { dsize = 11; g.font = `500 ${dsize}px ${SANS}`; }
+    while (detail.length > 1 && g.measureText(detail).width > room) detail = detail.slice(0, -2) + '…';
+    const dw = detail ? g.measureText(detail).width + 12 : 0;
+    const w = Math.min(W - 4, tw + dw + pad * 2 + (r.tone === 'hint' ? 0 : 16)), x = left ? 2 : (W - w) / 2;
     roundRect(g, x, y + 3, w, LOG_ROW - 6, 15);
     g.fillStyle = r.tone === 'critical' ? 'rgba(48,34,8,0.86)' : 'rgba(9,8,28,0.8)'; g.fill();
     g.lineWidth = 1; g.strokeStyle = r.tone === 'critical' ? 'rgba(255,214,130,0.85)' : r.tone === 'fear' ? 'rgba(185,156,255,0.42)' : 'rgba(231,199,124,0.34)'; g.stroke();
@@ -579,7 +585,7 @@ export function paintLog(g, W, H, rows, layout = {}) {
     g.font = `700 17px ${SANS}`; g.fillStyle = LOG_TONE[r.tone];
     if (r.tone === 'critical') { g.shadowColor = 'rgba(255,200,90,0.9)'; g.shadowBlur = 10; }
     g.fillText(r.text, cx, y + LOG_ROW / 2 + 1); g.shadowBlur = 0; cx += tw + 12;
-    if (r.detail) { g.font = `500 13px ${SANS}`; g.fillStyle = 'rgba(239,232,214,0.64)'; g.fillText(r.detail, cx, y + LOG_ROW / 2 + 1); }
+    if (detail) { g.font = `500 ${dsize}px ${SANS}`; g.fillStyle = 'rgba(239,232,214,0.64)'; g.fillText(detail, cx, y + LOG_ROW / 2 + 1); }
     g.restore(); g.restore();
   }
 }
@@ -592,7 +598,7 @@ function buildLogEl(el, rows, layout = {}) {
     const row = h('p', 'lg-row lg-' + r.tone);
     row.style.opacity = r.alpha.toFixed(2);
     row.append(h('b', null, r.text));
-    if (r.detail) row.append(h('span', null, r.detail));
+    if (r.detail) { row.append(h('span', null, r.detail)); if ((r.text + r.detail).length > 40) row.classList.add('is-long'); }
     el.append(row);
   }
 }
