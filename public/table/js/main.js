@@ -9,6 +9,7 @@ import { createPlay } from './play.js';
 import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
+import { loadBaked, BAKED_FILES } from './textures.js';
 import { createPerf } from './perf.js';
 import { startRatio, decide } from './quality.js';
 
@@ -66,7 +67,7 @@ async function boot() {
   // words need their typefaces before they are painted
   const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 80px "HSG Title"'];
   await Promise.race([Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => 0))), new Promise((r) => setTimeout(r, 3000))]);
-  const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt()]);
+  const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt(), hashFlag(/[#&]bake=off/) ? 0 : loadBaked(BAKED_FILES)]);
 
   if (perf) perf.mark('assets');
   const surfaces = new Surfaces(renderer);

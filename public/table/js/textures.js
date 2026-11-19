@@ -45,6 +45,25 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 function mixRGB(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
 function sstep(a, b, x) { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
 
+// --- baked textures -----------------------------------------------------------------------
+// The wood and the battle mat are painted by the functions below (the source of truth), baked once by
+// scripts/bake-textures.mjs into tex/*.webp with the same painters and seeds. loadBaked() fetches them
+// before the world is built; a painter finds its file in BAKED and uses it, and paints itself if the
+// file is missing or failed to load.
+export const BAKED = {};
+export const BAKED_FILES = ['wood-1024', 'wood-1024-bump', 'wood-768', 'wood-768-bump', 'mat-1536x896', 'mat-1024x598'];
+export async function loadBaked(names, base = new URL('../tex/', import.meta.url)) {
+  await Promise.all(names.map(async (name) => {
+    try {
+      const res = await fetch(new URL(name + '.webp', base));
+      if (!res.ok) return;
+      const bmp = await createImageBitmap(await res.blob());
+      const c = makeCanvas(bmp.width, bmp.height); c.getContext('2d').drawImage(bmp, 0, 0); bmp.close();
+      BAKED[name] = c;
+    } catch (e) { /* paint it instead */ }
+  }));
+}
+
 function tex(canvas, { srgb = true, repeat = null, aniso = 8 } = {}) {
   const t = new THREE.CanvasTexture(canvas);
   if (srgb) t.colorSpace = THREE.SRGBColorSpace;
@@ -55,6 +74,7 @@ function tex(canvas, { srgb = true, repeat = null, aniso = 8 } = {}) {
 
 // --- oak table top -----------------------------------------------------------
 export function woodTextures(size = 1024) {
+  if (BAKED['wood-' + size] && BAKED['wood-' + size + '-bump']) return { map: tex(BAKED['wood-' + size], { aniso: 16 }), bump: tex(BAKED['wood-' + size + '-bump'], { srgb: false, aniso: 4 }) };
   const W = size, H = size;
   const col = makeCanvas(W, H), bmp = makeCanvas(W, H);
   const cc = col.getContext('2d'), bc = bmp.getContext('2d');
@@ -116,6 +136,7 @@ export function woodTextures(size = 1024) {
 
 // --- battle map: painted ground with a road and a 1-inch grid -------------------
 export function battleMatTexture(W = 1536, H = 896) {
+  if (BAKED['mat-' + W + 'x' + H]) return tex(BAKED['mat-' + W + 'x' + H], { aniso: 16 });
   const c = makeCanvas(W, H), g = c.getContext('2d');
   const img = g.createImageData(W, H);
   const moss = [44, 62, 34], grass = [78, 98, 46], dry = [124, 116, 62];
