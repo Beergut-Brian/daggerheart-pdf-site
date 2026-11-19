@@ -423,14 +423,17 @@ async function boot() {
     camera.position.set(0, 12, 16); camera.lookAt(0, 0, 0); camera.updateMatrixWorld();
     dice.setResin('full');
     const hidden = []; scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
+    // the scene is drawn into rtScene (linear, no tone mapping), and a program is keyed on that: compile for it
+    renderer.setRenderTarget(usePost ? rtScene : null);
     try { await renderer.compileAsync(scene, camera); } catch (e) { console.warn('[table] compileAsync', e); }
+    renderer.setRenderTarget(null);
     for (const o of hidden) o.visible = false;
-    if (!instant) dice.setResin('lite');
     const pr = renderer.getPixelRatio(), cw = canvas.clientWidth, chh = canvas.clientHeight;
     renderer.setPixelRatio(1); renderer.setSize(128, 72, false); renderer.getDrawingBufferSize(size);
     if (usePost) { rtScene.setSize(size.x, size.y); rtFlat.setSize(size.x, size.y); bloom.setSize(64, 36); finalQuad.material.uniforms.uRes.value.copy(size); }
     camera.aspect = 128 / 72; camera.updateProjectionMatrix();
     drawScene(0.016);
+    if (!instant) dice.setResin('lite');
     renderer.setPixelRatio(pr); renderer.setSize(cw, chh, false);
     resize(true);
     if (perf) perf.mark('warm');

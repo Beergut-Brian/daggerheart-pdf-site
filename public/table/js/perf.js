@@ -17,9 +17,13 @@ export function createPerf(renderer) {
   };
   const casters = (scene) => { let n = 0; scene.traverse((o) => { if (o.isLight && o.castShadow) n++; }); return n; };
   const fmt = (v) => (v == null ? '…' : v.toFixed(0) + ' ms');
+  const known = new Set();
   const notePrograms = (phase) => {
     const n = programCount();
-    if (n !== lastPrograms) { r.programs.push({ t: Math.round(t()), phase, count: n }); lastPrograms = n; }
+    if (n !== lastPrograms) {
+      const names = (renderer.info.programs || []).map((p) => p.id + ':' + String(p.cacheKey).slice(0, 400)), added = names.filter((x) => !known.has(x)); added.forEach((x) => known.add(x));
+      r.programs.push({ t: Math.round(t()), phase, count: n, added: added.length > 6 ? added.length + ' programs' : added }); lastPrograms = n;
+    }
   };
   // bytes of every distinct texture the scene's materials hold (mip chain counted as +1/3)
   const bytes = (scene) => {
