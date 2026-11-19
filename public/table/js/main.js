@@ -9,6 +9,7 @@ import { createPlay } from './play.js';
 import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
+import { createPerf } from './perf.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
 const FOCUS_EASE = 6;      // how fast the depth-of-field focus follows (per second)
@@ -42,6 +43,7 @@ async function boot() {
   const canvas = $('#gl');
   const tier = pickTier(), lite = tier === 'lite';
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, stencil: false, powerPreference: 'high-performance' });
+  const perf = hashFlag(/[#&]perf\b/) ? createPerf(renderer) : null;   // test flag: timing readout and a JSON summary
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -58,6 +60,7 @@ async function boot() {
   await Promise.race([Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => 0))), new Promise((r) => setTimeout(r, 3000))]);
   const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt()]);
 
+  if (perf) perf.mark('assets');
   const surfaces = new Surfaces(renderer);
   const character = CHARACTERS[0] || null, cardState = { hot: -1 };
   defineSurfaces(surfaces, BOOKS, images, { character, cardState });
@@ -76,6 +79,7 @@ async function boot() {
   const defs = BOOKS.map((b) => (tall && b.placeTall ? { ...b, place: b.placeTall } : b));
   const world = buildWorld({ renderer, surfaces, tier, books: defs, tall });
   const { scene, books } = world;
+  if (perf) perf.mark('world');
   const camera = new THREE.PerspectiveCamera(30, 1, 0.5, 90);
 
   // ---------------------------------------------------------------- final image: bloom, depth of field, grade
@@ -366,6 +370,7 @@ async function boot() {
         quality.acc = 0; quality.n = 0;
       }
     }
+    if (perf && firstFrame) perf.mark('frame0start');
     const time = clock.t;
     if (!started) started = now;
     const since = (now - started) / 1000;
@@ -473,12 +478,13 @@ async function boot() {
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     }
     bar.update(gameClock()); bar.render(renderer);
+    if (perf) perf.frame(now, scene, since >= 3.8 || instant);
     if (firstFrame) { firstFrame = false; if (!holdLoad) document.body.classList.add('is-ready'); }
   }
   renderer.setAnimationLoop(frame);
 
   // handles for testing from the console:  __table.open('core')
-  window.__table = { area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
+  window.__table = { area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier, quality, perf,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels
