@@ -413,14 +413,14 @@ async function fix() {
     await ctx.close();
   }
   if (want("video")) {
-    const plan = [[0.3, "/roll duality", [9, 4]], [3.6, "/roll duality", [6, 11]]];
+    const plan = [[0.2, "/roll duality", [9, 4]], [2.8, "/roll duality", [6, 11]]];
     await record("rolls.webm", "#shot&seed=7", async (pg, t) => {
       while (plan.length && t >= plan[0][0]) {
         const [, cmd, f] = plan.shift();
         await pg.evaluate(([h, fe]) => window.__table.forceRoll(h, fe), f);
         await type(pg, cmd);
       }
-    }, { seconds: 7, fps: 12, lean: true });
+    }, { seconds: 5.6, fps: 10, lean: true });
   }
 }
 
