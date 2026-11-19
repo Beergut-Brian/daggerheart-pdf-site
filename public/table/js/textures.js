@@ -240,6 +240,23 @@ export function contactShadowTexture(size = 64) {
   return tex(c, { srgb: false, aniso: 1 });
 }
 
+// --- a hit: a small hot starburst (thin rays round a white core) ----------------------
+export function starburstTexture(size = 128, rays = 9, seed = 4) {
+  const c = makeCanvas(size, size), g = c.getContext('2d'), r = rng(seed), m = size / 2;
+  g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < rays; i++) {
+    const a = (i / rays) * Math.PI * 2 + (r() - 0.5) * 0.5, len = m * (0.55 + r() * 0.45), w = 2 + r() * 3;
+    const gr = g.createLinearGradient(m, m, m + Math.cos(a) * len, m + Math.sin(a) * len);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.strokeStyle = gr; g.lineWidth = w; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(m, m); g.lineTo(m + Math.cos(a) * len, m + Math.sin(a) * len); g.stroke();
+  }
+  const core = g.createRadialGradient(m, m, 0, m, m, m * 0.3);
+  core.addColorStop(0, 'rgba(255,255,255,1)'); core.addColorStop(0.5, 'rgba(255,255,255,0.6)'); core.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = core; g.fillRect(0, 0, size, size);
+  return tex(c, { srgb: false, aniso: 1 });
+}
+
 // --- wax: bright near the flame, cool at the foot (fake subsurface) -------------------
 export function waxGlowTexture() {
   const c = makeCanvas(8, 128), g = c.getContext('2d');

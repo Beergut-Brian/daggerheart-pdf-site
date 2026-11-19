@@ -18,6 +18,8 @@ const AVOID = [[0.9, 0.2, 0.2], [1.9, 0.3, 0.32], [3.3, -0.2, 0.3]];
 const SHADOW = { size: 2.7, opacity: 0.62, fadeH: 0.9, spreadK: 0.9 };
 // tall phones (height / width above TALL_ASPECT): bigger dice and a wider throw
 export const TALL_ASPECT = 1.8, TALL_SCALE = 1.3;
+// depth of field: focus follows the dice from the throw until this long after they settle
+const FOCUS_HOLD_MS = 1600;
 const THROW_MS = 1150, HOLD_MS = 4000, CLEAR_MS = 450, SWAP_MS = 200;
 
 const UP = new THREE.Vector3(0, 1, 0), _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
@@ -224,8 +226,16 @@ export function createDice({ scene, atlas, calm, lite = false, clock = () => per
     });
   }
 
+  // where the dice are, while they are worth looking at (for the depth-of-field focus); null otherwise
+  const _f = new THREE.Vector3();
+  function focus(now = clock()) {
+    if (!live.length || state === 'idle' || state === 'clear' || (state === 'rest' && now - restAt > FOCUS_HOLD_MS)) return null;
+    _f.set(0, 0, 0); for (const L of live) _f.add(L.die.position);
+    return _f.multiplyScalar(1 / live.length);
+  }
+
   return {
-    group, throwDice, update, readUp,
+    group, throwDice, update, readUp, focus,
     get busy() { return state === 'throw' || state === 'swap' || state === 'clear' || spareFrames > 0; },
     get state() { return state; },
     get centre() { return new THREE.Vector3(live.length <= 2 ? 0.55 : (AREA.x0 + AREA.x1) / 2, 0.2, 0.28); },

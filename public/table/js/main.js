@@ -10,6 +10,7 @@ import { createDice } from './dice3d.js';
 import { createAttack } from './attack.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
+const FOCUS_EASE = 6;      // how fast the depth-of-field focus follows (per second)
 const $ = (s) => document.querySelector(s);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -428,12 +429,15 @@ async function boot() {
     }
 
     // focus: on the books, or on whichever one has your attention
-    const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : cardState.hot >= 0 && world.note ? world.note.position : world.focus;
+    // (and on the dice while they fly and settle)
+    const diceAt = state.phase === 'table' ? dice.focus(game.t) : null;
+    const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : diceAt ? diceAt : cardState.hot >= 0 && world.note ? world.note.position : world.focus;
     const fd = camera.position.distanceTo(focusOn);
 
     if (usePost) {
       const u = finalQuad.material.uniforms;
-      u.uFocus.value += (fd - u.uFocus.value) * (firstFrame ? 1 : 1 - Math.exp(-dt * 5));
+      // eased on whichever clock moved more, so stepped proofs (game clock only) catch up too
+      u.uFocus.value += (fd - u.uFocus.value) * (firstFrame ? 1 : 1 - Math.exp(-Math.max(dt, gdt) * FOCUS_EASE));
       u.uAperture.value = lerp(17, 13, opening);
       u.uTime.value = time;
       u.uFade.value = instant ? 1 : ease(since / 1.6);
