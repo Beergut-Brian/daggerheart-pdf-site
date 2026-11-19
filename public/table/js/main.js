@@ -56,7 +56,9 @@ async function boot() {
   const log = { rows: [] };
   defineLogSurface(surfaces, log);
   const mode = await surfaces.ready();
-  $('#mode').textContent = mode === 'html' ? 'Live HTML in canvas' : '';
+  // which path draws the surfaces: no visible label, a data attribute and one console line for testing
+  document.documentElement.dataset.surfaces = mode === 'html' ? 'html' : 'painted';
+  console.info('[table] surfaces: ' + (mode === 'html' ? 'live HTML in canvas' : 'painted 2D canvas'));
   if (matchMedia('(pointer: coarse)').matches) $('#hint').innerHTML = '<b>Tap a book</b> to open it · drag to look around';
 
   // an upright phone gets a tighter arrangement, so both books fit across the screen

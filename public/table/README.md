@@ -91,8 +91,9 @@ desktop app) the covers, opened pages, GM screen and note are real DOM
 elements inside the `<canvas>`, drawn into textures whenever they repaint, so
 CSS animation, real text and the links' accessibility all carry into the 3D
 scene. Everywhere else the same designs are painted with the 2D canvas API and
-the scene is otherwise identical. The corner of the page says "Live HTML in
-canvas" when the first path is running.
+the scene is otherwise identical. Nothing on the page says which path runs;
+the `<html>` element carries `data-surfaces="html"` or `data-surfaces="painted"`
+and the console logs one `[table] surfaces: ...` line.
 
 ## Address flags for testing
 

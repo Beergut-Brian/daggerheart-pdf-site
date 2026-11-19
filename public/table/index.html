@@ -96,9 +96,6 @@ body.has-touched #hint { opacity: 0; transition-delay: 0s; }
 body.has-log #hint { opacity: 0; transition-delay: 0s; }
 body:has(#cmd-in:focus) #hint { opacity: 0; transition: none; }
 
-#mode { right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; pointer-events: none;
-  font: 500 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: rgba(239, 232, 214, .34); }
-
 /* command bar: chat-style dice commands */
 #cmd { left: 50%; bottom: calc(var(--bar-bottom) + var(--kb)); transform: translateX(-50%); width: min(var(--bar-w), calc(100vw - var(--bar-inset) * 2)); height: var(--bar-h); margin: 0;
   display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 18px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line);
@@ -295,7 +292,7 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
   .spread-right .sp-name .w span, .spread-right :is(.sp-kicker, .sp-rule, .sp-sub, .sp-meta, .sp-go) { opacity: 1; transform: none; filter: none; transition: none; }
 }
 @media (max-width: 560px) {
-  #mode { display: none; } #hint { font-size: 12px; }
+  #hint { font-size: 12px; }
   /* phones: a slimmer bar, and a sheet whose attack rows each fit on one line */
   :root { --bar-h: 42px; --sheet-pad: 14px; --sheet-gap: 8px; --sheet-name: 16px; --sheet-meta: 13px; }
   #cmd { padding-left: 16px; }
@@ -310,7 +307,6 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 
 <a id="home" class="hud hide-open" href="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4"/></svg>High Sodium Gaming</a>
 <p id="hint" class="hud hide-open"><b>Pick up a book</b> to open it · drag to look around</p>
-<p id="mode" class="hud hide-open" aria-hidden="true"></p>
 
 <form id="cmd" class="hud" autocomplete="off">
   <label class="sr" for="cmd-in">Dice command, for example /roll duality, /roll 2d6+1, /attack longsword or /attack +2</label>
