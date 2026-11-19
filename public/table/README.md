@@ -95,6 +95,15 @@ the scene is otherwise identical. Nothing on the page says which path runs;
 the `<html>` element carries `data-surfaces="html"` or `data-surfaces="painted"`
 and the console logs one `[table] surfaces: ...` line.
 
+## The loading screen
+
+While the scene loads, a "Go to Daggerheart Resources" button sits under
+"Setting the table" and goes to the site's `/resources` page in the same tab.
+It is plain HTML, so it works before any script runs and with scripts off; if
+the browser has no WebGL, the plain list page shows the same button. Once the
+table is ready the button fades with the loading screen (the books are the way
+in from then on).
+
 ## Address flags for testing
 
 Add after `#`, joined with `&`:
@@ -104,6 +113,8 @@ Add after `#`, joined with `&`:
 - `shot` skip the intro
 - `open=core` or `open=hf` open a book on load; `p=0.6` freezes the opening there
 - `dof=off`, `post=off` switch off depth of field / all post-processing
+- `hold-load` keeps the loading screen (and its "Go to Daggerheart Resources" button) up after the scene is ready
+- `cam=az,el,zoom,x,z` sets the camera (orbit angle, height, zoom, pan); see `gm-screen-front` in `scripts/table-proof.mjs` for the straight-on GM screen view
 
 - `seed=42` makes every roll repeatable
 

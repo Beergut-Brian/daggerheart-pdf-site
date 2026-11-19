@@ -1,6 +1,6 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
-import { BOOKS, CHARACTERS, hrefFor, HOME_HREF, ON_SITE, pickTier } from './config.js';
+import { BOOKS, CHARACTERS, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
 import { createCard } from './card.js';
 import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
@@ -24,6 +24,8 @@ const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const home = $('#home');
 home.href = HOME_HREF;
 if (!ON_SITE) { home.target = '_blank'; home.rel = 'noopener'; }
+// "Go to Daggerheart Resources" on the loading screen and the plain page: same tab, the site's /resources
+for (const a of document.querySelectorAll('a.cta')) a.href = ON_SITE ? '/resources' : SITE + '/resources';
 for (const b of BOOKS) {
   const a = document.createElement('a'); a.className = 'card'; a.href = hrefFor(b);
   if (!ON_SITE) { a.target = '_blank'; a.rel = 'noopener'; }
@@ -328,6 +330,7 @@ async function boot() {
 
   // ---------------------------------------------------------------- frame
   const instant = !!hashFlag(/[#&]shot/) || calm;
+  const holdLoad = !!hashFlag(/[#&]hold-load/);   // keep the loading screen up, for screenshots
   const goal = { target: new THREE.Vector3(), az: 0, el: 0, dist: 0 };
   const v = new THREE.Vector3(), clock = { last: performance.now(), t: 0 };
   const viewM = new THREE.Matrix4(), pixM = new THREE.Matrix4(), mvp = new THREE.Matrix4();
@@ -456,7 +459,7 @@ async function boot() {
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     }
     bar.update(gameClock()); bar.render(renderer);
-    if (firstFrame) { firstFrame = false; document.body.classList.add('is-ready'); }
+    if (firstFrame) { firstFrame = false; if (!holdLoad) document.body.classList.add('is-ready'); }
   }
   renderer.setAnimationLoop(frame);
 

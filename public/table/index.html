@@ -48,6 +48,25 @@
   --serif: Cinzel, "Trajan Pro", Georgia, serif;
   --sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --hand: Caveat, "Segoe Script", "Bradley Hand", cursive;
+  /* the site's primary button (app/styles/base.css .cta), ported for the loading screen */
+  --cta-h: 64px;
+  --cta-sq: 56px;
+  --cta-pad: 4px;
+  --cta-gap: 20px;
+  --cta-end: 32px;
+  --cta-rad: 10px;
+  --cta-rad-sq: 6px;
+  --cta-icon: 22px;
+  --cta-text: 500 17px/1 var(--sans);
+  --cta-line: #d9d9d6;
+  --cta-bg: #1c1c1c;
+  --cta-sqbg: #f4f4f2;
+  --cta-ink: #111111;
+  --cta-dur: 300ms;
+  --cta-ease: cubic-bezier(.2, .7, .2, 1);
+  --cta-ring: 2px;
+  --cta-ring-gap: 3px;
+  --load-gap: 40px;
   /* the note card's paper and ink (painted twin: PAPER in js/surfaces.js) */
   --paper-hi: #f1e6c4;
   --paper-lo: #dccb9c;
@@ -138,9 +157,25 @@ body.is-open #cmd, body.is-leaving #cmd { visibility: hidden; }
 
 :is(#home, #enter a, #enter button):focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
-#load { position: fixed; z-index: 6; inset: 0; display: grid; place-items: center; background: var(--night); transition: opacity .9s ease; }
+#load { position: fixed; z-index: 6; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--load-gap); background: var(--night); transition: opacity .9s ease; }
+/* the site's primary button: white icon square, fill grows right on hover and focus */
+.cta { position: relative; isolation: isolate; display: inline-flex; align-items: center; gap: var(--cta-gap);
+  height: var(--cta-h); padding: var(--cta-pad) var(--cta-end) var(--cta-pad) var(--cta-pad);
+  border: 1px solid var(--cta-line); border-radius: var(--cta-rad); background: var(--cta-bg); color: var(--ink);
+  font: var(--cta-text); text-decoration: none; white-space: nowrap;
+  transition: color var(--cta-dur) var(--cta-ease), border-color var(--cta-dur) var(--cta-ease), background-color 0s; }
+.cta::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--cta-sqbg);
+  clip-path: inset(calc((100% - var(--cta-sq)) / 2) calc(100% - var(--cta-pad) - var(--cta-sq)) calc((100% - var(--cta-sq)) / 2) var(--cta-pad) round var(--cta-rad-sq));
+  transition: clip-path var(--cta-dur) var(--cta-ease); }
+.cta:hover, .cta:focus-visible { color: var(--cta-ink); border-color: var(--cta-sqbg); background-color: var(--cta-sqbg);
+  transition: color var(--cta-dur) var(--cta-ease), border-color var(--cta-dur) var(--cta-ease), background-color 0s var(--cta-dur); }
+.cta:hover::before, .cta:focus-visible::before { clip-path: inset(0 0 0 0 round var(--cta-rad)); }
+.cta:focus-visible { outline: var(--cta-ring) solid var(--gold); outline-offset: var(--cta-ring-gap); }
+.cta .cta-icon { width: var(--cta-sq); height: var(--cta-sq); flex: none; display: grid; place-items: center; border-radius: var(--cta-rad-sq); background: var(--cta-sqbg); color: var(--cta-ink); }
+.cta .cta-icon svg { width: var(--cta-icon); height: var(--cta-icon); }
+#plain .cta { margin: 0 auto var(--load-gap); }
 #load p { margin: 0; font: 700 13px/1 var(--serif); letter-spacing: .34em; text-transform: uppercase; color: rgba(231, 199, 124, .8); animation: breathe 1.8s ease-in-out infinite; }
-body.is-ready #load { opacity: 0; pointer-events: none; }
+body.is-ready #load { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .9s ease, visibility 0s .9s; }  /* faded: the button leaves the tab order too */
 @keyframes breathe { 50% { opacity: .35; } }
 
 /* plain page for browsers with no WebGL at all */
@@ -287,7 +322,8 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 .rolllog .lg-hint::before { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hud, #load, #plate, #enter, #cmd { transition: none; }
+  .hud, #load, body.is-ready #load, #plate, #enter, #cmd { transition: none; }
+  .cta, .cta::before, .cta:hover, .cta:focus-visible { transition: none; }
   .cover.is-hot .cv-sheen, .gm .gm-title span, #load p { animation: none; }
   .spread-right .sp-name .w span, .spread-right :is(.sp-kicker, .sp-rule, .sp-sub, .sp-meta, .sp-go) { opacity: 1; transform: none; filter: none; transition: none; }
 }
@@ -329,10 +365,13 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
   <button type="button">Back to the table</button>
 </div>
 
-<div id="load" role="status"><p>Setting the table</p></div>
+<div id="load"><p role="status">Setting the table</p>
+  <a class="cta" href="/resources"><span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>Go to Daggerheart Resources</a>
+</div>
 
 <main id="plain">
   <h1>Daggerheart Resources</h1>
+  <a class="cta" href="/resources"><span class="cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>Go to Daggerheart Resources</a>
   <div id="plain-list"></div>
 </main>
 
