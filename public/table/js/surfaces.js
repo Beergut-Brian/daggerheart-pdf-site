@@ -347,12 +347,15 @@ function titleLayout(W, H) {
   const n = TITLE.lines.length, gaps = (n - 1) * TITLE.lead;
   const byWidth = (W * TITLE.fill) / (widest / 100);
   const topEdge = FRAME_W + TITLE.margin, botEdge = H * (1 - TITLE.floor) - TITLE.margin;
-  const byHeight = (botEdge - topEdge) / (gaps + asc + desc);
+  // centred on the panel's own middle (Kaden, Nov 19: "center high sodium gaming vertically"); the block is sized so
+  // it stays clear of the frame above and of the hidden floor below, measured from that middle
+  const mid = H / 2, half = Math.min(mid - topEdge, botEdge - mid);
+  const byHeight = (2 * half) / (gaps + asc + desc);
   const px = Math.floor(Math.min(byWidth, byHeight));
   const lead = px * TITLE.lead;
-  const base = (topEdge + botEdge) / 2 - (((n - 1) * lead - asc * px + desc * px) / 2);
+  const base = mid - (((n - 1) * lead - asc * px + desc * px) / 2);
   const top = base - ((lead - (fa + fd) * px) / 2 + fa * px);
-  return { px, lead, base, top, mid: (topEdge + botEdge) / 2, inkH: (gaps + asc + desc) * px };
+  return { px, lead, base, top, mid, inkH: (gaps + asc + desc) * px };
 }
 
 export function paintScreen(g, W, H, { text = true } = {}) {
