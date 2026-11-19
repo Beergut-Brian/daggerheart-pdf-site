@@ -804,7 +804,7 @@ export class Surfaces {
         const changed = ev && ev.changedElements ? ev.changedElements : null;
         try {
           for (const s of this.list) {
-            if (step < 2 || s.dirty || s.live || !changed || changed.includes(s.el)) { this._upload(s); s.dirty = false; }
+            if (step < 2 || s.dirty || s.live || (!changed && !s.focus) || (changed && changed.includes(s.el))) {   // a focus surface is never retaken just because the canvas repainted this._upload(s); s.dirty = false; }
           }
           if (step === 0) {
             const bad = this.list.filter((s) => !this._probe(s));
