@@ -1,6 +1,7 @@
 // Proof shots, videos, the up-face check and frame timings for /table's dice and attack.
 //   node scripts/table-proof.mjs [stills|videos|perf|card|all] [baseUrl] [outDir]
 // card: the attack card (pass 2): a row's dice icon rolls, video + stills; not part of "all".
+// look: the look pass (resin dice, impact, phone layout) into ../review/table-look; not part of "all".
 // Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
 // (software GL), so it is slow: videos are rendered frame by frame on the table's game clock
 // (__table.timeScale(0) + __table.step(ms)) and piped to ffmpeg, so they play at real speed.
@@ -11,7 +12,7 @@ import path from "node:path";
 
 const mode = process.argv[2] || "all";
 const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
-const out = path.resolve(process.argv[4] || "../review/table-1");
+const out = path.resolve(process.argv[4] || (mode === "look" ? "../review/table-look" : "../review/table-1"));
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
 const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
 fs.mkdirSync(out, { recursive: true });
@@ -24,8 +25,8 @@ const say = (m) => console.log(new Date().toISOString().slice(11, 19), m);
 const upface = [];
 let failures = 0;
 
-async function open(hash, { w = 1440, h = 900, phone = false } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 3 : 1, isMobile: phone, hasTouch: phone });
+async function open(hash, { w = 1440, h = 900, phone = false, reduced = false } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 3 : 1, isMobile: phone, hasTouch: phone, reducedMotion: reduced ? "reduce" : "no-preference" });
   const p = await ctx.newPage();
   p.setDefaultTimeout(600000);
   p.on("pageerror", (e) => { console.error("page error:", e.message); failures++; });
@@ -241,6 +242,59 @@ async function card() {
   }
 }
 
+// the look pass: every die type in resin, the impact, the phone layout, reduced motion
+const ALL_DICE = "/roll 1d4+1d6+1d8+1d10+1d12+1d20";
+async function look() {
+  let p, ctx;
+  for (const [name, hash] of [["dice-1440.png", "#shot&seed=11"], ["dice-painted-1440.png", "#shot&html=off&seed=11"]]) {
+    if (!want(name.includes("painted") ? "painted" : "dice")) continue;
+    ({ p, ctx } = await open(hash));
+    await p.evaluate(() => window.__table.timeScale(0));
+    await camera(p, 0.55, 0.65, 0.15); await frames(p, 3);
+    await type(p, ALL_DICE); await settle(p);
+    await checkUp(p, name); await shot(p, name);
+    await ctx.close();
+  }
+  if (want("impact")) {
+    ({ p, ctx } = await open("#shot&seed=9"));
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
+    await type(p, "/attack +2"); await step(p, 1700);
+    const a = await p.evaluate(() => window.__table.attackPhase());
+    await step(p, Math.round((a.impactAt + 0.03 - a.t) * 1000));       // inside the hit-stop: burst at full
+    await shot(p, "attack-impact-1440.png");
+    await ctx.close();
+  }
+  if (want("video")) {
+    const plan = [[0.3, 9, 4, "guardian", "/attack +2"], [3.7, 2, 4, "rogue", "/attack +0"]];
+    await record("attack.webm", "#shot&seed=9", async (pg, t) => {
+      while (plan.length && t >= plan[0][0]) {
+        const [, hope, fear, hero, cmd] = plan.shift();
+        await pg.evaluate(([h, f, who]) => { window.__table.forceRoll(h, f); window.__table.nextAttacker(who); }, [hope, fear, hero]);
+        await type(pg, cmd);
+      }
+    }, { seconds: 7.2, fps: 12, lean: true });
+  }
+  if (want("phone")) {
+    ({ p, ctx } = await open("#shot&tier=lite&seed=3", { w: 390, h: 844, phone: true }));
+    await p.evaluate(() => window.__table.timeScale(0));
+    await type(p, "/roll duality", true); await settle(p);
+    await checkUp(p, "phone 390"); await shot(p, "phone-dice-390.png");
+    await p.tap("#attacks-chip"); await frames(p, 2);
+    await shot(p, "phone-card-390.png");
+    await ctx.close();
+  }
+  if (want("reduced")) {
+    ({ p, ctx } = await open("#seed=5", { reduced: true }));
+    await type(p, "/roll duality"); await frames(p, 3);
+    await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
+    await type(p, "/attack +2"); await frames(p, 4);
+    say("reduced motion: " + JSON.stringify(await p.evaluate(() => ({ dice: window.__table.diceState(), attack: window.__table.attackPhase() }))));
+    await shot(p, "reduced-motion.png");
+    await ctx.close();
+  }
+}
+
+if (mode === "look") await look();
 if (mode === "card") await card();
 if (mode === "stills" || mode === "all") await stills();
 if (mode === "perf" || mode === "all") await perf();

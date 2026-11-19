@@ -15,7 +15,7 @@ const RADIUS = { d4: 0.33, d6: 0.25, d8: 0.27, d10: 0.28, d12: 0.27, d20: 0.3 };
 const AREA = { x0: -1.25, x1: 2.55, z0: -0.3, z1: 0.72, y: 0.03 };
 const AVOID = [[0.9, 0.2, 0.2], [1.9, 0.3, 0.32], [3.3, -0.2, 0.3]];
 // contact shadow: a soft dark blob on the table under each die, wider and fainter as it lifts
-const SHADOW = { size: 2.7, opacity: 0.62, fadeH: 0.9, spreadK: 0.9 };
+const SHADOW = { size: 3.8, opacity: 0.78, fadeH: 0.9, spreadK: 0.9 };
 // tall phones (height / width above TALL_ASPECT): bigger dice and a wider throw
 export const TALL_ASPECT = 1.8, TALL_SCALE = 1.3;
 // depth of field: focus follows the dice from the throw until this long after they settle

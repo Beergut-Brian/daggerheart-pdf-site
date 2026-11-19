@@ -11,8 +11,8 @@ const WIND = 0.25, LUNGE = 0.34, HOLD = 0.08, BACK = 0.5, BOLT_SPEED = 6.5;
 const HITSTOP = 0.075;                                  // a hit freezes the attack (not the page) this long
 const LEAN = { back: 0.3, forward: 0.5, hop: 0.1 };     // the hero's wind-up and lunge lean (radians), hop (units)
 const KNOCK = { push: 0.17, tilt: 0.24, squash: 0.15, spring: 21, decay: 5.5, crit: 1.6 };
-const FLASH = { emissive: 0.35, light: 2.4, decay: 14 };
-const BURST = { size: 0.42, grow: 0.6, life: 0.2, color: new THREE.Color(3.2, 2.6, 1.7), critColor: new THREE.Color(3.4, 2.7, 1.1) };
+const FLASH = { tint: 0.18, emissive: 0.25, light: 1.8, decay: 16 };   // a short warm tint, not a glow over the whole monster
+const BURST = { size: 0.62, grow: 0.5, life: 0.2, color: new THREE.Color(4.5, 3.7, 2.5), critColor: new THREE.Color(4.8, 3.8, 1.5) };
 const SPARK = { full: 12, lite: 9, speed: 2.5, life: 0.42, gravity: 5.5, len: 0.09, width: 0.014,
   color: new THREE.Color(3.0, 2.0, 1.0), critColor: new THREE.Color(3.4, 2.6, 0.8) };
 const CRYSTAL_DIM = 0.55;                               // the monster's crystal glow, so its silhouette reads
@@ -177,7 +177,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
         p.m.scale.set(SPARK.width, SPARK.width, SPARK.len * (0.4 + 0.6 * sl) * big);
       }
       const flash = Math.exp(-Math.max(0, since) * FLASH.decay) * big;
-      flashMats.forEach((m) => { m.emissive.copy(m.userData.base.c).lerp(warm, Math.min(1, flash)); m.emissiveIntensity = m.userData.base.i + flash * FLASH.emissive; });
+      flashMats.forEach((m) => { m.emissive.copy(m.userData.base.c).lerp(warm, Math.min(1, flash * FLASH.tint)); m.emissiveIntensity = m.userData.base.i + flash * FLASH.emissive; });
       const env = Math.exp(-s * KNOCK.decay), wob = env * Math.cos(s * KNOCK.spring);
       target.pivot.position.copy(target.home).addScaledVector(c.dir, KNOCK.push * big * env);
       // tilt away from the hero: rotate about the horizontal axis across the blow

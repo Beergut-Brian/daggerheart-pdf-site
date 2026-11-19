@@ -469,7 +469,7 @@ export const DIE_TYPES = Object.keys(FACES);
 // Resin dice. Full tier: real transmission with a tinted attenuation (light passes through and
 // picks up the colour); lite tier: no transmission, a clearcoat over a sheen and an inner glow.
 export const RESIN = {
-  full: { transmission: 0.62, thicknessK: 1.6, attenuationK: 0.9, ior: 1.5, roughness: 0.1, emissive: 0.05 },
+  full: { transmission: 0.9, thicknessK: 1.6, attenuationK: 0.9, ior: 1.5, roughness: 0.08, emissive: 0.04, env: 1.0 },
   lite: { sheen: 0.7, sheenRoughness: 0.35, roughness: 0.18, emissive: 0.16 },
   clearcoat: 1, clearcoatRoughness: 0.05,
 };
@@ -481,7 +481,7 @@ function resinMaterial(color, r, tier) {
   if (tier === 'full') {
     const F = RESIN.full;
     return new THREE.MeshPhysicalMaterial({ ...base, roughness: F.roughness, transmission: F.transmission, thickness: r * F.thicknessK, ior: F.ior,
-      attenuationColor: c, attenuationDistance: r * F.attenuationK, emissiveIntensity: F.emissive });
+      attenuationColor: c, attenuationDistance: r * F.attenuationK, emissiveIntensity: F.emissive, envMapIntensity: F.env });
   }
   const L = RESIN.lite;
   return new THREE.MeshPhysicalMaterial({ ...base, roughness: L.roughness, sheen: L.sheen, sheenRoughness: L.sheenRoughness,

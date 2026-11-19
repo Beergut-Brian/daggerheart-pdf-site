@@ -111,3 +111,15 @@ From the console: `__table.open('core')`, `__table.close()`, `__table.roll('/att
 `__table.dice()` (each thrown die's rolled value and the number actually facing up),
 `__table.timeScale(0)` and `__table.step(50)` (freeze, then step, dice and attacks in ms; for stills),
 `__table.rollAttack('longsword')`, `__table.card().openSheet()`, `__table.cardPoint(0)` (a row's icon on screen).
+`__table.attackPhase()` also reports `hitStop` (seconds the attack holds at a hit's impact; `end` includes it).
+
+## Look tunables (named constants at the top of each file)
+
+- `js/models.js` `RESIN`, `GLYPH_SCALE`: resin dice (transmission + tinted attenuation on the full tier;
+  clearcoat, sheen and an inner glow on lite) and the engraved numbers' size. The number atlas with its
+  groove and bump is `diceInkAtlas()` in `js/textures.js`.
+- `js/dice3d.js` `DIE_STYLE` (die and ink colours), `SHADOW` (contact shadow), `TALL_ASPECT` / `TALL_SCALE`
+  (phones taller than 1.8 x their width get 1.3x dice and throw), `FOCUS_HOLD_MS` (depth of field follows the dice).
+- `js/attack.js` `WIND`, `LUNGE`, `HOLD`, `HITSTOP`, `LEAN`, `KNOCK`, `FLASH`, `BURST`, `SPARK`, `CRYSTAL_DIM`.
+- `js/command.js` `PHONE_W`, `LOG_ROWS`: the roll log sits under the home link (centred on phones, left on wider screens).
+- Proofs for this pass: `node scripts/table-proof.mjs look http://localhost:3123` writes to `../review/table-look/`.
