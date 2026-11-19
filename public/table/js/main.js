@@ -48,6 +48,7 @@ async function boot() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
+  renderer.transmissionResolutionScale = 0.5;   // the resin dice refract a blurred copy of the table: a half-size copy does it for a quarter of the pixels
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   // the canvas gets its real size before the HTML surfaces take their first snapshots (they are drawn at its pixel ratio)

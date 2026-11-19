@@ -4,7 +4,7 @@ const WINDOW_MS = 5000, LONG_MS = 50, MIN_FRAMES = 12;   // software GL draws a 
 
 export function createPerf(renderer) {
   const t = () => performance.now();
-  const r = { marks: {}, programs: [], frames: { n: 0, longest: 0, over50: 0, worst: [] }, done: false };
+  const r = { marks: {}, programs: [], frames: { n: 0, sum: 0, longest: 0, over50: 0, worst: [] }, done: false };
   let last = 0, readyAt = 0, afterReady = 0, lastPrograms = 0, textureBytes = 0;
   const el = document.createElement('pre');
   el.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;margin:0;padding:6px 8px;font:11px/1.35 monospace;color:#9f9;background:rgba(0,0,0,.7);pointer-events:none;white-space:pre';
@@ -46,14 +46,14 @@ export function createPerf(renderer) {
       if (isReady && r.marks.ready == null) { r.marks.ready = t(); readyAt = now; textureBytes = bytes(scene); }
       const d = now - last; last = now;
       if (!r.done) {
-        const f = r.frames; f.n++; f.longest = Math.max(f.longest, d); if (d > LONG_MS) f.over50++;
+        const f = r.frames; f.n++; if (readyAt) f.sum += d; f.longest = Math.max(f.longest, d); if (d > LONG_MS) f.over50++;
         f.worst.push(Math.round(d)); f.worst.sort((a, b) => b - a); f.worst.length = Math.min(f.worst.length, 10);
         if (readyAt) afterReady++;
         if (readyAt && now - readyAt >= WINDOW_MS && afterReady >= MIN_FRAMES) {
           r.done = true;
           const out = {
             timeToFirstFrameMs: Math.round(r.marks.firstFrame), timeToReadyMs: Math.round(r.marks.ready),
-            longestFrameMs: Math.round(f.longest), framesOver50ms: f.over50, frames: f.n, worstFramesMs: f.worst,
+            longestFrameMs: Math.round(f.longest), framesOver50ms: f.over50, frames: f.n, meanFrameAfterReadyMs: afterReady ? Math.round(f.sum / afterReady) : null, worstFramesMs: f.worst,
             longTasks: { n: r.longTasks.n, longestMs: Math.round(r.longTasks.longest), totalMs: Math.round(r.longTasks.total) }, firstFrameStallMs: r.marks.frame0start != null ? Math.round(r.marks.firstFrame - r.marks.frame0start) : null, shaderPrograms: programCount(), shadowCasters: casters(scene), textureCount: renderer.info.memory.textures, programTimeline: r.programs, textureBytes, marks: Object.fromEntries(Object.entries(r.marks).map(([k, v]) => [k, Math.round(v)])),
             tier: window.__table && window.__table.tier, surfaces: document.documentElement.dataset.surfaces,
             startRatio: window.__table && window.__table.quality ? window.__table.quality.start : null, ratio: renderer.getPixelRatio(), ratioHistory: window.__table && window.__table.quality ? window.__table.quality.history || [] : [], timerQuery: !!window.__table?.quality?.timer,

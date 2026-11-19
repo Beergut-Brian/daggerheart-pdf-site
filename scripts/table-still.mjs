@@ -22,7 +22,7 @@ await new Promise((r) => server.listen(0, r));
 const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-blink-features=CanvasDrawElement"] });
 fs.mkdirSync(path.dirname(prefix), { recursive: true });
-for (const [name, hash] of [["html", "#shot&t=7"], ["painted", "#shot&t=7&html=off"]]) {
+for (const [name, hash] of process.env.LIVE ? [["live", "#t=7"]] : [["html", "#shot&t=7"], ["painted", "#shot&t=7&html=off"]]) {
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR });
   const p = await ctx.newPage(); p.setDefaultTimeout(300000);
   p.on("pageerror", (e) => console.error("page error:", e.message));
