@@ -325,31 +325,46 @@ function paintArt(g, W, H, panel) {
   g.restore();
 }
 // the title on the centre panel: one word per line, centred; y is where the block's middle sits (fraction of the
-// height), fill is how much of the panel's width the longest line takes, lead is the line height in font sizes;
-// shared by the CSS (buildScreenEl sets --title-y and --title-px) and the painted twin
-const TITLE = { lines: ['High', 'Sodium', 'Gaming'], y: 0.5, fill: 0.84, lead: 0.9 };
+// height), fill is how much of the panel's width the longest line takes, lead is the line height in font sizes,
+// margin is the clear space kept above and below the block beyond the gold frame (px, at the panel's own size);
+// shared by the CSS (buildScreenEl sets --title-px, --title-top, --title-lead) and the painted twin
+const TITLE = { lines: ['High', 'Sodium', 'Gaming'], y: 0.5, fill: 0.84, lead: 0.9, margin: 30 };
+const FRAME_W = 34;
 const titleFont = (px) => `400 ${px}px ${BLOCK}`;
-// the font size at which the widest line spans TITLE.fill of the panel's width
-function titlePx(W) {
+// size and placement of the block on a W x H panel: the smaller of the width fit (widest line = TITLE.fill of W) and
+// the height fit (inked block inside the frame plus margin), centred on H * TITLE.y by its inked top and bottom.
+// px = font size; base = baseline of the first line; top = top of the CSS box whose line boxes land on the same baselines
+function titleLayout(W, H) {
   const g = makeCanvas(8, 8).getContext('2d');
   g.font = titleFont(100);
-  const widest = Math.max(...TITLE.lines.map((l) => g.measureText(l.toUpperCase()).width));
-  return Math.floor((100 * W * TITLE.fill) / widest);
+  const m = TITLE.lines.map((l) => g.measureText(l.toUpperCase()));
+  const widest = Math.max(...m.map((t) => t.width));
+  const asc = Math.max(...m.map((t) => t.actualBoundingBoxAscent)) / 100;
+  const desc = Math.max(...m.map((t) => t.actualBoundingBoxDescent)) / 100;
+  const fa = m[0].fontBoundingBoxAscent / 100, fd = m[0].fontBoundingBoxDescent / 100;
+  const n = TITLE.lines.length, gaps = (n - 1) * TITLE.lead;
+  const byWidth = (W * TITLE.fill) / (widest / 100);
+  const byHeight = (H - 2 * (FRAME_W + TITLE.margin)) / (gaps + asc + desc);
+  const px = Math.floor(Math.min(byWidth, byHeight));
+  const lead = px * TITLE.lead;
+  const base = H * TITLE.y - (((n - 1) * lead - asc * px + desc * px) / 2);
+  const top = base - ((lead - (fa + fd) * px) / 2 + fa * px);
+  return { px, lead, base, top, inkH: (gaps + asc + desc) * px };
 }
 
 export function paintScreen(g, W, H, { text = true } = {}) {
   if (screenArt) {
     paintArt(g, W, H, 1);
     // soft dark glow behind the title (not a box)
-    const px = titlePx(W), blockH = px * TITLE.lead * TITLE.lines.length;
-    g.save(); g.translate(W / 2, H * TITLE.y); g.scale(1, Math.min(1, (blockH * 0.8) / (W * 0.5)));
+    const L = titleLayout(W, H);
+    g.save(); g.translate(W / 2, H * TITLE.y); g.scale(1, Math.min(1, (L.inkH * 0.8) / (W * 0.5)));
     const gl = g.createRadialGradient(0, 0, 0, 0, 0, W * 0.5);
     gl.addColorStop(0, 'rgba(6,4,20,0.66)'); gl.addColorStop(0.6, 'rgba(6,4,20,0.42)'); gl.addColorStop(1, 'rgba(6,4,20,0)');
     g.fillStyle = gl; g.fillRect(-W / 2, -W * 0.5, W, W); g.restore();
     if (!text) return;
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = titleFont(px);
-    const line = (i) => H * TITLE.y + (i - (TITLE.lines.length - 1) / 2) * px * TITLE.lead;
+    g.font = titleFont(L.px); g.textBaseline = 'alphabetic';
+    const line = (i) => L.base + i * L.lead;
     g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = 26; g.fillStyle = '#f3dc9a';
     TITLE.lines.forEach((l, i) => g.fillText(l.toUpperCase(), W / 2, line(i)));
     g.shadowBlur = 6; g.shadowOffsetY = 3;
@@ -569,8 +584,9 @@ function buildScreenEl(el) {
   if (screenArt) {
     // the picture carries the screen: the house name in block capitals; the page's heading stays for assistive tech
     el.classList.add('has-art');
-    el.style.setProperty('--title-y', TITLE.y * 100 + '%');
-    el.style.setProperty('--title-px', titlePx(W) + 'px');
+    const L = titleLayout(W, H);
+    el.style.setProperty('--title-top', L.top + 'px');
+    el.style.setProperty('--title-px', L.px + 'px');
     el.style.setProperty('--title-lead', TITLE.lead);
     const name = h('p', 'gm-name');
     name.append(...TITLE.lines.map((l) => h('span', null, l)));
