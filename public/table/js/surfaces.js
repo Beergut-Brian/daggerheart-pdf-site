@@ -324,15 +324,17 @@ function paintArt(g, W, H, panel) {
   frame(g, total, H, 34 * k, '#d9b565');
   g.restore();
 }
-// the title on the centre panel: one word per line, centred; y is where the block's middle sits (fraction of the
-// height), fill is how much of the panel's width the longest line takes, lead is the line height in font sizes,
-// margin is the clear space kept above and below the block beyond the gold frame (px, at the panel's own size);
+// the title on the centre panel: one word per line, centred; fill is how much of the panel's width the longest line takes, lead is the line height in font sizes,
+// margin is the clear space kept above the block beyond the gold frame and below it above the floor (px, at the panel's
+// own size); floor is the part of the panel's height, from the bottom, that the battle map and its terrain hide at the
+// default cameras (measured with scripts/title-probe.mjs: 0.21 at 1440, 0.08 on a tall phone, on the left columns);
 // shared by the CSS (buildScreenEl sets --title-px, --title-top, --title-lead) and the painted twin
-const TITLE = { lines: ['High', 'Sodium', 'Gaming'], y: 0.5, fill: 0.84, lead: 0.9, margin: 30 };
+const TITLE = { lines: ['High', 'Sodium', 'Gaming'], fill: 0.84, lead: 0.9, margin: 30, floor: 0.22 };
 const FRAME_W = 34;
 const titleFont = (px) => `400 ${px}px ${BLOCK}`;
 // size and placement of the block on a W x H panel: the smaller of the width fit (widest line = TITLE.fill of W) and
-// the height fit (inked block inside the frame plus margin), centred on H * TITLE.y by its inked top and bottom.
+// the height fit (inked block between the frame plus margin and the floor plus margin), centred in that visible band by its
+// inked top and bottom.
 // px = font size; base = baseline of the first line; top = top of the CSS box whose line boxes land on the same baselines
 function titleLayout(W, H) {
   const g = makeCanvas(8, 8).getContext('2d');
@@ -344,12 +346,13 @@ function titleLayout(W, H) {
   const fa = m[0].fontBoundingBoxAscent / 100, fd = m[0].fontBoundingBoxDescent / 100;
   const n = TITLE.lines.length, gaps = (n - 1) * TITLE.lead;
   const byWidth = (W * TITLE.fill) / (widest / 100);
-  const byHeight = (H - 2 * (FRAME_W + TITLE.margin)) / (gaps + asc + desc);
+  const topEdge = FRAME_W + TITLE.margin, botEdge = H * (1 - TITLE.floor) - TITLE.margin;
+  const byHeight = (botEdge - topEdge) / (gaps + asc + desc);
   const px = Math.floor(Math.min(byWidth, byHeight));
   const lead = px * TITLE.lead;
-  const base = H * TITLE.y - (((n - 1) * lead - asc * px + desc * px) / 2);
+  const base = (topEdge + botEdge) / 2 - (((n - 1) * lead - asc * px + desc * px) / 2);
   const top = base - ((lead - (fa + fd) * px) / 2 + fa * px);
-  return { px, lead, base, top, inkH: (gaps + asc + desc) * px };
+  return { px, lead, base, top, mid: (topEdge + botEdge) / 2, inkH: (gaps + asc + desc) * px };
 }
 
 export function paintScreen(g, W, H, { text = true } = {}) {
@@ -357,7 +360,7 @@ export function paintScreen(g, W, H, { text = true } = {}) {
     paintArt(g, W, H, 1);
     // soft dark glow behind the title (not a box)
     const L = titleLayout(W, H);
-    g.save(); g.translate(W / 2, H * TITLE.y); g.scale(1, Math.min(1, (L.inkH * 0.8) / (W * 0.5)));
+    g.save(); g.translate(W / 2, L.mid); g.scale(1, Math.min(1, (L.inkH * 0.8) / (W * 0.5)));
     const gl = g.createRadialGradient(0, 0, 0, 0, 0, W * 0.5);
     gl.addColorStop(0, 'rgba(6,4,20,0.66)'); gl.addColorStop(0.6, 'rgba(6,4,20,0.42)'); gl.addColorStop(1, 'rgba(6,4,20,0)');
     g.fillStyle = gl; g.fillRect(-W / 2, -W * 0.5, W, W); g.restore();
