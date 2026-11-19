@@ -37,6 +37,11 @@ test.describe("table dice", () => {
       expect(d.up, `${d.type} shows ${d.up}, rolled ${d.rolled}`).toBe(d.rolled);
       expect(d.tilt).toBeLessThan(0.02);
     }
+    const { area, at } = (await page.evaluate(`({ area: ${T}.area, at: ${T}.diceAt() })`)) as { area: { x0: number; x1: number; z0: number; z1: number }; at: { out: boolean; x: number; z: number }[] };
+    for (const d of at.filter((o) => o.out)) {
+      expect(d.x).toBeGreaterThanOrEqual(area.x0); expect(d.x).toBeLessThanOrEqual(area.x1);
+      expect(d.z).toBeGreaterThanOrEqual(area.z0); expect(d.z).toBeLessThanOrEqual(area.z1);
+    }
     const total = dice.reduce((s, d) => s + d.rolled, 0);
     await expect(page.locator("#log-live")).toContainText(`${total} on 1d4+1d6+1d8+1d10+1d12+1d20`, { timeout: 30_000 });
   });

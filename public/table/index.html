@@ -147,9 +147,9 @@ body.is-open #cmd, body.is-leaving #cmd { visibility: hidden; }
 
 #load { position: fixed; z-index: 6; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--load-gap); background: var(--night); transition: opacity .9s ease; }
 /* secondary line under the loading text: quiet, no button shape */
-#load .skip { margin: 0; font: 400 13px/1.4 var(--sans); color: #aaa397; text-align: center; padding: 0 24px; }
-#load .skip a { color: #cfc8ba; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-#load .skip a:hover { color: #fff; }
+#load .skip { margin: 0; font: 400 13px/1.4 var(--sans); letter-spacing: .01em; text-transform: none; animation: none; color: #8f8a80; text-align: center; padding: 0 24px; }
+#load .skip a { color: #b9b3a6; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+#load .skip a:hover { color: #efe8d6; }
 #load .skip a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
 #plain .skip { margin: 0 auto var(--load-gap); font: 400 14px/1.4 var(--sans); color: var(--dim); }
 #plain .skip a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
