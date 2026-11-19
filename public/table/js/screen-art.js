@@ -26,3 +26,10 @@ export function panelSlices(iw, ih, fx = 0.5, fy = 0.5) {
     const w = c.w * (pw / total), s = { x, y: c.y, w, h: c.h }; x += w; return s;
   });
 }
+
+// Where a panel starts on the unfolded screen, in that panel's own pixels (panel height H): the
+// picture's darkening and the gold frame are laid out once across all three and shifted by this.
+export function panelOffset(panel, H = SCREEN_H) {
+  const k = H / SCREEN_H;
+  return { x: SCREEN_PANELS.slice(0, panel).reduce((a, b) => a + b, 0) * k, total: SCREEN_PANELS.reduce((a, b) => a + b, 0) * k, k };
+}

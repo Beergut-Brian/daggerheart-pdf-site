@@ -6,6 +6,9 @@
 // look: the look pass (resin dice, impact, phone layout) into ../review/table-look; not part of "all".
 // fix: loading-screen link, then the rolling area: a Duality roll and /roll 3d6 at 1440 and 390 (dice must
 //   rest inside __table.area), and a recording of two rolls; into ../review/table-fix. ONLY=load,still,video
+// fix2: the HTML surfaces (books, attack card, GM screen straight on) in each path: live HTML, live HTML forced
+//   through texElementSubImage2D (#html=sub), painted (#html=off); 1440 at device pixel ratio 2 and 390; plus
+//   the #debug=surfaces view; into ../review/table-fix-2/<PREFIX>. ONLY=wide,phone,debug  PATHS=live,sub,painted
 // pickup: the table's own dice get rolled (two Duality rolls, then 3d6 borrowing from the tray), the
 //   landed d12s, reduced motion; into ../review/table-look; not part of "all". ONLY=still,reduced,video
 // Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
@@ -18,7 +21,7 @@ import path from "node:path";
 
 const mode = process.argv[2] || "all";
 const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
-const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : mode === "fix" ? "../review/table-fix" : "../review/table-1"));
+const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : mode === "fix" ? "../review/table-fix" : mode === "fix2" ? "../review/table-fix-2" : "../review/table-1"));
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
 const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
 fs.mkdirSync(out, { recursive: true });
@@ -31,8 +34,8 @@ const say = (m) => console.log(new Date().toISOString().slice(11, 19), m);
 const upface = [];
 let failures = 0;
 
-async function open(hash, { w = 1440, h = 900, phone = false, reduced = false } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 3 : 1, isMobile: phone, hasTouch: phone, reducedMotion: reduced ? "reduce" : "no-preference" });
+async function open(hash, { w = 1440, h = 900, phone = false, reduced = false, dpr = 0 } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr || (phone ? 3 : 1), isMobile: phone, hasTouch: phone, reducedMotion: reduced ? "reduce" : "no-preference" });
   const p = await ctx.newPage();
   p.setDefaultTimeout(600000);
   p.on("pageerror", (e) => { console.error("page error:", e.message); failures++; });
@@ -249,6 +252,48 @@ async function card() {
 }
 
 // the look pass: every die type in resin, the impact, the phone layout, reduced motion
+// camera aims for fix2 (jumped, not eased): over both books, onto the attack card, straight on to the GM screen
+const aim = (p, a) => p.evaluate((v) => {
+  const t = window.__table, R = t.rig;
+  R.user.az = 0; R.user.el = v.el == null ? 0 : v.el - R.home.el; R.user.zoom = v.zoom; R.off.set(v.x, v.y || 0, v.z);
+  R.cur.target.copy(R.home.target).add(R.off); R.cur.dist = R.home.dist * v.zoom; R.cur.el = R.home.el + R.user.el; R.cur.az = R.home.az;
+}, a);
+const AIM = {
+  books: { zoom: 0.5, x: 0, z: 2.2, el: 1.15 },
+  card: { zoom: 0.22, x: -5.6, z: 2.9 },
+  screen: { zoom: 0.62, x: 0.25, y: 0.68, z: -5.9, el: 0.12 },
+};
+async function fix2() {
+  const prefix = process.env.PREFIX || "after";
+  const paths = (process.env.PATHS || "live,sub,painted").split(",");
+  const HASH = { live: "#shot&dof=off", sub: "#shot&dof=off&html=sub", painted: "#shot&dof=off&html=off" };
+  let p, ctx;
+  for (const k of paths) {
+    if (want("wide")) {
+      ({ p, ctx } = await open(HASH[k], { dpr: 2 }));
+      say(`${k}: surfaces = ${await p.evaluate(() => document.documentElement.dataset.surfaces)}`);
+      await shot(p, `${prefix}-${k}-scene-1440.png`);
+      for (const a of ["books", "card", "screen"]) { await aim(p, AIM[a]); await p.waitForTimeout(1500); await frames(p, 4); await shot(p, `${prefix}-${k}-${a}-1440.png`); }
+      await ctx.close();
+    }
+    if (want("phone")) {
+      ({ p, ctx } = await open(HASH[k], { w: 390, h: 844, phone: true }));
+      await shot(p, `${prefix}-${k}-scene-390.png`);
+      await aim(p, { ...AIM.screen, zoom: 1.1, x: 0.3, z: -5.9 }); await p.waitForTimeout(1500); await frames(p, 4);
+      await shot(p, `${prefix}-${k}-screen-390.png`);
+      await ctx.close();
+    }
+  }
+  if (want("debug")) {
+    for (const [k, hash] of [["live", "#shot&debug=surfaces"], ["painted", "#shot&html=off&debug=surfaces"]]) {
+      ({ p, ctx } = await open(hash, { dpr: 2 }));
+      await p.waitForSelector("#surf-debug figure canvas"); await p.waitForTimeout(2500);
+      await shot(p, `${prefix}-debug-surfaces-${k}-1440.png`);
+      await ctx.close();
+    }
+  }
+}
+
 const ALL_DICE = "/roll 1d4+1d6+1d8+1d10+1d12+1d20";
 async function extras() {
   // the loading screen, held up by #hold-load (the scene renders behind it but the loader never fades)
@@ -425,6 +470,7 @@ async function fix() {
 }
 
 if (mode === "fix") await fix();
+if (mode === "fix2") await fix2();
 if (mode === "pickup") await pickup();
 if (mode === "extras") await extras();
 if (mode === "look") await look();

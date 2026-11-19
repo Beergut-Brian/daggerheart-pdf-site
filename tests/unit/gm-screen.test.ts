@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coverCrop, panelSlices, SCREEN_ASPECT, SCREEN_PANELS } from "../../public/table/js/screen-art.js";
+import { coverCrop, panelOffset, panelSlices, SCREEN_ASPECT, SCREEN_PANELS } from "../../public/table/js/screen-art.js";
 
 describe("GM screen art crop", () => {
   it("covers the unfolded screen without stretching", () => {
@@ -29,5 +29,16 @@ describe("GM screen art crop", () => {
     expect(s[2].x + s[2].w).toBeCloseTo(1280);
     expect(s[1].w / s[0].w).toBeCloseTo(2);
     for (const p of s) expect(p.y).toBe(s[0].y);
+  });
+
+  it("lays the frame and darkening out once across the unfolded screen", () => {
+    expect(panelOffset(0)).toMatchObject({ x: 0, total: 2560, k: 1 });
+    expect(panelOffset(1).x).toBe(640);
+    expect(panelOffset(2).x).toBe(1920);
+    // each panel's right edge is the next one's left edge, at any panel height
+    const half = [0, 1, 2].map((i) => panelOffset(i, 380));
+    expect(half[0].x + SCREEN_PANELS[0] / 2).toBe(half[1].x);
+    expect(half[1].x + SCREEN_PANELS[1] / 2).toBe(half[2].x);
+    expect(half[2].x + SCREEN_PANELS[2] / 2).toBe(half[0].total);
   });
 });

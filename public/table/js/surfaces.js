@@ -10,12 +10,12 @@
 import * as THREE from '../vendor/three.bundle.js';
 import { makeCanvas, rng } from './textures.js';
 import { hrefFor, ON_SITE, GM_SCREEN } from './config.js';
-import { panelSlices } from './screen-art.js';
+import { panelSlices, panelOffset } from './screen-art.js';
 
 const SERIF = 'Cinzel, "Trajan Pro", Georgia, serif';
 const SANS = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif';
 const HAND = 'Caveat, "Segoe Script", "Bradley Hand", cursive';
-const SCRIPT = '"Great Vibes", "Segoe Script", cursive';
+const BLOCK = '"Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif';
 
 // ---------------------------------------------------------------- helpers
 
@@ -310,33 +310,45 @@ export function loadScreenArt() {
     setTimeout(() => { late = true; res(screenArt); }, 4000);
   });
 }
-// panel 0 = left wing, 1 = centre, 2 = right wing
+// panel 0 = left wing, 1 = centre, 2 = right wing. The picture, its darkening and the gold frame are
+// laid out once over the unfolded screen and each panel shows its own slice, so all three meet at the folds.
 function paintArt(g, W, H, panel) {
   const s = panelSlices(screenArt.naturalWidth, screenArt.naturalHeight, GM_SCREEN.focusX ?? 0.5, GM_SCREEN.focusY ?? 0.5)[panel];
   g.drawImage(screenArt, s.x, s.y, s.w, s.h, 0, 0, W, H);
-  // a soft darkening toward the edges so the gold frame reads
-  const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+  const { x: ox, total, k } = panelOffset(panel, H);
+  g.save(); g.translate(-ox, 0);
+  // a soft darkening toward the outer edges so the gold frame reads
+  const v = g.createRadialGradient(total / 2, H / 2, H * 0.45, total / 2, H / 2, total * 0.55);
   v.addColorStop(0, 'rgba(5,4,18,0)'); v.addColorStop(1, 'rgba(5,4,18,0.45)');
-  g.fillStyle = v; g.fillRect(0, 0, W, H);
+  g.fillStyle = v; g.fillRect(ox, 0, W, H);
+  frame(g, total, H, 34 * k, '#d9b565');
+  g.restore();
 }
-// where the script title sits on the centre panel (fractions of its height), shared by CSS and paint
-const TITLE_Y = 0.2, TITLE_PX = 118;
+// the title on the centre panel: where it sits (fraction of the height) and how much of the width it fills;
+// shared by the CSS (buildScreenEl sets --title-y and --title-px) and the painted twin
+const TITLE = { text: 'High Sodium Gaming', y: 0.22, fill: 0.84 };
+const titleFont = (px) => `400 ${px}px ${BLOCK}`;
+// the font size at which the uppercase title spans TITLE.fill of the panel's width
+function titlePx(W) {
+  const g = makeCanvas(8, 8).getContext('2d');
+  g.font = titleFont(100);
+  return Math.floor((100 * W * TITLE.fill) / g.measureText(TITLE.text.toUpperCase()).width);
+}
 
 export function paintScreen(g, W, H, { text = true } = {}) {
   if (screenArt) {
     paintArt(g, W, H, 1);
-    // soft dark glow behind the script title (not a box), kept off the castle below it
-    g.save(); g.translate(W / 2, H * TITLE_Y); g.scale(1, 0.3);
-    const gl = g.createRadialGradient(0, 0, 0, 0, 0, W * 0.4);
-    gl.addColorStop(0, 'rgba(6,4,20,0.62)'); gl.addColorStop(0.55, 'rgba(6,4,20,0.4)'); gl.addColorStop(1, 'rgba(6,4,20,0)');
-    g.fillStyle = gl; g.fillRect(-W / 2, -W * 0.4, W, W * 0.8); g.restore();
-    frame(g, W, H, 34, '#d9b565');
+    // soft dark glow behind the title (not a box)
+    g.save(); g.translate(W / 2, H * TITLE.y); g.scale(1, 0.32);
+    const gl = g.createRadialGradient(0, 0, 0, 0, 0, W * 0.5);
+    gl.addColorStop(0, 'rgba(6,4,20,0.66)'); gl.addColorStop(0.6, 'rgba(6,4,20,0.42)'); gl.addColorStop(1, 'rgba(6,4,20,0)');
+    g.fillStyle = gl; g.fillRect(-W / 2, -W * 0.5, W, W); g.restore();
     if (!text) return;
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = `400 ${TITLE_PX}px ${SCRIPT}`;
+    g.font = titleFont(titlePx(W));
     g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = 26;
-    g.fillStyle = '#f3dc9a'; g.fillText('High Sodium Gaming', W / 2, H * TITLE_Y);
-    g.shadowBlur = 6; g.shadowOffsetY = 3; g.fillText('High Sodium Gaming', W / 2, H * TITLE_Y);
+    g.fillStyle = '#f3dc9a'; g.fillText(TITLE.text.toUpperCase(), W / 2, H * TITLE.y);
+    g.shadowBlur = 6; g.shadowOffsetY = 3; g.fillText(TITLE.text.toUpperCase(), W / 2, H * TITLE.y);
     g.shadowColor = 'transparent';
     return;
   }
@@ -368,7 +380,7 @@ export function paintScreen(g, W, H, { text = true } = {}) {
 }
 
 export function paintWing(g, W, H, which) {
-  if (screenArt) { paintArt(g, W, H, which === 'hope' ? 0 : 2); frame(g, W, H, 34, '#d9b565'); return; }
+  if (screenArt) { paintArt(g, W, H, which === 'hope' ? 0 : 2); return; }
   const bg = g.createLinearGradient(0, 0, 0, H);
   bg.addColorStop(0, '#12123a'); bg.addColorStop(1, '#07061a');
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
@@ -550,10 +562,11 @@ function buildScreenEl(el) {
   el.style.width = W + 'px'; el.style.height = H + 'px';
   el.style.backgroundImage = bgFrom((g) => paintScreen(g, W, H, { text: false }), W, H);
   if (screenArt) {
-    // the picture carries the screen: the house name in script; the page's heading stays for assistive tech
+    // the picture carries the screen: the house name in block capitals; the page's heading stays for assistive tech
     el.classList.add('has-art');
-    el.style.setProperty('--title-y', TITLE_Y * 100 + '%');
-    el.append(h('p', 'gm-script', 'High Sodium Gaming'), h('h1', 'sr', 'Daggerheart Resources'));
+    el.style.setProperty('--title-y', TITLE.y * 100 + '%');
+    el.style.setProperty('--title-px', titlePx(W) + 'px');
+    el.append(h('p', 'gm-name', TITLE.text), h('h1', 'sr', 'Daggerheart Resources'));
     return;
   }
   el.append(h('p', 'gm-house', 'High Sodium Gaming'));
@@ -667,7 +680,12 @@ function detect(gl) {
   if (/[#&]html=off/.test(location.hash)) return null;
   const proto = HTMLCanvasElement.prototype;
   const markup = 'content' in proto ? 'drawable' : 'layoutSubtree' in proto ? 'layoutsubtree' : null;
-  const call = 'texElementSubImage2D' in gl ? 'sub' : 'texElementImage2D' in gl ? (gl.texElementImage2D.length === 3 ? 'tex3' : 'tex6') : null;
+  // texElementImage2D sizes the texture from the element's own snapshot, so storage and drawing
+  // can never disagree; texElementSubImage2D (Chrome 155+) draws into storage the page allocates,
+  // so it is only the fallback, and every upload re-allocates (see _upload) and is checked (see _probe)
+  // (#html=sub forces the fallback, for testing it in a browser that has both)
+  const sub = 'texElementSubImage2D' in gl, forceSub = sub && /[#&]html=sub/.test(location.hash);
+  const call = !forceSub && 'texElementImage2D' in gl ? (gl.texElementImage2D.length === 3 ? 'tex3' : 'tex6') : sub ? 'sub' : null;
   const paint = 'requestPaint' in proto || 'onpaint' in proto;
   return markup && call && paint ? { markup, call } : null;
 }
@@ -711,7 +729,7 @@ export class Surfaces {
         console.warn('[table] HTML-in-Canvas path failed, using painted textures:', e);
         this.mode = 'canvas';
         if (this._onPaint) this.canvas.removeEventListener('paint', this._onPaint);
-        for (const s of this.list) { s.el.textContent = ''; s.el.style.backgroundImage = ''; if (s.plain) s.plain(s.el); }
+        for (const s of this.list) { s.el.textContent = ''; s.el.style.backgroundImage = ''; s.el.classList.remove('surf-probe'); if (s.plain) s.plain(s.el); }
       }
     }
     if (this.mode === 'canvas') this._startCanvas();
@@ -742,18 +760,29 @@ export class Surfaces {
       t.repeat.set(1, -1); t.offset.set(0, 1);
       s.texture = t;
     }
+    // start-up runs in two paints: the first with a marker on every surface's bottom-right edge
+    // (.surf-probe), checked in the texture (_probe), the second without it, which is what shows
+    for (const s of this.list) s.el.classList.add('surf-probe');
     return new Promise((resolve, reject) => {
-      let first = true;
-      const timer = setTimeout(() => reject(new Error('no paint event')), 2500);
+      let step = 0;
+      const timer = setTimeout(() => reject(new Error('no paint event')), 4000);
       this._onPaint = (ev) => {
         const changed = ev && ev.changedElements ? ev.changedElements : null;
         try {
           for (const s of this.list) {
-            if (first || s.dirty || s.live || !changed || changed.includes(s.el)) { this._upload(s); s.dirty = false; }
+            if (step < 2 || s.dirty || s.live || !changed || changed.includes(s.el)) { this._upload(s); s.dirty = false; }
           }
-        } catch (e) { if (first) { clearTimeout(timer); reject(e); } return; }
-        if (first) {
-          first = false; clearTimeout(timer);
+          if (step === 0) {
+            const bad = this.list.filter((s) => !this._probe(s));
+            if (bad.length) throw new Error('texture does not match its element: ' + bad.map((s) => s.id).join(', '));
+            for (const s of this.list) s.el.classList.remove('surf-probe');
+            step = 1;
+            if (canvas.requestPaint) canvas.requestPaint();
+            return;
+          }
+        } catch (e) { if (step < 2) { clearTimeout(timer); reject(e); } return; }
+        if (step === 1) {
+          step = 2; clearTimeout(timer);
           const err = gl.getError();
           if (err) reject(new Error('GL error ' + err)); else resolve();
         }
@@ -774,15 +803,13 @@ export class Surfaces {
     this._bind(s);
     st.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     st.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    // one size for storage and drawing: the element's snapshot, measured now (it follows the
+    // canvas's pixel ratio, which changes on resize and when the frame rate steps quality down)
+    const [w, hgt] = this.snapSize(s);
+    s.aw = w; s.ah = hgt;
     if (call === 'sub') {
-      // Chrome 155+: storage is allocated by the page, then filled
-      let w = 0, hgt = 0;
-      try { const im = this.canvas.captureElementImage(s.el); w = Math.ceil(im.width); hgt = Math.ceil(im.height); if (im.close) im.close(); } catch (e) { /* older shape */ }
-      if (!w || !hgt) { const d = window.devicePixelRatio || 1; w = Math.ceil(s.el.offsetWidth * d); hgt = Math.ceil(s.el.offsetHeight * d); }
-      if (w !== s.aw || hgt !== s.ah) {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, w, hgt, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        s.aw = w; s.ah = hgt;
-      }
+      // fresh storage on every upload: nothing from an earlier snapshot (another size) can show through
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, w, hgt, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       gl.texElementSubImage2D(gl.TEXTURE_2D, 0, 0, 0, s.el);
     } else if (call === 'tex3') {
       gl.texElementImage2D(gl.TEXTURE_2D, gl.SRGB8_ALPHA8, s.el);
@@ -797,6 +824,44 @@ export class Surfaces {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     const ext = this.renderer.extensions.get('EXT_texture_filter_anisotropic');
     if (ext) gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, this.maxAniso));
+  }
+
+  // The element's snapshot size in texels: what the browser reports, else its CSS box at the canvas's pixel ratio.
+  snapSize(s) {
+    let w = 0, hgt = 0;
+    if (this.canvas.captureElementImage) {
+      try { const im = this.canvas.captureElementImage(s.el); w = Math.ceil(im.width); hgt = Math.ceil(im.height); if (im.close) im.close(); } catch (e) { /* older shape */ }
+    }
+    if (!w || !hgt) { const k = this.canvas.width / Math.max(1, this.canvas.clientWidth); w = Math.ceil(s.el.offsetWidth * k); hgt = Math.ceil(s.el.offsetHeight * k); }
+    return [w, hgt];
+  }
+
+  // Reads texels back from a surface's texture (rows top first), or null. For the start-up check and #debug=surfaces.
+  readTexels(s, x, y, w, hgt) {
+    const gl = this.gl;
+    if (!s.glTex) return null;
+    const fb = gl.createFramebuffer(), px = new Uint8Array(w * hgt * 4);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, s.glTex, 0);
+    const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    if (ok) gl.readPixels(x, y, w, hgt, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.deleteFramebuffer(fb);
+    this.renderer.resetState();
+    return ok ? px : null;
+  }
+
+  // The marker (.surf-probe) sits on the element's right and bottom edges. It has to be at the
+  // texture's bottom-right corner: drawn smaller leaves the corner empty, drawn larger clips it off.
+  _probe(s) {
+    const px = this.readTexels(s, Math.max(0, s.aw - 2), Math.max(0, s.ah - 2), 1, 1);
+    return !!px && px[0] > 180 && px[1] < 90 && px[2] > 180;
+  }
+
+  // After the canvas's pixel ratio changes, every snapshot is retaken at the new size.
+  refresh() {
+    if (this.mode !== 'html') return;
+    for (const s of this.list) s.dirty = true;
+    if (this.canvas.requestPaint) this.canvas.requestPaint();
   }
 
   // Ask for a fresh snapshot (after a class change, or every frame while live).

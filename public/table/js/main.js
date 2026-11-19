@@ -47,9 +47,14 @@ async function boot() {
   renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // the canvas gets its real size before the HTML surfaces take their first snapshots (they are drawn at its pixel ratio)
+  const ratioCap = (w, h, level = 0) => (level > 0 ? 1 : lite ? 1.5 : w * h > 2.6e6 ? 1.25 : 1.75);
+  const pixelK = () => canvas.width / Math.max(1, canvas.clientWidth);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, ratioCap(canvas.clientWidth, canvas.clientHeight)));
+  renderer.setSize(Math.max(1, canvas.clientWidth), Math.max(1, canvas.clientHeight), false);
 
   // words need their typefaces before they are painted
-  const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 118px "Great Vibes"'];
+  const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 80px "Alfa Slab One"'];
   await Promise.race([Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => 0))), new Promise((r) => setTimeout(r, 3000))]);
   const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt()]);
 
@@ -62,6 +67,8 @@ async function boot() {
   // which path draws the surfaces: no visible label, a data attribute and one console line for testing
   document.documentElement.dataset.surfaces = mode === 'html' ? 'html' : 'painted';
   console.info('[table] surfaces: ' + (mode === 'html' ? 'live HTML in canvas' : 'painted 2D canvas'));
+  // #debug=surfaces: every surface's texture against its element's box (js/debug-surfaces.js)
+  if (hashFlag(/[#&]debug=surfaces/)) import('./debug-surfaces.js').then((m) => m.startSurfaceDebug(surfaces));
   if (matchMedia('(pointer: coarse)').matches) $('#hint').innerHTML = '<b>Tap a book</b> to open it · drag to look around';
 
   // an upright phone gets a tighter arrangement, so both books fit across the screen
@@ -149,9 +156,11 @@ async function boot() {
   const quality = { level: 0, acc: 0, n: 0 };
   function resize() {
     const w = Math.max(1, canvas.clientWidth), h = Math.max(1, canvas.clientHeight);
-    const cap = quality.level > 0 ? 1 : lite ? 1.5 : (w * h > 2.6e6 ? 1.25 : 1.75);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
+    const k0 = pixelK();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, ratioCap(w, h, quality.level)));
     renderer.setSize(w, h, false);
+    // the HTML surfaces' snapshots follow the canvas's pixel ratio: retake them all at the new size
+    if (Math.abs(pixelK() - k0) > 0.01) surfaces.refresh();
     renderer.getDrawingBufferSize(size);
     const aspect = w / h;
     camera.aspect = aspect;

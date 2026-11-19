@@ -18,7 +18,7 @@
 @font-face { font-family: "Space Grotesk"; font-weight: 500; font-display: swap; src: url(fonts/space-grotesk-latin-500-normal.woff2) format("woff2"); }
 @font-face { font-family: "Space Grotesk"; font-weight: 700; font-display: swap; src: url(fonts/space-grotesk-latin-700-normal.woff2) format("woff2"); }
 @font-face { font-family: Caveat; font-weight: 600; font-display: swap; src: url(fonts/caveat-latin-600-normal.woff2) format("woff2"); }
-@font-face { font-family: "Great Vibes"; font-weight: 400; font-display: swap; src: url(fonts/great-vibes-hsg-400.woff2) format("woff2"); } /* subset: "High Sodium Gaming" only */
+@font-face { font-family: "Alfa Slab One"; font-weight: 400; font-display: swap; src: url(fonts/alfa-slab-one-hsg-400.woff2) format("woff2"); } /* subset: "High Sodium Gaming" only */
 @font-face { font-family: Caveat; font-weight: 700; font-display: swap; src: url(fonts/caveat-latin-700-normal.woff2) format("woff2"); }
 :root {
   color-scheme: dark;
@@ -49,11 +49,10 @@
   --serif: Cinzel, "Trajan Pro", Georgia, serif;
   --sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --hand: Caveat, "Segoe Script", "Bradley Hand", cursive;
-  --script: "Great Vibes", "Segoe Script", cursive;
-  /* the GM screen's script title (painted twin: paintScreen in js/surfaces.js) */
-  --gm-script: 400 118px/1 var(--script);
-  --gm-script-ink: #f3dc9a;
-  --gm-script-glow: 0 0 26px rgba(0, 0, 0, .85), 0 3px 6px rgba(0, 0, 0, .85);
+  --block: "Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
+  /* the GM screen's title (painted twin: paintScreen in js/surfaces.js; size set per panel as --title-px) */
+  --gm-name-ink: #f3dc9a;
+  --gm-name-glow: 0 0 26px rgba(0, 0, 0, .85), 0 3px 6px rgba(0, 0, 0, .85);
   --load-gap: 40px;
   /* the note card's paper and ink (painted twin: PAPER in js/surfaces.js) */
   --paper-hi: #f1e6c4;
@@ -175,6 +174,8 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 .surf { position: absolute; left: 0; top: 0; margin: 0; overflow: hidden; display: block; pointer-events: none; outline: none; text-decoration: none;
   background-size: 100% 100%; color: #f3deaa; font-family: var(--sans); -webkit-font-smoothing: antialiased; contain: strict; }
 .surf * { margin: 0; }
+/* start-up check only (surfaces.js _probe): a marker on the right and bottom edges, gone before the first frame shows */
+.surf.surf-probe { box-shadow: inset -6px -6px 0 #f0f; }
 .gold { background: linear-gradient(#fff6cf 0%, #f0cc74 30%, #b98532 56%, #f7dc92 74%, #a8742a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* covers */
@@ -213,7 +214,8 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 
 /* GM screen */
 .gm { text-align: center; }
-.gm .gm-script { position: absolute; left: 0; right: 0; top: var(--title-y); transform: translateY(-50%); margin: 0; font: var(--gm-script); color: var(--gm-script-ink); text-shadow: var(--gm-script-glow); }
+.gm .gm-name { position: absolute; left: 0; right: 0; top: var(--title-y); transform: translateY(-50%); margin: 0; white-space: nowrap; text-transform: uppercase;
+  font: 400 var(--title-px)/1 var(--block); letter-spacing: 0; color: var(--gm-name-ink); text-shadow: var(--gm-name-glow); }
 .gm .gm-house { position: absolute; left: 0; right: 0; top: 19.5%; font: 500 24px/1 var(--sans); letter-spacing: 10px; text-transform: uppercase; color: rgba(232, 214, 170, .8); }
 .gm .gm-title { position: absolute; left: 0; right: 0; top: 29%; font-family: var(--serif); text-transform: uppercase; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .6)); }
 .gm .gm-title span { display: block; -webkit-background-clip: text; background-clip: text; color: transparent; background-repeat: no-repeat;
@@ -300,6 +302,15 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 .rolllog .lg-critical b { text-shadow: 0 0 10px var(--crit-glow); }
 .rolllog .lg-hint { color: var(--dim); }
 .rolllog .lg-hint::before { display: none; }
+
+/* #debug=surfaces (js/debug-surfaces.js): texture rectangle solid, element box dashed */
+:root { --debug-tex: #4ade80; --debug-box: #f0f; }
+#surf-debug { position: fixed; z-index: 9; left: 8px; top: 8px; bottom: 8px; width: 244px; overflow: auto; padding: 8px 12px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: 500 11px/1.35 var(--sans); }
+#surf-debug p { margin: 0 0 8px; color: var(--gold); }
+#surf-debug figure { margin: 0 0 10px; }
+#surf-debug canvas { display: block; }
+#surf-debug figcaption.is-off { color: var(--debug-box); }
 
 @media (prefers-reduced-motion: reduce) {
   .hud, #load, body.is-ready #load, #plate, #enter, #cmd { transition: none; }

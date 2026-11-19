@@ -122,14 +122,34 @@ the scene is otherwise identical. Nothing on the page says which path runs;
 the `<html>` element carries `data-surfaces="html"` or `data-surfaces="painted"`
 and the console logs one `[table] surfaces: ...` line.
 
+How a surface stays the right size (js/surfaces.js, `Surfaces`):
+- Each element has a fixed CSS size in px (the numbers in `surfaces.js`); its
+  snapshot is drawn at the canvas's pixel ratio, so the texture is that size
+  times the ratio. The canvas gets its real size before the first snapshot.
+- `texElementImage2D` is used where it exists: the texture takes the
+  snapshot's own size, so the two cannot disagree. `texElementSubImage2D` is
+  the fallback: the texture is re-made at the snapshot's size on every upload,
+  so an older snapshot of another size can never show through it.
+- At start-up every surface is drawn once with a magenta marker on its
+  right and bottom edges, and the marker is looked for at the texture's
+  bottom-right corner. If any surface misses it (drawn smaller or larger than
+  its texture), the whole table uses the painted path instead.
+- When the canvas's pixel ratio changes (window resize, or the frame-rate
+  guard stepping quality down) every surface is retaken.
+- `#debug=surfaces` shows a panel with every surface's actual texture:
+  solid green outline = the texture, dashed magenta = the element's box at the
+  canvas's pixel ratio. They should match and the picture should fill both;
+  a mismatch is marked with a cross.
+
 ## Changing the GM screen image
 
 One picture runs across all three panels of the GM screen (left wing, centre,
 right wing), split at the folds so it reads as one scene. It is on the front of
 the screen, the side facing the camera (the players' side); the back stays the
-plain dark board it has always been. "High Sodium Gaming" in script (Great
-Vibes) sits over the upper part of the centre panel as real text, so it stays
-when you swap the picture.
+plain dark board it has always been. "HIGH SODIUM GAMING" in block capitals
+(Alfa Slab One) spans the upper part of the centre panel as real text, so it
+stays when you swap the picture. The picture's darkening and the gold frame
+are laid out once across the unfolded screen, so nothing breaks at the folds.
 
 1. Pick a wide landscape image, ideally at least 2560 px wide. The screen is
    very wide (about 3.4 : 1), so only a horizontal band of the picture shows.
@@ -164,6 +184,8 @@ fades with the loading screen (the books are the way in from then on).
 Add after `#`, joined with `&`:
 
 - `html=off` use the painted fallback even where HTML-in-Canvas exists
+- `html=sub` use the `texElementSubImage2D` upload even where `texElementImage2D` exists
+- `debug=surfaces` the surface debug panel (see HTML-in-Canvas)
 - `tier=lite` / `tier=full` force the phone or desktop quality tier
 - `shot` skip the intro
 - `open=core` or `open=hf` open a book on load; `p=0.6` freezes the opening there
