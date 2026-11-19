@@ -213,3 +213,19 @@ From the console: `__table.open('core')`, `__table.close()`, `__table.roll('/att
 - `js/command.js` `PHONE_W`, `LOG_ROWS`: the roll log sits under the home link (centred on phones, left on wider screens).
 - Proofs for the rolling-area pass: `node scripts/table-proof.mjs fix http://localhost:3123` writes to `../review/table-fix/`.
 - Proofs for the look pass: `node scripts/table-proof.mjs look http://localhost:3123` writes to `../review/table-look/`.
+
+## Load and frame-rate (perf run, 2026-11-19)
+
+- **Warm-up** (`warmUp` in `js/main.js`): before the opening, every program is compiled (`compileAsync`, for the render target the
+  scene is drawn into, full resin included) and the whole image pipeline draws once into a tiny buffer. The loading screen stays up
+  until then.
+- **Pixel ratio** (`js/quality.js`, unit-tested): the render starts at the tier's cap, lowered so the buffer holds about 3.8 M pixels
+  (a 2560x1440 window starts at 1.0). The guard looks at ten frames during the opening (45 after), steps down at once if they are
+  slow (over 24 ms between frames or 13 ms of GPU time), and steps up 15% at a time only where `EXT_disjoint_timer_query_webgl2`
+  shows room. HTML surface snapshots are retaken once, 2 s after the ratio stops moving.
+- **Shadows**: the lamp is the one shadow caster; candles light and flicker without shadow maps.
+- **Resin dice** use the lite material until the opening ends, then the full transmission one (`dice.setResin`).
+- **Baked textures**: `tex/*.webp` are the wood and battle mat painted by `js/textures.js` and saved by
+  `node scripts/bake-textures.mjs`. The painters stay the source: change one, re-run the script. A missing file is painted instead.
+- Test flags: `#perf` (timing readout and a `[perf]` JSON line, `window.__perf`), `#t=N` (freeze the animation clock for
+  before/after stills), `#bake=off` (paint instead of loading `tex/`). Scripts: `scripts/table-perf.mjs`, `table-still.mjs`, `table-diff.mjs`.
