@@ -134,8 +134,13 @@ How a surface stays the right size (js/surfaces.js, `Surfaces`):
   right and bottom edges, and the marker is looked for at the texture's
   bottom-right corner. If any surface misses it (drawn smaller or larger than
   its texture), the whole table uses the painted path instead.
-- When the canvas's pixel ratio changes (window resize, or the frame-rate
-  guard stepping quality down) every surface is retaken.
+- When the canvas's pixel ratio changes (window resize) every surface is retaken. Ratio steps
+  (the guard down, the frame-time ramp up, `js/quality.js`) retake only the non-focus surfaces, once, after the ratio has
+  been still for 2 s. The focus surfaces (the covers and the attack card, `focus: true` in `defineSurfaces`) are made at the
+  screen's pixel density, up to 2048 texels on the long side, whatever the canvas ratio is (the element is CSS-zoomed by
+  density / ratio), and are not retaken by ratio steps. `#focus=off` and `#ramp=off` turn those two off for comparison.
+- Load order: covers and card typefaces first (preloaded), GM-screen art and the small baked wood and mat next, full-size
+  wood and mat swapped in when the table is idle (`upgradeBaked`).
 - `#debug=surfaces` shows a panel with every surface's actual texture:
   solid green outline = the texture, dashed magenta = the element's box at the
   canvas's pixel ratio. They should match and the picture should fill both;

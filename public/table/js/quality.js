@@ -52,7 +52,8 @@ export function rampDecide(s) {
 
 // The ramp's memory: feed it every frame's interval (ms) once the opening is over; it answers with what to do.
 // reset() after any ratio change, whoever made it. `apply(ratio)` is the caller's; log gets [t s, ratio, why].
-export function createRamp({ cap, getRatio, getCeiling, setCeiling, apply, gpu = () => 0, log = () => {} }) {
+/** @param {{ cap: () => number, getRatio: () => number, getCeiling: () => number, setCeiling: (c: number) => void, apply: (r: number) => void, gpu?: () => number, log?: ((t: number, r: number, why: string) => void) | null }} o */
+export function createRamp({ cap, getRatio, getCeiling, setCeiling, apply, gpu = () => 0, log = null }) {
   let frames = [], hist = [], probe = null, sinceMs = 0, skip = RAMP_SKIP;
   const refresh = () => Math.max(6, Math.min(17.5, hist.length >= 20 ? [...hist].sort((a, b) => a - b)[Math.floor(hist.length * 0.1)] : 16.7));
   const reset = () => { frames = []; skip = RAMP_SKIP; sinceMs = 0; };
@@ -64,8 +65,8 @@ export function createRamp({ cap, getRatio, getCeiling, setCeiling, apply, gpu =
       if (skip > 0) { skip--; return; }
       frames.push(ms); if (frames.length > 90) frames.shift();
       const d = rampDecide({ ratio: getRatio(), cap: cap(), ceiling: getCeiling(), probe, frames, refresh: refresh(), since: sinceMs / 1000, gpu: gpu() });
-      if (d.action === 'up') { probe = getRatio(); apply(d.ratio); log(t, d.ratio, 'up'); reset(); }
-      else if (d.action === 'undo') { setCeiling(d.ceiling); probe = null; apply(d.ratio); log(t, d.ratio, 'undo: over, ceiling ' + d.ceiling.toFixed(3)); reset(); }
+      if (d.action === 'up') { probe = getRatio(); apply(d.ratio); if (log) log(t, d.ratio, 'up'); reset(); }
+      else if (d.action === 'undo') { setCeiling(d.ceiling); probe = null; apply(d.ratio); if (log) log(t, d.ratio, 'undo: over, ceiling ' + d.ceiling.toFixed(3)); reset(); }
       else if (d.action === 'keep') { probe = null; }
     },
   };
