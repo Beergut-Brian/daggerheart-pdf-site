@@ -1,7 +1,7 @@
 // The table and everything on it.
 import * as THREE from '../vendor/three.bundle.js';
 import * as TX from './textures.js';
-import { Builder, makeMaterials, buildTerrain, makeDie } from './models.js';
+import { Builder, makeMaterials, buildTerrain } from './models.js';
 import { makeCanvas, rng } from './textures.js';
 import { paintSpine, paintWing } from './surfaces.js';
 import { MINIS } from './minis.js';
@@ -294,12 +294,17 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   const books = bookDefs.map((d) => { const b = makeBook(d, surfaces, shared); scene.add(b.root); return b; });
 
   // ---- the duality dice and their tokens, between the books
+  // The dice themselves are made and moved by dice3d.js (they are the ones that get rolled);
+  // this only says where they start: the Duality d12s here, the rest in the tray (below).
   const atlas = TX.diceAtlas();
-  const dice = new THREE.Group(); scene.add(dice);
-  const addDie = (type, r, color, ink, x, z, o) => { const d = makeDie(type, r, color, ink, atlas, o); d.position.x = x; d.position.z = z; dice.add(d); return d; };
   const dz = tall ? 2.55 : 0, dx = tall ? -0.1 : 0;      // upright phones: the dice and tokens move in front of the books
-  addDie('d12', 0.235, 0xf0a820, 0x2a1400, -0.42 + dx, 2.25 + dz, { up: 11, spin: 0.5, seed: 3 });
-  addDie('d12', 0.235, 0x5a23c8, 0xf1e4ff, 0.14 + dx, 2.7 + dz * 0.9, { up: 7, spin: 2.2, seed: 9 });
+  const tableDice = {
+    duality: [
+      { role: 'hope', x: -0.42 + dx, z: 2.25 + dz, up: 11, spin: 0.5, seed: 3 },
+      { role: 'fear', x: 0.14 + dx, z: 2.7 + dz * 0.9, up: 7, spin: 2.2, seed: 9 },
+    ],
+    floor: 0,
+  };
 
   const props = new Builder(77);
   // hope tokens (gold) and fear tokens (dark glass)
@@ -340,13 +345,14 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
     const m = new THREE.Mesh(beadGeo, beadMat); m.position.set(x - 0.55 + (tall ? 1.1 : 0), i === 6 ? 0.13 : 0.048, z + 0.25 + (tall ? 0.85 : 0)); m.castShadow = true; scene.add(m);
   });
 
-  // dice in the tray
-  addDie('d20', 0.25, 0x1f7a6a, 0xfdf3d0, 5.45, 1.05, { up: 20, spin: 0.8, seed: 21 });
-  addDie('d8', 0.21, 0xb0302c, 0xfdf3d0, 6.2, 0.85, { up: 5, spin: 2.0, seed: 31 });
-  addDie('d6', 0.2, 0x2a4fb8, 0xfdf3d0, 5.9, 1.75, { up: 6, spin: 0.4, seed: 41 });
-  addDie('d6', 0.2, 0xe6e0d0, 0x1a1a22, 5.2, 1.7, { up: 3, spin: 1.3, seed: 51 });
-  addDie('d8', 0.21, 0x6a2a9a, 0xfdf3d0, 6.35, 1.5, { up: 2, spin: 4.0, seed: 61 });
-  dice.children.forEach((d) => { if (d.position.x > 4) d.position.y += 0.04; });
+  // dice in the tray (its floor is at y = 0.04)
+  tableDice.tray = { x: 5.75, z: 1.25, y: 0.04, r: 1.0, dice: [
+    { type: 'd20', r: 0.25, color: 0x1f7a6a, ink: 0xfdf3d0, x: 5.45, z: 1.05, up: 20, spin: 0.8, seed: 21 },
+    { type: 'd8', r: 0.21, color: 0xb0302c, ink: 0xfdf3d0, x: 6.2, z: 0.85, up: 5, spin: 2.0, seed: 31 },
+    { type: 'd6', r: 0.2, color: 0x2a4fb8, ink: 0xfdf3d0, x: 5.9, z: 1.75, up: 6, spin: 0.4, seed: 41 },
+    { type: 'd6', r: 0.2, color: 0xe6e0d0, ink: 0x1a1a22, x: 5.2, z: 1.7, up: 3, spin: 1.3, seed: 51 },
+    { type: 'd8', r: 0.21, color: 0x6a2a9a, ink: 0xfdf3d0, x: 6.35, z: 1.5, up: 2, spin: 4.0, seed: 61 },
+  ] };
 
   // cards: a deck and a fanned hand
   const backTex = TX.cardBackTexture();
@@ -430,7 +436,7 @@ export function buildWorld({ renderer, surfaces, tier, books: bookDefs, tall = f
   // ---- per-frame
   const tmp = new THREE.Vector3();
   const world = {
-    scene, books, candles, lamp, MAT, atlas, minis, mats, note, intro: 0, lampPower: 330, moving: true, stirring: false, frame: 0, candleShadows: true,
+    scene, books, candles, lamp, MAT, atlas, tableDice, minis, mats, note, intro: 0, lampPower: 330, moving: true, stirring: false, frame: 0, candleShadows: true,
     focus: new THREE.Vector3(-0.2, 0.25, 2.2),
     update(time, dt, camera, pxScale) {
       const k = world.intro;                               // 0..1, lights coming up

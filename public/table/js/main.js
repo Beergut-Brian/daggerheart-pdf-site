@@ -321,7 +321,7 @@ async function boot() {
   const gameClock = () => game.t;
   const bar = createCommandBar({ surfaces, log, canvas, renderer, clock: gameClock, onCommand: (text) => play.run(text) });
   // tall phones get bigger dice and a wider throw
-  const dice = createDice({ scene, atlas: world.atlas, calm, lite, clock: gameClock, view: () => camera.position,
+  const dice = createDice({ scene, atlas: world.atlas, table: world.tableDice, calm, lite, clock: gameClock, view: () => camera.position,
     scale: () => (canvas.clientHeight / Math.max(1, canvas.clientWidth) > TALL_ASPECT ? TALL_SCALE : 1) });
   const attack = createAttack({ scene, minis: world.minis, calm, lite, clock: gameClock });
   play = createPlay({ bar, dice, attack, character, canAct: () => state.phase === 'table' });
@@ -465,7 +465,7 @@ async function boot() {
 
   // handles for testing from the console:  __table.open('core')
   window.__table = { world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier,
-    roll: (text) => play.run(text), dice: () => dice.readUp(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
+    roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels
     cardPoint: (i, part = 'icon') => {

@@ -47,9 +47,31 @@ The bar at the bottom takes chat-style commands (press `/` anywhere to jump to i
 
 The d10 is numbered 1 to 10 (not 0 to 9), so its face is what you add. The d4 is read at its top point.
 
+The dice on the table are the ones that get rolled; no new dice appear for a Duality roll:
+
+- The gold Hope and violet Fear d12s start between the books. A Duality roll (and an attack) picks
+  them up from wherever they lie (a short rise and a shake in the air), throws them into the open
+  part of the battle map, and they land with the rolled number up and stay there. The next roll
+  picks them up from there. They never go into the tray, and plain `d12` rolls leave them alone.
+- Other dice (`3d6`, `d20`, damage dice) use the dice already lying out of that type first, then
+  the tray's own dice of that type (one d20, two d8s, two d6s); only the missing ones are new teal
+  dice, and they rise out of the tray. About 2.6 s after the result shows (on the game clock) the
+  tray's dice hop back into the tray, rolled face still up, and the new ones drop in and fade, so
+  the table never fills up. A new roll before then picks them up from where they lie.
+- Landing spots stay inside the throw zone (`AREA`), clear of the minis and boulders (`AVOID`) and
+  of the dice already lying there. Which die a roll uses and the clamping are in `js/dice-table.js`
+  (pure, unit-tested in `tests/unit/dice-table.test.ts`); where the dice start is `tableDice` in `js/world.js`.
+- Reduced motion: the dice turn to their result where they lie (extras appear in the tray), no
+  lift or throw.
+- Tunables at the top of `js/dice3d.js`: `LIFT_MS` and `LIFT` (pick-up), `THROW_MS`,
+  `STAGGER_MS`/`JITTER_MS`, `HOLD_MS` (result showing before the tray's dice go back),
+  `RETURN_MS`/`RETURN_ARC`, `TAG_IN_MS`/`TAG_OUT_MS`.
+- Proofs: `__table.dice()` (last roll: rolled value vs up face), `__table.diceAt()` (every die:
+  kind, out or in the tray, phase, position); `node scripts/table-proof.mjs pickup <url>`.
+
 Files: `js/dice-logic.js` (the rules: parser, rolls, log lines; no three.js or DOM, unit-tested
 in `tests/unit/dice.test.ts`), `js/command.js` (bar and roll log), `js/play.js` (what a command
-does), `js/dice3d.js` (thrown dice), `js/attack.js` (the attack), `js/minis.js` (the minis).
+does), `js/dice3d.js` (the table's dice and their rolls), `js/dice-table.js` (which dice a roll picks up), `js/attack.js` (the attack), `js/minis.js` (the minis).
 
 ## The attack card (the note left of the books)
 

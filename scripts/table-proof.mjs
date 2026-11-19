@@ -4,6 +4,8 @@
 // extras: loading screen with its button (#hold-load), the scene with no corner label, the GM screen
 //   (default camera and straight on) into ../review/table-look; not part of "all".
 // look: the look pass (resin dice, impact, phone layout) into ../review/table-look; not part of "all".
+// pickup: the table's own dice get rolled (two Duality rolls, then 3d6 borrowing from the tray), the
+//   landed d12s, reduced motion; into ../review/table-look; not part of "all". ONLY=still,reduced,video
 // Needs the site running (npm run build && npm start). Headless Chromium draws with SwiftShader
 // (software GL), so it is slow: videos are rendered frame by frame on the table's game clock
 // (__table.timeScale(0) + __table.step(ms)) and piped to ffmpeg, so they play at real speed.
@@ -14,7 +16,7 @@ import path from "node:path";
 
 const mode = process.argv[2] || "all";
 const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
-const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" ? "../review/table-look" : "../review/table-1"));
+const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : "../review/table-1"));
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
 const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
 fs.mkdirSync(out, { recursive: true });
@@ -91,7 +93,7 @@ async function stills() {
   await checkUp(p, "general 1440"); await shot(p, "general-dice-1440.png");
   await camera(p, 1, 0, 0); await frames(p, 4);
   await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
-  await type(p, "/attack +2"); await step(p, 1700);
+  await type(p, "/attack +2"); await step(p, 2100);
   const a = await p.evaluate(() => window.__table.attackPhase());
   await step(p, Math.round((a.impactAt + 0.04 - a.t) * 1000));
   await shot(p, "attack-hit-1440.png");
@@ -295,7 +297,7 @@ async function look() {
   if (want("impact")) {
     ({ p, ctx } = await open("#shot&seed=9"));
     await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
-    await type(p, "/attack +2"); await step(p, 1700);
+    await type(p, "/attack +2"); await step(p, 2100);
     const a = await p.evaluate(() => window.__table.attackPhase());
     await step(p, Math.round((a.impactAt + 0.03 - a.t) * 1000));       // inside the hit-stop: burst at full
     await shot(p, "attack-impact-1440.png");
@@ -331,6 +333,56 @@ async function look() {
   }
 }
 
+async function pickup() {
+  let p, ctx;
+  const d12s = (at) => at.filter((d) => d.type === "d12");
+  if (want("still")) {
+    ({ p, ctx } = await open("#shot&seed=7"));
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); });
+    await type(p, "/roll duality"); await settle(p);
+    await checkUp(p, "pickup: first Duality roll");
+    const at = await p.evaluate(() => window.__table.diceAt());
+    const ok = d12s(at).length === 2 && d12s(at).every((d) => d.kind === "duality" && d.out && d.phase === "rest");
+    if (!ok) failures++;
+    say(`landed d12s (${ok ? "only the table's two" : "WRONG"}): ${JSON.stringify(d12s(at))}`);
+    await shot(p, "pickup-landed-1440.png");
+    await ctx.close();
+  }
+  if (want("reduced")) {
+    ({ p, ctx } = await open("#seed=5", { reduced: true }));
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); });
+    const before = await p.evaluate(() => window.__table.diceAt());
+    await type(p, "/roll duality"); await frames(p, 3);
+    await checkUp(p, "pickup: reduced motion, turned in place");
+    const after = await p.evaluate(() => window.__table.diceAt());
+    const still = d12s(after).every((d, i) => Math.abs(d.x - d12s(before)[i].x) < 1e-3 && Math.abs(d.z - d12s(before)[i].z) < 1e-3);
+    if (!still) failures++;
+    say(`reduced motion: d12s ${still ? "stayed where they lay" : "MOVED"}, state ${await p.evaluate(() => window.__table.diceState())}`);
+    await shot(p, "reduced-motion-roll.png");
+    await ctx.close();
+  }
+  if (want("video")) {
+    // two Duality rolls in a row (the second picks the d12s up where the first left them), then 3d6
+    const plan = [[0.3, "/roll duality", [9, 4]], [3.6, "/roll duality", [6, 11]], [6.9, "/roll 3d6", null]];
+    const notes = [[3.5, "after roll 1"], [6.8, "after roll 2"], [8.9, "3d6 landed"], [12.3, "3d6 back in the tray"]];
+    await record("pickup.webm", "#shot&seed=7", async (pg, t) => {
+      while (plan.length && t >= plan[0][0]) {
+        const [, cmd, f] = plan.shift();
+        if (f) await pg.evaluate(([h, fe]) => window.__table.forceRoll(h, fe), f);
+        await type(pg, cmd);
+      }
+      while (notes.length && t >= notes[0][0]) {
+        const [, label] = notes.shift();
+        const at = await pg.evaluate(() => window.__table.diceAt());
+        say(`${label}: ${at.map((d) => `${d.kind}:${d.type}${d.out ? "@" + d.x + "," + d.z : " in tray"} ${d.phase}`).join(" | ")}`);
+        if (label.endsWith("landed")) await checkUp(pg, "pickup: 3d6 (tray d6s + one extra)");
+        if (label.startsWith("after")) await checkUp(pg, "pickup: Duality " + label);
+      }
+    }, { seconds: 12.6, fps: 12, lean: true });
+  }
+}
+
+if (mode === "pickup") await pickup();
 if (mode === "extras") await extras();
 if (mode === "look") await look();
 if (mode === "card") await card();

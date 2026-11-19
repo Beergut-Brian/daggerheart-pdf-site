@@ -48,13 +48,13 @@ test.describe("table dice", () => {
     await settle(page);
     const dice = (await page.evaluate(`${T}.dice()`)) as Die[];
     expect(dice).toMatchObject([{ type: "d12", style: "hope", rolled: 9, up: 9 }, { type: "d12", style: "fear", rolled: 4, up: 4 }]);
-    await page.evaluate(`${T}.step(2000)`);
+    await page.evaluate(`${T}.step(2800)`);
     await expect(page.locator("#log-live")).toContainText("15 with Hope: hit!", { timeout: 30_000 });
 
     await page.evaluate(`${T}.forceRoll(2, 4)`);
     await command(page, "/attack");
     await settle(page);
-    await page.evaluate(`${T}.step(2500)`);
+    await page.evaluate(`${T}.step(3300)`);
     await expect(page.locator("#log-live")).toContainText("6 with Fear: miss", { timeout: 30_000 });
   });
 
