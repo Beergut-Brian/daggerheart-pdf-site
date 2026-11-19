@@ -801,11 +801,11 @@ export class Surfaces {
       let step = 0;
       const timer = setTimeout(() => reject(new Error('no paint event')), 4000);
       this._onPaint = (ev) => {
-        // a focus surface is never retaken just because the canvas repainted (only when dirty, live or reported changed)
+        // a focus surface is never retaken just because the canvas repainted (only when dirty or live: a ratio step makes the browser report every element changed, which must not retake them)
         const changed = ev && ev.changedElements ? ev.changedElements : null;
         try {
           for (const s of this.list) {
-            if (step < 2 || s.dirty || s.live || (!changed && !s.focus) || (changed && changed.includes(s.el))) { this._upload(s); s.dirty = false; }
+            if (step < 2 || s.dirty || s.live || (!s.focus && (!changed || changed.includes(s.el)))) { this._upload(s); s.dirty = false; }
           }
           if (step === 0) {
             const bad = this.list.filter((s) => !this._probe(s));
