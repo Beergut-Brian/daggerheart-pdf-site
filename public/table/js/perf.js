@@ -56,6 +56,7 @@ export function createPerf(renderer) {
             longestFrameMs: Math.round(f.longest), framesOver50ms: f.over50, frames: f.n, worstFramesMs: f.worst,
             longTasks: { n: r.longTasks.n, longestMs: Math.round(r.longTasks.longest), totalMs: Math.round(r.longTasks.total) }, firstFrameStallMs: r.marks.frame0start != null ? Math.round(r.marks.firstFrame - r.marks.frame0start) : null, shaderPrograms: programCount(), shadowCasters: casters(scene), textureCount: renderer.info.memory.textures, programTimeline: r.programs, textureBytes, marks: Object.fromEntries(Object.entries(r.marks).map(([k, v]) => [k, Math.round(v)])),
             tier: window.__table && window.__table.tier, surfaces: document.documentElement.dataset.surfaces,
+            startRatio: window.__table && window.__table.quality ? window.__table.quality.start : null, ratio: renderer.getPixelRatio(), ratioHistory: window.__table && window.__table.quality ? window.__table.quality.history || [] : [], timerQuery: !!window.__table?.quality?.timer,
             qualityLevel: window.__table && window.__table.quality ? window.__table.quality.level : null,
           };
           window.__perf = out; console.log('[perf] ' + JSON.stringify(out));

@@ -10,6 +10,7 @@ import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
 import { createPerf } from './perf.js';
+import { startRatio, decide } from './quality.js';
 
 const { UnrealBloomPass, FullScreenQuad } = THREE;
 const FOCUS_EASE = 6;      // how fast the depth-of-field focus follows (per second)
@@ -55,9 +56,9 @@ async function boot() {
   // The render starts at the pixel ratio a big canvas can hold (about 3.8 M pixels: a 2560x1440 window starts
   // at 1.0, not the 1.25 cap, which took ~65 ms a frame on a 5K iMac) and the frame-rate guard moves it from there
   // (down at once if frames are slow, up one small step when the GPU timer shows room). The ceiling is the tier's cap.
-  const START_PX = 3.8e6, RATIO_MIN = 0.6;
-  const fitRatio = (w, h) => Math.max(RATIO_MIN, Math.min(ratioCap(w, h), Math.sqrt(START_PX / Math.max(1, w * h))));
-  const quality = { level: 0, ratio: fitRatio(canvas.clientWidth, canvas.clientHeight), ceiling: Infinity, acc: 0, n: 0, skip: 3, lastChange: 0, snapRatio: 0, gpuMs: 0 };
+  const fitRatio = (w, h) => startRatio(w, h, ratioCap(w, h));
+  const quality = { level: 0, ratio: fitRatio(canvas.clientWidth, canvas.clientHeight), ceiling: Infinity, acc: 0, n: 0, skip: 3, lastChange: 0, snapRatio: 0, gpuMs: 0, start: 0, timer: false };
+  quality.start = quality.ratio;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality.ratio));
   renderer.setSize(Math.max(1, canvas.clientWidth), Math.max(1, canvas.clientHeight), false);
 
@@ -367,6 +368,7 @@ async function boot() {
   // pixel ratio at once; afterwards at 45. Slow means over 24 ms between frames, or over 13 ms of GPU time.
   // Up, one 15% step, only when the GPU timer is there and says the next step would cost under 10 ms.
   const tq = gl.getExtension('EXT_disjoint_timer_query_webgl2'), qs = [];
+  quality.timer = !!tq;
   const gpuTime = {
     begin() { if (!tq) return; const q = gl.createQuery(); gl.beginQuery(tq.TIME_ELAPSED_EXT, q); qs.push(q); },
     end() { if (tq) gl.endQuery(tq.TIME_ELAPSED_EXT); },
@@ -379,6 +381,7 @@ async function boot() {
     },
   };
   function setRatio(r, now) {
+    (quality.history ||= []).push([Math.round(performance.now()), +r.toFixed(3), quality.gpuMs ? +quality.gpuMs.toFixed(1) : null]);
     quality.ratio = r; quality.lastChange = now; quality.acc = 0; quality.n = 0; quality.skip = 3; quality.gpuMs = 0;
     resize(true);
   }
@@ -388,21 +391,11 @@ async function boot() {
     quality.acc += raw; quality.n++;
     const opening = clock.t < 6, need = opening ? 10 : 45;
     if (quality.n < need) return;
-    const avg = quality.acc / quality.n, gpu = tq && quality.gpuMs ? quality.gpuMs : 0, cap = ratioCap(canvas.clientWidth, canvas.clientHeight);
-    if (avg > 0.024 || gpu > 13) {
-      const over = Math.max(avg / 0.0167, gpu / 8);
-      if (quality.ratio > RATIO_MIN + 0.01) {
-        const r = Math.max(RATIO_MIN, quality.ratio * Math.max(0.7, Math.min(0.92, 1 / Math.sqrt(over))));
-        quality.ceiling = Math.min(quality.ceiling, quality.ratio);    // the step above this one was too dear
-        setRatio(r, now);
-      } else if (quality.level < 2) { quality.level++; resize(true); quality.acc = 0; quality.n = 0; }
-      else { quality.acc = 0; quality.n = 0; }
-      return;
-    }
-    if (gpu && quality.level === 0 && quality.n >= 45 && clock.t > 5) {
-      const next = Math.min(cap, quality.ratio * 1.15, quality.ceiling - 0.001);
-      if (next > quality.ratio + 0.02 && gpu * Math.pow(next / quality.ratio, 2.4) < 10) { setRatio(next, now); return; }
-    }
+    const d = decide({ ratio: quality.ratio, ceiling: quality.ceiling, level: quality.level, avg: quality.acc / quality.n, gpu: tq && quality.gpuMs ? quality.gpuMs : 0,
+      cap: ratioCap(canvas.clientWidth, canvas.clientHeight), stable: need >= 45 && clock.t > 5 });
+    if (d.action === 'down') { quality.ceiling = d.ceiling; setRatio(d.ratio, now); return; }
+    if (d.action === 'up') { setRatio(d.ratio, now); return; }
+    if (d.action === 'level') { quality.level = d.level; resize(true); }
     quality.acc = 0; quality.n = 0;
   }
 
@@ -444,9 +437,9 @@ async function boot() {
   function frame(now) {
     const raw = (now - clock.last) / 1000;
     const dt = Math.min(0.05, raw); clock.last = now; clock.t += dt;
-    if (!instant && !firstFrame && raw < 0.25) guard(raw, now);
+    if (!instant && !firstFrame && raw < 1) guard(Math.min(raw, 0.25), now);   // a long pause (hidden tab) is not a slow frame
     if (perf && firstFrame) perf.mark('frame0start');
-    const time = clock.t;
+    const ft = hashFlag(/[#&]t=([\d.]+)/), time = ft ? +ft[1] : clock.t;   // #t=N: freeze the animation clock, for before/after stills
     if (!started) started = now;
     const since = (now - started) / 1000;
     world.intro = instant ? 1 : clamp(since / 3.4, 0, 1);

@@ -26,7 +26,7 @@ const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-blink-features=CanvasDrawElement"] });
 const results = [];
 for (let i = 0; i < runs; i++) {
-  const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: +(process.env.DPR || 1) });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => console.error("page error:", e.message));
   await p.goto(`${base}/table/#perf${extra}`);
