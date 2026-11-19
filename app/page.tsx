@@ -1,6 +1,6 @@
 import { preload } from "react-dom";
-import { shelfTag } from "./books";
 import Cta from "./components/Cta";
+import PreviewTag from "./components/PreviewTag";
 import SiteNav from "./components/SiteNav";
 import SplatHero from "./components/SplatHero";
 
@@ -21,7 +21,7 @@ export default function Home() {
           <SplatHero />
           <div className="hero-shade" />
           <div className="hero-copy">
-            <span className="tag">{shelfTag()}</span>
+            <PreviewTag />
             <h1 className="display" id="hero-title"><span className="dim">Every rule your party needs.</span><span className="bright">Just keep it out of the fire.</span></h1>
             <p className="lead">The Core Rulebook and Hope &amp; Fear. Every page, searchable.</p>
             <Cta href="/resources">Daggerheart Resources</Cta>

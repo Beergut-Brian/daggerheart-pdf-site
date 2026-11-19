@@ -74,6 +74,26 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: var(--color-ember);
 }
 
+/* the hero tag as a button (preview of the HTML-in-Canvas table) */
+.tag-button { cursor: pointer; transition: color var(--dur-fast), border-color var(--dur-fast); }
+.tag-button::after { content: "\2192"; margin-left: var(--space-1); }
+.tag-button:hover, .tag-button:focus-visible { color: var(--color-text); border-color: var(--color-text-soft); }
+.tag-button:focus-visible { outline: 2px solid var(--color-ember); outline-offset: 2px; }
+.preview-dialog {
+  margin: auto; max-width: min(26rem, calc(100vw - 2rem)); padding: var(--space-6);
+  border: 1px solid var(--color-line-strong); border-radius: var(--radius-md);
+  background: var(--color-nav-bg); color: var(--color-nav-ink);
+  box-shadow: var(--shadow-nav);
+}
+.preview-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+.preview-dialog h2 { margin: 0 0 var(--space-3); font-size: var(--text-body); font-weight: var(--weight-semibold); }
+.preview-dialog p { margin: 0 0 var(--space-3); font-size: var(--text-small); line-height: 1.5; color: var(--color-nav-link); }
+.preview-dialog-close {
+  margin-top: var(--space-2); padding: var(--space-2) var(--space-5); cursor: pointer;
+  border: 1px solid currentColor; border-radius: var(--radius-full); background: transparent; color: var(--color-nav-ink);
+  font: inherit; font-size: var(--text-small);
+}
+
 /* ---------- Display headline: dim first line, bright rest ---------- */
 .display {
   margin: 0; font-weight: var(--weight-medium);

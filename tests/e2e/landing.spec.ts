@@ -6,7 +6,13 @@ test.describe("landing /", () => {
   test("renders the headline, the tag from book data and a CTA to /resources", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Every rule your party needs.Just keep it out of the fire.");
-    await expect(page.locator(".hero .tag")).toHaveText("2 books · 601 pages");
+    await expect(page.getByRole("button", { name: "Preview the new version" })).toBeVisible();
+    // headless Chromium has no HTML-in-Canvas: the button explains instead of opening /table
+    await page.getByRole("button", { name: "Preview the new version" }).click();
+    await expect(page.getByRole("dialog")).toContainText("Chrome 157 or later");
+    await expect(page.getByRole("dialog")).toContainText("Firefox and Safari have not shipped support yet");
+    await page.getByRole("button", { name: "Got it" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
     const cta = page.getByRole("link", { name: "Daggerheart Resources" }).and(page.locator(".cta"));
     await expect(cta).toHaveAttribute("href", "/resources");
     await cta.click();
