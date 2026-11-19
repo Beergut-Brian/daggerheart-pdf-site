@@ -18,7 +18,7 @@
 @font-face { font-family: "Space Grotesk"; font-weight: 500; font-display: swap; src: url(fonts/space-grotesk-latin-500-normal.woff2) format("woff2"); }
 @font-face { font-family: "Space Grotesk"; font-weight: 700; font-display: swap; src: url(fonts/space-grotesk-latin-700-normal.woff2) format("woff2"); }
 @font-face { font-family: Caveat; font-weight: 600; font-display: swap; src: url(fonts/caveat-latin-600-normal.woff2) format("woff2"); }
-@font-face { font-family: "Alfa Slab One"; font-weight: 400; font-display: swap; src: url(fonts/alfa-slab-one-hsg-400.woff2) format("woff2"); } /* subset: "High Sodium Gaming" only */
+@font-face { font-family: "HSG Title"; font-weight: 400; font-display: swap; src: url(fonts/hsg-title.woff2) format("woff2"); } /* the GM screen title; subset: A-Z, a-z, space */
 @font-face { font-family: Caveat; font-weight: 700; font-display: swap; src: url(fonts/caveat-latin-700-normal.woff2) format("woff2"); }
 :root {
   color-scheme: dark;
@@ -49,7 +49,7 @@
   --serif: Cinzel, "Trajan Pro", Georgia, serif;
   --sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --hand: Caveat, "Segoe Script", "Bradley Hand", cursive;
-  --block: "Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
+  --block: "HSG Title", "Cinzel Decorative", Cinzel, Georgia, serif;
   /* the GM screen's title (painted twin: paintScreen in js/surfaces.js; size set per panel as --title-px) */
   --gm-name-ink: #f3dc9a;
   --gm-name-glow: 0 0 26px rgba(0, 0, 0, .85), 0 3px 6px rgba(0, 0, 0, .85);
@@ -215,7 +215,8 @@ body.no-gl #gl, body.no-gl .hud, body.no-gl #load { display: none; }
 /* GM screen */
 .gm { text-align: center; }
 .gm .gm-name { position: absolute; left: 0; right: 0; top: var(--title-y); transform: translateY(-50%); margin: 0; white-space: nowrap; text-transform: uppercase;
-  font: 400 var(--title-px)/1 var(--block); letter-spacing: 0; color: var(--gm-name-ink); text-shadow: var(--gm-name-glow); }
+  font: 400 var(--title-px)/var(--title-lead) var(--block); letter-spacing: 0; color: var(--gm-name-ink); text-shadow: var(--gm-name-glow); }
+.gm .gm-name span { display: block; }
 .gm .gm-house { position: absolute; left: 0; right: 0; top: 19.5%; font: 500 24px/1 var(--sans); letter-spacing: 10px; text-transform: uppercase; color: rgba(232, 214, 170, .8); }
 .gm .gm-title { position: absolute; left: 0; right: 0; top: 29%; font-family: var(--serif); text-transform: uppercase; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .6)); }
 .gm .gm-title span { display: block; -webkit-background-clip: text; background-clip: text; color: transparent; background-repeat: no-repeat;

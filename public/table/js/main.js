@@ -54,7 +54,7 @@ async function boot() {
   renderer.setSize(Math.max(1, canvas.clientWidth), Math.max(1, canvas.clientHeight), false);
 
   // words need their typefaces before they are painted
-  const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 80px "Alfa Slab One"'];
+  const fonts = ['900 60px Cinzel', '700 40px Cinzel', '500 20px "Space Grotesk"', '700 15px "Space Grotesk"', '700 40px Caveat', '600 30px Caveat', '400 80px "HSG Title"'];
   await Promise.race([Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => 0))), new Promise((r) => setTimeout(r, 3000))]);
   const [images] = await Promise.all([loadCoverImages(BOOKS), loadScreenArt()]);
 

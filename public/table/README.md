@@ -147,7 +147,7 @@ One picture runs across all three panels of the GM screen (left wing, centre,
 right wing), split at the folds so it reads as one scene. It is on the front of
 the screen, the side facing the camera (the players' side); the back stays the
 plain dark board it has always been. "HIGH SODIUM GAMING" in block capitals
-(Alfa Slab One) spans the upper part of the centre panel as real text, so it
+(Cinzel Decorative 900, subset to `fonts/hsg-title.woff2`) fills the centre panel as three centred lines, one word each, as real text, so it
 stays when you swap the picture. The picture's darkening and the gold frame
 are laid out once across the unfolded screen, so nothing breaks at the folds.
 

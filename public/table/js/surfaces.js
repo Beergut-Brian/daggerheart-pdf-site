@@ -15,7 +15,7 @@ import { panelSlices, panelOffset } from './screen-art.js';
 const SERIF = 'Cinzel, "Trajan Pro", Georgia, serif';
 const SANS = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif';
 const HAND = 'Caveat, "Segoe Script", "Bradley Hand", cursive';
-const BLOCK = '"Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif';
+const BLOCK = '"HSG Title", "Cinzel Decorative", Cinzel, Georgia, serif';
 
 // ---------------------------------------------------------------- helpers
 
@@ -324,32 +324,37 @@ function paintArt(g, W, H, panel) {
   frame(g, total, H, 34 * k, '#d9b565');
   g.restore();
 }
-// the title on the centre panel: where it sits (fraction of the height) and how much of the width it fills;
+// the title on the centre panel: one word per line, centred; y is where the block's middle sits (fraction of the
+// height), fill is how much of the panel's width the longest line takes, lead is the line height in font sizes;
 // shared by the CSS (buildScreenEl sets --title-y and --title-px) and the painted twin
-const TITLE = { text: 'High Sodium Gaming', y: 0.22, fill: 0.84 };
+const TITLE = { lines: ['High', 'Sodium', 'Gaming'], y: 0.5, fill: 0.84, lead: 0.9 };
 const titleFont = (px) => `400 ${px}px ${BLOCK}`;
-// the font size at which the uppercase title spans TITLE.fill of the panel's width
+// the font size at which the widest line spans TITLE.fill of the panel's width
 function titlePx(W) {
   const g = makeCanvas(8, 8).getContext('2d');
   g.font = titleFont(100);
-  return Math.floor((100 * W * TITLE.fill) / g.measureText(TITLE.text.toUpperCase()).width);
+  const widest = Math.max(...TITLE.lines.map((l) => g.measureText(l.toUpperCase()).width));
+  return Math.floor((100 * W * TITLE.fill) / widest);
 }
 
 export function paintScreen(g, W, H, { text = true } = {}) {
   if (screenArt) {
     paintArt(g, W, H, 1);
     // soft dark glow behind the title (not a box)
-    g.save(); g.translate(W / 2, H * TITLE.y); g.scale(1, 0.32);
+    const px = titlePx(W), blockH = px * TITLE.lead * TITLE.lines.length;
+    g.save(); g.translate(W / 2, H * TITLE.y); g.scale(1, Math.min(1, (blockH * 0.8) / (W * 0.5)));
     const gl = g.createRadialGradient(0, 0, 0, 0, 0, W * 0.5);
     gl.addColorStop(0, 'rgba(6,4,20,0.66)'); gl.addColorStop(0.6, 'rgba(6,4,20,0.42)'); gl.addColorStop(1, 'rgba(6,4,20,0)');
     g.fillStyle = gl; g.fillRect(-W / 2, -W * 0.5, W, W); g.restore();
     if (!text) return;
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = titleFont(titlePx(W));
-    g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = 26;
-    g.fillStyle = '#f3dc9a'; g.fillText(TITLE.text.toUpperCase(), W / 2, H * TITLE.y);
-    g.shadowBlur = 6; g.shadowOffsetY = 3; g.fillText(TITLE.text.toUpperCase(), W / 2, H * TITLE.y);
-    g.shadowColor = 'transparent';
+    g.font = titleFont(px);
+    const line = (i) => H * TITLE.y + (i - (TITLE.lines.length - 1) / 2) * px * TITLE.lead;
+    g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = 26; g.fillStyle = '#f3dc9a';
+    TITLE.lines.forEach((l, i) => g.fillText(l.toUpperCase(), W / 2, line(i)));
+    g.shadowBlur = 6; g.shadowOffsetY = 3;
+    TITLE.lines.forEach((l, i) => g.fillText(l.toUpperCase(), W / 2, line(i)));
+    g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     return;
   }
   const bg = g.createLinearGradient(0, 0, 0, H);
@@ -566,7 +571,10 @@ function buildScreenEl(el) {
     el.classList.add('has-art');
     el.style.setProperty('--title-y', TITLE.y * 100 + '%');
     el.style.setProperty('--title-px', titlePx(W) + 'px');
-    el.append(h('p', 'gm-name', TITLE.text), h('h1', 'sr', 'Daggerheart Resources'));
+    el.style.setProperty('--title-lead', TITLE.lead);
+    const name = h('p', 'gm-name');
+    name.append(...TITLE.lines.map((l) => h('span', null, l)));
+    el.append(name, h('h1', 'sr', 'Daggerheart Resources'));
     return;
   }
   el.append(h('p', 'gm-house', 'High Sodium Gaming'));

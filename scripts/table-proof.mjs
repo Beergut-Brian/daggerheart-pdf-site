@@ -21,7 +21,7 @@ import path from "node:path";
 
 const mode = process.argv[2] || "all";
 const base = (process.argv[3] || "http://localhost:3000").replace(/\/$/, "");
-const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : mode === "fix" ? "../review/table-fix" : mode === "fix2" ? "../review/table-fix-2" : "../review/table-1"));
+const out = path.resolve(process.argv[4] || (mode === "look" || mode === "extras" || mode === "pickup" ? "../review/table-look" : mode === "fix" ? "../review/table-fix" : mode === "fix2" ? "../review/table-fix-2" : mode === "title" ? "../review/table-title" : "../review/table-1"));
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
 const FFMPEG = process.env.FFMPEG_PATH || "/ms-playwright/ffmpeg-1013/ffmpeg-linux";
 fs.mkdirSync(out, { recursive: true });
@@ -469,6 +469,22 @@ async function fix() {
   }
 }
 
+// title: the GM screen's title. TITLE_NAME=<font> -> title-<font>.png straight on; TITLE_FINAL=1 also the default camera at 1440 and 390
+async function title() {
+  const name = process.env.TITLE_NAME || "title";
+  let { p, ctx } = await open("#shot&dof=off");
+  await p.evaluate(() => { const t = window.__table; t.rig.user.az = 0; t.rig.user.el = 0.12 - t.rig.home.el; t.rig.user.zoom = 0.62; t.rig.off.set(0.25, 0.68, -5.9); });
+  await p.waitForTimeout(4000); await frames(p, 6);
+  await shot(p, `title-${name}.png`);
+  await ctx.close();
+  if (!process.env.TITLE_FINAL) return;
+  ({ p, ctx } = await open("#shot")); await p.waitForTimeout(1500);
+  await shot(p, `title-${name}-default-1440.png`); await ctx.close();
+  ({ p, ctx } = await open("#shot", { w: 390, h: 844, phone: true }));
+  await shot(p, `title-${name}-default-390.png`); await ctx.close();
+}
+
+if (mode === "title") await title();
 if (mode === "fix") await fix();
 if (mode === "fix2") await fix2();
 if (mode === "pickup") await pickup();
