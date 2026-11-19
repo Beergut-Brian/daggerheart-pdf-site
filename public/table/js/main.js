@@ -24,8 +24,8 @@ const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const home = $('#home');
 home.href = HOME_HREF;
 if (!ON_SITE) { home.target = '_blank'; home.rel = 'noopener'; }
-// "Go to Daggerheart Resources" on the loading screen and the plain page: same tab, the site's /resources
-for (const a of document.querySelectorAll('a.cta')) a.href = ON_SITE ? '/resources' : SITE + '/resources';
+// "Click here for resources" on the loading screen and the plain page: same tab, the site's /resources
+for (const a of document.querySelectorAll('.skip a')) a.href = ON_SITE ? '/resources' : SITE + '/resources';
 for (const b of BOOKS) {
   const a = document.createElement('a'); a.className = 'card'; a.href = hrefFor(b);
   if (!ON_SITE) { a.target = '_blank'; a.rel = 'noopener'; }
