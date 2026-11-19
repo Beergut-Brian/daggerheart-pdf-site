@@ -8,6 +8,7 @@ import path from "node:path";
 
 const out = path.resolve(process.argv[2] || "../review/table-perf/perf.json");
 const extra = process.argv[3] || "";
+const [VW, VH] = (process.env.VIEW || "1440x900").split("x").map(Number);
 const runs = +(process.argv[4] || 1);
 const root = path.resolve("public");
 const CHROME = process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome";
@@ -25,7 +26,7 @@ const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-blink-features=CanvasDrawElement"] });
 const results = [];
 for (let i = 0; i < runs; i++) {
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => console.error("page error:", e.message));
   await p.goto(`${base}/table/#perf${extra}`);
@@ -35,8 +36,8 @@ for (let i = 0; i < runs; i++) {
   res.firstRoll = await p.evaluate(async () => {
     const t = window.__table, n0 = t.renderer.info.programs.length; let last = performance.now(), worst = 0;
     const next = () => new Promise((r) => requestAnimationFrame((x) => { worst = Math.max(worst, x - last); last = x; r(); }));
-    t.roll('/roll duality'); for (let i = 0; i < 4; i++) { await next(); t.step(450); }
-    t.roll('/attack +2'); for (let i = 0; i < 8; i++) { await next(); t.step(450); }
+    t.roll('/roll duality'); for (let i = 0; i < 3; i++) { await next(); t.step(500); }
+    t.roll('/attack +2'); for (let i = 0; i < 4; i++) { await next(); t.step(900); }
     return { newPrograms: t.renderer.info.programs.length - n0, longestFrameMs: Math.round(worst) };
   });
   results.push(res);

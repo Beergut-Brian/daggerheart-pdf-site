@@ -50,9 +50,15 @@ async function boot() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   // the canvas gets its real size before the HTML surfaces take their first snapshots (they are drawn at its pixel ratio)
-  const ratioCap = (w, h, level = 0) => (level > 0 ? 1 : lite ? 1.5 : w * h > 2.6e6 ? 1.25 : 1.75);
+  const ratioCap = (w, h) => (lite ? 1.5 : w * h > 2.6e6 ? 1.25 : 1.75);
   const pixelK = () => canvas.width / Math.max(1, canvas.clientWidth);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, ratioCap(canvas.clientWidth, canvas.clientHeight)));
+  // The render starts at the pixel ratio a big canvas can hold (about 3.8 M pixels: a 2560x1440 window starts
+  // at 1.0, not the 1.25 cap, which took ~65 ms a frame on a 5K iMac) and the frame-rate guard moves it from there
+  // (down at once if frames are slow, up one small step when the GPU timer shows room). The ceiling is the tier's cap.
+  const START_PX = 3.8e6, RATIO_MIN = 0.6;
+  const fitRatio = (w, h) => Math.max(RATIO_MIN, Math.min(ratioCap(w, h), Math.sqrt(START_PX / Math.max(1, w * h))));
+  const quality = { level: 0, ratio: fitRatio(canvas.clientWidth, canvas.clientHeight), ceiling: Infinity, acc: 0, n: 0, skip: 3, lastChange: 0, snapRatio: 0, gpuMs: 0 };
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality.ratio));
   renderer.setSize(Math.max(1, canvas.clientWidth), Math.max(1, canvas.clientHeight), false);
 
   // words need their typefaces before they are painted
@@ -157,14 +163,14 @@ async function boot() {
   };
 
   // steps down by itself on machines that cannot hold the frame rate
-  const quality = { level: 0, acc: 0, n: 0 };
-  function resize() {
+  function resize(fromGuard = false) {
     const w = Math.max(1, canvas.clientWidth), h = Math.max(1, canvas.clientHeight);
-    const k0 = pixelK();
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, ratioCap(w, h, quality.level)));
+    if (!fromGuard) quality.ratio = Math.min(quality.ratio, fitRatio(w, h));   // a bigger window may need a lower ratio
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality.ratio));
     renderer.setSize(w, h, false);
-    // the HTML surfaces' snapshots follow the canvas's pixel ratio: retake them all at the new size
-    if (Math.abs(pixelK() - k0) > 0.01) surfaces.refresh();
+    // the HTML surfaces' snapshots follow the canvas's pixel ratio. Retaking them is a stall, so guard steps
+    // leave them be and one retake follows once the ratio has settled (frame loop); a window resize retakes at once.
+    if (!fromGuard && Math.abs(pixelK() - quality.snapRatio) > 0.01) { surfaces.refresh(); quality.snapRatio = pixelK(); }
     renderer.getDrawingBufferSize(size);
     const aspect = w / h;
     camera.aspect = aspect;
@@ -181,11 +187,12 @@ async function boot() {
       rtScene.setSize(size.x, size.y); rtFlat.setSize(size.x, size.y);
       bloom.setSize(Math.round(size.x / 2), Math.round(size.y / 2));
       finalQuad.material.uniforms.uRes.value.copy(size);
-      finalQuad.material.uniforms.uMaxBlur.value = quality.level > 2 ? 0 : 10.5 * (size.y / 900);
+      finalQuad.material.uniforms.uMaxBlur.value = (quality.level > 1 ? 0 : quality.level ? 5.25 : 10.5) * (size.y / 900);
     }
   }
   resize();
-  new ResizeObserver(resize).observe(canvas);
+  quality.snapRatio = pixelK();
+  new ResizeObserver(() => resize()).observe(canvas);
 
   // ---------------------------------------------------------------- state
   const state = { hot: null, hotBy: null, open: null, t0: 0, phase: 'table', closeFrom: 0 };
@@ -356,21 +363,53 @@ async function boot() {
   const OPEN_MS = 2500, CLOSE_MS = 1500;
   const fp = hashFlag(/[#&]p=([\d.]+)/), fixedP = fp ? +fp[1] : null;   // freeze the opening at a point, for screenshots
 
+  // Frame-rate guard: during the opening it looks at ten frames (about a second when they are slow) and lowers the
+  // pixel ratio at once; afterwards at 45. Slow means over 24 ms between frames, or over 13 ms of GPU time.
+  // Up, one 15% step, only when the GPU timer is there and says the next step would cost under 10 ms.
+  const tq = gl.getExtension('EXT_disjoint_timer_query_webgl2'), qs = [];
+  const gpuTime = {
+    begin() { if (!tq) return; const q = gl.createQuery(); gl.beginQuery(tq.TIME_ELAPSED_EXT, q); qs.push(q); },
+    end() { if (tq) gl.endQuery(tq.TIME_ELAPSED_EXT); },
+    poll() {
+      while (tq && qs.length > 1 && gl.getQueryParameter(qs[0], gl.QUERY_RESULT_AVAILABLE)) {
+        const q = qs.shift();
+        if (!gl.getParameter(tq.GPU_DISJOINT_EXT)) { const ms = gl.getQueryParameter(q, gl.QUERY_RESULT) / 1e6; quality.gpuMs = quality.gpuMs ? quality.gpuMs * 0.85 + ms * 0.15 : ms; }
+        gl.deleteQuery(q);
+      }
+    },
+  };
+  function setRatio(r, now) {
+    quality.ratio = r; quality.lastChange = now; quality.acc = 0; quality.n = 0; quality.skip = 3; quality.gpuMs = 0;
+    resize(true);
+  }
+  function guard(raw, now) {
+    gpuTime.poll();
+    if (quality.skip > 0) { quality.skip--; return; }
+    quality.acc += raw; quality.n++;
+    const opening = clock.t < 6, need = opening ? 10 : 45;
+    if (quality.n < need) return;
+    const avg = quality.acc / quality.n, gpu = tq && quality.gpuMs ? quality.gpuMs : 0, cap = ratioCap(canvas.clientWidth, canvas.clientHeight);
+    if (avg > 0.024 || gpu > 13) {
+      const over = Math.max(avg / 0.0167, gpu / 8);
+      if (quality.ratio > RATIO_MIN + 0.01) {
+        const r = Math.max(RATIO_MIN, quality.ratio * Math.max(0.7, Math.min(0.92, 1 / Math.sqrt(over))));
+        quality.ceiling = Math.min(quality.ceiling, quality.ratio);    // the step above this one was too dear
+        setRatio(r, now);
+      } else if (quality.level < 2) { quality.level++; resize(true); quality.acc = 0; quality.n = 0; }
+      else { quality.acc = 0; quality.n = 0; }
+      return;
+    }
+    if (gpu && quality.level === 0 && quality.n >= 45 && clock.t > 5) {
+      const next = Math.min(cap, quality.ratio * 1.15, quality.ceiling - 0.001);
+      if (next > quality.ratio + 0.02 && gpu * Math.pow(next / quality.ratio, 2.4) < 10) { setRatio(next, now); return; }
+    }
+    quality.acc = 0; quality.n = 0;
+  }
+
   function frame(now) {
     const raw = (now - clock.last) / 1000;
     const dt = Math.min(0.05, raw); clock.last = now; clock.t += dt;
-    if (!instant && !firstFrame && raw < 0.25 && clock.t > 4.5) {
-      quality.acc += raw; quality.n++;
-      if (quality.n >= 80) {
-        if (quality.acc / quality.n > 0.0235 && quality.level < 3) {
-          quality.level++;
-          if (quality.level === 2) { world.candleShadows = false; world.candles.forEach((c) => { c.light.castShadow = false; }); }
-          resize();
-        }
-        quality.acc = 0; quality.n = 0;
-      }
-    }
-    if (perf && firstFrame) perf.mark('frame0start');
+    if (!instant && !firstFrame && raw < 0.25) guard(raw, now);
     const time = clock.t;
     if (!started) started = now;
     const since = (now - started) / 1000;
@@ -416,6 +455,8 @@ async function boot() {
     const pxScale = size.y / (2 * Math.tan((camera.fov * Math.PI) / 360));
     world.update(time, dt, camera, pxScale);
     surfaces.tick();
+    // one retake of the surfaces once the guard has stopped moving the ratio
+    if (quality.lastChange && now - quality.lastChange > 2000 && Math.abs(pixelK() - quality.snapRatio) > 0.01) { surfaces.refresh(); quality.snapRatio = pixelK(); quality.lastChange = 0; }
 
     // name plate follows the book
     if (state.hot) {
@@ -460,6 +501,7 @@ async function boot() {
     const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : diceAt ? diceAt : cardState.hot >= 0 && world.note ? world.note.position : world.focus;
     const fd = camera.position.distanceTo(focusOn);
 
+    gpuTime.begin();
     if (usePost) {
       const u = finalQuad.material.uniforms;
       // eased on whichever clock moved more, so stepped proofs (game clock only) catch up too
@@ -477,6 +519,7 @@ async function boot() {
     } else {
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     }
+    gpuTime.end();
     bar.update(gameClock()); bar.render(renderer);
     if (perf) perf.frame(now, scene, since >= 3.8 || instant);
     if (firstFrame) { firstFrame = false; if (!holdLoad) document.body.classList.add('is-ready'); }
