@@ -1,12 +1,11 @@
-// The eight player-character pieces: load the glb files, stand them in a lineup, find which one a ray hits.
+// The eight player-character pieces: load the glb files, stand them on the map, find which one a ray hits.
 // Each piece is a `mini` in attack.js's sense ({ def, obj, pivot, home, yaw }), so the party's attacks reuse it.
 // A file that does not load, or has no node of the expected name, becomes a plain disc and one console line.
 import * as THREE from '../vendor/three.bundle.js';
-import { lineupX, rowSizes } from './pieces-logic.js';
 
 const FALLBACK_R = 0.2;   // placeholder disc radius, table units
 
-export function createPieces({ parent, party, cfg, scale, tall = false, lite = false, y = 0.03, loader = null, compile = null, log = console.warn }) {
+export function createPieces({ parent, party, cfg, scale, lite = false, y = 0.03, loader = null, compile = null, log = console.warn }) {
   const pieces = [];
   const ray = new THREE.Raycaster();
   const loadGltf = loader || ((url) => new (THREE.GLTFLoader)().loadAsync(url));
@@ -49,18 +48,16 @@ export function createPieces({ parent, party, cfg, scale, tall = false, lite = f
   // Loads all eight (in parallel), compiles their shaders off the main thread, then adds the lineup to the scene.
   async function load() {
     const got = await Promise.all(party.map(one));
-    const layout = tall ? cfg.tall : cfg.wide, sizes = rowSizes(got.length, layout.z.length);
-    let at = 0;
-    sizes.forEach((n, r) => {
-      const row = got.slice(at, at + n); at += n;
-      const xs = lineupX(row.map((p) => p.box.max.x - p.box.min.x), layout.gap, layout.cx);
-      row.forEach((p, i) => {
-        // stand the box's centre on its slot (the origin is the base centre, which is not always the middle of the figure)
-        const cxBox = (p.box.min.x + p.box.max.x) / 2;
-        p.pivot.position.set(xs[i] - cxBox, y, layout.z[r]);
-        p.home.copy(p.pivot.position);
-      });
-    });
+    for (const p of got) {
+      // stand the footprint's centre on its place (the origin is the base centre, which is not always the middle of the piece:
+      // Zeke's base carries Brutus), turned toward the golem a little
+      const at = cfg.places[p.def.id] || { x: 0, z: 0, yaw: 0 };
+      p.yaw = at.yaw; p.pivot.rotation.y = at.yaw;
+      p.pivot.updateMatrixWorld(true);
+      const turned = new THREE.Box3().setFromObject(p.pivot).getCenter(new THREE.Vector3());
+      p.pivot.position.set(at.x - turned.x, y, at.z - turned.z);
+      p.home.copy(p.pivot.position);
+    }
     if (compile) { try { for (const p of got) await compile(p.pivot); } catch (e) { /* the first draw compiles it instead */ } }
     for (const p of got) { parent.add(p.pivot); pieces.push(p); }
     return { loaded: got.filter((p) => !p.placeholder).length, failed: got.filter((p) => p.placeholder).length };

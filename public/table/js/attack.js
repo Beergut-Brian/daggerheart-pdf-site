@@ -23,12 +23,12 @@ const smooth = (t) => { t = clamp01(t); return t * t * (3 - 2 * t); };
 const angleTo = (a, b) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a));
 
 export function createAttack({ scene, minis, calm, lite, clock = () => performance.now() }) {
-  // `minis` can grow after start-up (the party's pieces load later), so the list is read each time; the round-robin
-  // (a plain /attack) stays with the stand-in minis, a party piece attacks when its own card row is rolled
+  // `minis` can grow after start-up (the party's pieces load later), so the list is read each time; a plain /attack
+  // takes the party in turn, a card row's attack comes from its own piece
   const heroList = () => minis.filter((m) => m.def.role === 'hero');
-  const roundRobin = () => minis.filter((m) => m.def.role === 'hero' && !m.def.pc);
+  const roundRobin = heroList;
   const target = minis.find((m) => m.def.target) || minis.find((m) => m.def.role === 'monster');
-  if (!target || !heroList().length) return null;
+  if (!target) return null;
   let turn = 0, cur = null, tail = 0;
   const r = rng(77);
 
@@ -76,7 +76,9 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   function play({ hit, critical, onImpact, hero: heroId = null, style = null, bolt: boltColor = null }) {
     if (cur) finish();
     const all = heroList(), rr = roundRobin(), chosen = heroId ? all.findIndex((m) => m.def.id === heroId) : -1;
-    const hero = chosen >= 0 ? all[chosen] : rr[turn++ % rr.length];
+    const hero = chosen >= 0 ? all[chosen] : rr.length ? rr[turn++ % rr.length] : null;
+    // no piece yet (they load after the opening): the blow still counts, there is just nothing to animate
+    if (!hero) { if (onImpact) onImpact(); return 0; }
     const to = v.subVectors(target.home, hero.home).setY(0), dist = to.length(), dir = to.clone().normalize();
     side.set(-dir.z, 0, dir.x).multiplyScalar(turn % 2 ? 1 : -1);
     const yaw0 = hero.pivot.rotation.y, face = angleTo(yaw0, Math.atan2(dir.x, dir.z));

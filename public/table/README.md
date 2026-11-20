@@ -80,15 +80,15 @@ does), `js/dice3d.js` (the table's dice and their rolls), `js/dice-table.js` (wh
 
 ## The attack card (the note left of the books)
 
-The note shows the first character in `CHARACTERS` (`js/config.js`). Each row is one attack;
+The note shows the first character in `PARTY` (`js/party.js`) until another piece is clicked. Each row is one attack;
 click its dice icon (or Tab to it and press Enter/Space) to roll: 2d12 Duality + the trait
 modifier against the monster's Difficulty, the character's mini attacks the golem, and on a hit
 the damage dice follow (dice = Proficiency; a Critical Success adds the dice's maximum). On
 phones, tap the card or the **Attacks** chip above the command bar for a flat sheet.
-All names and numbers in `CHARACTERS` and the golem's `difficulty` are STAND-INS.
+The golem's `difficulty` is a STAND-IN; the party's own numbers are "to come" (see below).
 
-To add a character, add an entry to `CHARACTERS`: `{ id, name, class, mini, proficiency, attacks }`,
-where `mini` is an id from `MINIS` (the figure that attacks). To add an attack, add
+The party is generated into `js/party.js` (see below); a character is `{ id, name, class, mini, proficiency, attacks }`,
+where `mini` is the id of the piece that attacks. To add an attack, add
 `{ id, name, range: 'Melee' | 'Very Close' | 'Close' | 'Far', trait: 'Agility', mod: 2, damage: 'd8+2', type: 'phy' | 'mag' }`
 to its `attacks`; add `style: 'ranged' | 'magic'` (and a `bolt` colour) when the attack is not
 how the mini normally fights. The card fits four or five rows. The rules are pure functions in
@@ -98,8 +98,9 @@ buttons and the raycast hit-test; `js/card.js` handles hover, focus and the phon
 
 ## The party's pieces (models/pc, js/party.js)
 
-Eight glb pieces (Coach's, metres, true heights) stand in a lineup on the battle map along the GM screen (`PIECES` in
-`js/config.js`: scale in table units per metre, row z, gap; a phone held upright gets two rows). They are fetched once the
+Eight glb pieces (Coach's, metres, true heights) stand on the battle map where the party stood, on the road, three ranks turned a little
+toward the golem (`PIECES` in `js/config.js`: scale in table units per metre, `places` id -> x, z, yaw). They replace the old procedural
+stand-in heroes, which are gone. They are fetched once the
 opening is over and the table is idle (9.4 MB, shaders compiled before they join the scene), so first paint is unchanged.
 `#pieces=off` skips them. A file that fails to load, or lacks its node, is a plain disc and one `[table] piece ...` console line.
 
@@ -111,15 +112,15 @@ opening is over and the table is idle (9.4 MB, shaders compiled before they join
   and the depth of field focuses on the piece. **Click / second tap:** `card.setCharacter(char)` switches the attack card
   (and, on touch, opens the sheet). Table phase only. A piece and a book under the pointer: the nearer one wins.
 - **Attacks:** a party attack plays through `js/attack.js` with the piece as the attacker; a piece's charge is a little
-  longer than a stand-in's (it starts at the far edge). Magic adds a ring from the caster's feet and a bigger orb.
-  A plain `/attack +2` still uses the stand-in minis only.
+  a little longer when it is far from the golem. Magic adds a ring from the caster's feet and a bigger orb.
+  A plain `/attack +2` takes the party in turn. The golem is the target; until the pieces have loaded a card attack still rolls and logs, with nothing to animate.
 - **Not shown:** each attack's `description` and `episodes` are in party.js but the card has no place for them.
 - Proofs: `node scripts/table-pieces-proof.mjs ../review/table-pieces stills|videos`; e2e `tests/e2e/table-pieces.spec.ts`.
 - `vendor/three.bundle.js` was rebuilt from three 0.187.0 with `GLTFLoader` added to the same exports (esbuild, minified; +46 KB).
 
 ## Putting your own minis on the table
 
-Every mini is one entry in `MINIS` in `js/minis.js`: where it stands, which way it faces, its
+Every monster is one entry in `MINIS` in `js/minis.js`: where it stands, which way it faces, its
 scale and base, `role: 'hero'` or `'monster'`, and for heroes `attack: 'melee' | 'ranged' | 'magic'`
 (ranged and magic heroes throw a glowing bolt in their `bolt` colour). The monster with
 `target: true` is the one the party attacks; heroes take turns.

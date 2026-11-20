@@ -1,6 +1,6 @@
 // Proof set for the party pieces (software GL, so slow; the stills and clips matter, not wall times).
 //   node scripts/table-pieces-proof.mjs <outDir> stills|videos [clip ...]
-// stills: lineup 1440 + 390 (live HTML path, and the painted path), a hover card, the attack card after a click (1440 + phone sheet).
+// stills: party 1440 + 390 (live HTML path, and the painted path), a hover card, the attack card after a click (1440 + phone sheet).
 // videos: one attack per animation type (lunge, bolt, magic) on the game clock, frame by frame, as .webm.
 import { chromium } from "playwright-core";
 import { spawn } from "node:child_process";
@@ -43,14 +43,15 @@ const shot = async (p, name) => { await p.screenshot({ path: path.join(out, name
 const mid = async (p, id) => { const a = await p.evaluate((i) => window.__table.pieceAt(i), id); return { x: a.x, y: (a.top + a.bottom) / 2 }; };
 
 if (mode === "stills") {
-  if (want("lineup")) {
-    let s = await open("shot&seed=1", { dpr: 2 }); await shot(s.p, "lineup-1440.png"); await s.ctx.close();
-    s = await open("shot&seed=1&html=off", { dpr: 2 }); await shot(s.p, "lineup-painted-1440.png"); await s.ctx.close();
-    s = await open("shot&seed=1&tier=lite", { w: 390, h: 844, phone: true }); await shot(s.p, "lineup-390.png"); await s.ctx.close();
-    s = await open("shot&seed=1&tier=lite&html=off", { w: 390, h: 844, phone: true }); await shot(s.p, "lineup-painted-390.png"); await s.ctx.close();
+  if (want("party")) {
+    let s = await open("shot&seed=1", { dpr: 2 }); await shot(s.p, "party-1440.png"); await s.ctx.close();
+    s = await open("shot&seed=1&html=off", { dpr: 2 }); await shot(s.p, "party-painted-1440.png"); await s.ctx.close();
+    s = await open("shot&seed=1&dof=off&cam=0,0.06,0.55,0.15,-1.1", { dpr: 2 }); await shot(s.p, "party-close-1440.png"); await s.ctx.close();
+    s = await open("shot&seed=1&tier=lite", { w: 390, h: 844, phone: true }); await shot(s.p, "party-390.png"); await s.ctx.close();
+    s = await open("shot&seed=1&tier=lite&html=off", { w: 390, h: 844, phone: true }); await shot(s.p, "party-painted-390.png"); await s.ctx.close();
   }
   if (want("hover")) {
-    for (const [id, tag] of [["pc_thessaly", "thessaly"], ["pc_drex", "drex"]]) {
+    for (const [id, tag] of [["pc_thessaly", "thessaly"]]) {
       const s = await open("shot&seed=1", { dpr: 2 });
       const m = await mid(s.p, id); await s.p.mouse.move(m.x, m.y); await frames(s.p, 4);
       await shot(s.p, `hover-${tag}-1440.png`); await s.ctx.close();
@@ -85,7 +86,7 @@ if (mode === "stills") {
   ];
   for (const [name, id, atk] of clips) {
     if (!want(name) && !want(atk)) continue;
-    const { p, ctx } = await open("shot&seed=3&dof=off&cam=0,0.06,0.62,0.4,-3.2");
+    const { p, ctx } = await open("shot&seed=3&dof=off&cam=0,0.05,0.6,0.7,-1.5");
     await p.evaluate(([i]) => { const t = window.__table; t.card().setCharacter(t.pieces().byId(i).char); t.forceRoll(9, 4); }, [id]);
     const fps = 12, seconds = 3.1;
     const ff = spawn(FFMPEG, ["-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "pipe:0", "-y", "-an", "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-crf", "30", "-b:v", "0", "-deadline", "good", "-cpu-used", "4", "-row-mt", "1", path.join(out, name + ".webm")], { stdio: ["pipe", "inherit", "inherit"] });

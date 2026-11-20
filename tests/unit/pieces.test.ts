@@ -1,25 +1,28 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { lineupX, nearer, placeHover, rowSizes } from "../../public/table/js/pieces-logic.js";
+import { firstOverlap, nearer, placeHover } from "../../public/table/js/pieces-logic.js";
 import { PARTY } from "../../public/table/js/party.js";
+// config.js reads `location` (a browser file): take the layout from its source text instead
+const cfgSrc = fs.readFileSync(path.resolve("public/table/js/config.js"), "utf8");
+const SCALE = +/scale: ([\d.]+),/.exec(cfgSrc.slice(cfgSrc.indexOf("export const PIECES")))![1];
+const PLACES: Record<string, { x: number; z: number; yaw: number }> = Object.fromEntries(
+  [...cfgSrc.matchAll(/(pc_\w+): \{ x: (-?[\d.]+), z: (-?[\d.]+), yaw: (-?[\d.]+) \}/g)].map((m) => [m[1], { x: +m[2], z: +m[3], yaw: +m[4] }]));
+const glbBox = (id: string) => {
+  const b = fs.readFileSync(path.resolve("public/table/models/pc", id + ".glb")), j = JSON.parse(b.subarray(20, 20 + b.readUInt32LE(12)).toString());
+  const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
+  for (const m of j.meshes) for (const p of m.primitives) { const a = j.accessors[p.attributes.POSITION]; a.min.forEach((v: number, i: number) => (mn[i] = Math.min(mn[i], v))); a.max.forEach((v: number, i: number) => (mx[i] = Math.max(mx[i], v))); }
+  return { mn, mx };
+};
 import { damageText, formatAttack, helpLines, rangeText, rollAttack, traitText } from "../../public/table/js/dice-logic.js";
 
-describe("lineupX", () => {
-  it("centres the row on cx with the gap between neighbours", () => {
-    const xs = lineupX([1, 2, 1], 0.5, 10);
-    expect(xs).toEqual([8, 10, 12]);
-    expect(xs[1] - xs[0]).toBeCloseTo(1 / 2 + 0.5 + 2 / 2);
-    expect(lineupX([3], 0.5, 4)).toEqual([4]);
-    expect(lineupX([], 0.5, 4)).toEqual([]);
-  });
-});
-
-describe("rowSizes", () => {
-  it("splits 8 pieces into one or two rows, back row first", () => {
-    expect(rowSizes(8, 1)).toEqual([8]);
-    expect(rowSizes(8, 2)).toEqual([4, 4]);
-    expect(rowSizes(7, 2)).toEqual([4, 3]);
+describe("firstOverlap", () => {
+  it("finds the first pair of circles that touch or come within the gap", () => {
+    const a = { id: "a", x: 0, z: 0, r: 0.5 }, b = { id: "b", x: 1, z: 0, r: 0.4 }, c = { id: "c", x: 1.2, z: 0, r: 0.1 };
+    expect(firstOverlap([a, b])).toBeNull();
+    expect(firstOverlap([a, b], 0.2)).toEqual(["a", "b"]);
+    expect(firstOverlap([a, b, c])).toEqual(["b", "c"]);
+    expect(firstOverlap([])).toBeNull();
   });
 });
 
@@ -84,6 +87,23 @@ describe("party.js", () => {
       const json = JSON.parse(b.subarray(20, 20 + b.readUInt32LE(12)).toString());
       expect(json.nodes.map((n: { name: string }) => n.name)).toContain(c.node);
     }
+  });
+});
+
+describe("the party on the map", () => {
+  it("every piece has a place, and no two footprints overlap (circle = half the wider of width and depth at the chosen scale)", () => {
+    expect(Object.keys(PLACES).sort()).toEqual(PARTY.map((c) => c.id).sort());
+    const items = PARTY.map((c) => { const { mn, mx } = glbBox(c.id), p = PLACES[c.id]; return { id: c.id, x: p.x, z: p.z, r: (Math.max(mx[0] - mn[0], mx[2] - mn[2]) / 2) * SCALE }; });
+    expect(firstOverlap(items, 0.05)).toBeNull();
+  });
+  it("stands on the road area where the old party stood, clear of the skeletons and the golem", () => {
+    for (const p of Object.values(PLACES)) { expect(p.x).toBeGreaterThan(-1.6); expect(p.x).toBeLessThan(2); expect(p.z).toBeGreaterThan(-2.3); expect(p.z).toBeLessThan(0); }
+  });
+  it("true relative heights at one scale: Zeke tallest, Drex or the crouched Kerropi shortest", () => {
+    const h = Object.fromEntries(PARTY.map((c) => [c.id, glbBox(c.id).mx[1] * SCALE]));
+    expect(Math.max(...Object.values(h))).toBe(h.pc_zeke);
+    expect(h.pc_drex).toBeLessThan(h.pc_prim);
+    expect(h.pc_kerropi).toBeLessThan(h.pc_prim);
   });
 });
 

@@ -1,6 +1,6 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
-import { BOOKS, CHARACTERS, PIECES, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
+import { BOOKS, PIECES, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
 import { createCard } from './card.js';
 import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, loadScreenArt, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
@@ -83,8 +83,8 @@ async function boot() {
 
   if (perf) perf.mark('assets');
   const surfaces = new Surfaces(renderer);
-  // the card shows the stand-in character until a party piece is clicked (card.setCharacter); `cardHolder` is what it shows now
-  const character = CHARACTERS[0] || null, cardState = { hot: -1 }, cardHolder = { character };
+  // the card shows the first of the party until another piece is clicked (card.setCharacter); `cardHolder` is what it shows now
+  const character = PARTY[0] || null, cardState = { hot: -1 }, cardHolder = { character };
   defineSurfaces(surfaces, BOOKS, images, { character: () => cardHolder.character, cardState });
   const log = { rows: [] };
   defineLogSurface(surfaces, log);
@@ -416,13 +416,13 @@ async function boot() {
   // tall phones get bigger dice and a wider throw
   const dice = createDice({ scene, atlas: world.atlas, table: world.tableDice, area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), calm, lite, clock: gameClock, view: () => camera.position,
     scale: () => (canvas.clientHeight / Math.max(1, canvas.clientWidth) > TALL_ASPECT ? TALL_SCALE : 1) });
-  const attackMinis = world.minis.slice();      // the stand-ins now; the party's pieces join when they have loaded
+  const attackMinis = world.minis.slice();      // the monsters now; the party's pieces join (as heroes) when they have loaded
   const attack = createAttack({ scene, minis: attackMinis, calm, lite, clock: gameClock });
   play = createPlay({ bar, dice, attack, character: () => cardHolder.character, canAct: () => state.phase === 'table' });
   const touchy = lite || matchMedia('(pointer: coarse)').matches;
   const piecesOn = !hashFlag(/[#&]pieces=off/);
   pieces = piecesOn ? createPieces({
-    parent: scene, party: PARTY, cfg: PIECES, scale: PIECES.scale, tall, lite,
+    parent: scene, party: PARTY, cfg: PIECES, scale: PIECES.scale, lite,
     // compile their shaders for the render target the scene is drawn into (as warmUp does), without stalling a frame
     compile: (g) => { renderer.setRenderTarget(usePost ? rtScene : null); const p = renderer.compileAsync(g, camera, scene); renderer.setRenderTarget(null); return p; },
   }) : null;
@@ -657,7 +657,7 @@ async function boot() {
 
   // handles for testing from the console:  __table.open('core')
   window.__table = { ramp, setRatio: (r) => setRatio(r, performance.now()), area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier, quality, perf,
-    pieces: () => pieces, pieceAt: (id) => { const p = pieces && pieces.byId(id); return p ? pieces.anchor(p, camera, canvas.getBoundingClientRect()) : null; }, showPiece, clickPiece, pcHot: () => pcHot && pcHot.def.id,
+    pieces: () => pieces, attackHeroes: () => attack.heroes.map((h) => h.def.id), pieceAt: (id) => { const p = pieces && pieces.byId(id); return p ? pieces.anchor(p, camera, canvas.getBoundingClientRect()) : null; }, showPiece, clickPiece, pcHot: () => pcHot && pcHot.def.id,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels

@@ -97,7 +97,7 @@ async function stills() {
   await type(p, "/roll 1d4+1d6+1d8+1d10+1d20"); await settle(p);
   await checkUp(p, "general 1440"); await shot(p, "general-dice-1440.png");
   await camera(p, 1, 0, 0); await frames(p, 4);
-  await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
+  await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("pc_zeke"); });
   await type(p, "/attack +2"); await step(p, 2100);
   const a = await p.evaluate(() => window.__table.attackPhase());
   await step(p, Math.round((a.impactAt + 0.04 - a.t) * 1000));
@@ -154,7 +154,7 @@ async function videos() {
     if (!sent && t >= 0.4) { sent = true; await type(p, "/roll duality"); }
   }, { seconds: 2.8 });
   // a hit, then a miss
-  const plan = [[0.4, 9, 4, "guardian", "/attack +2"], [3.6, 2, 4, "ranger", "/attack +0"]];
+  const plan = [[0.4, 9, 4, "pc_zeke", "/attack +2"], [3.6, 2, 4, "pc_thessaly", "/attack +0"]];
   if (want("attack")) await record("attack.webm", "#shot&seed=9", async (p, t) => {
     while (plan.length && t >= plan[0][0]) {
       const [, hope, fear, hero, cmd] = plan.shift();
@@ -181,7 +181,7 @@ async function perf() {
     await frames(p, 1);
     const roll = stat(await measure(10, 1000 / 30));
     await p.evaluate(() => window.__table.step(5000)); await frames(p, 3);
-    await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("ranger"); window.__table.roll("/attack +2"); window.__table.step(1700); });
+    await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("pc_thessaly"); window.__table.roll("/attack +2"); window.__table.step(1700); });
     await frames(p, 2);
     const atk = stat(await measure(10, 1000 / 30));
     const info = await p.evaluate(() => ({ mode: window.__table.mode, tier: window.__table.tier, px: window.__table.renderer.getPixelRatio() }));
@@ -343,7 +343,7 @@ async function look() {
   }
   if (want("impact")) {
     ({ p, ctx } = await open("#shot&seed=9"));
-    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
+    await p.evaluate(() => { window.__table.timeScale(0); window.__table.forceRoll(9, 4); window.__table.nextAttacker("pc_zeke"); });
     await type(p, "/attack +2"); await step(p, 2100);
     const a = await p.evaluate(() => window.__table.attackPhase());
     await step(p, Math.round((a.impactAt + 0.03 - a.t) * 1000));       // inside the hit-stop: burst at full
@@ -351,7 +351,7 @@ async function look() {
     await ctx.close();
   }
   if (want("video")) {
-    const plan = [[0.3, 9, 4, "guardian", "/attack +2"], [3.7, 2, 4, "rogue", "/attack +0"]];
+    const plan = [[0.3, 9, 4, "pc_zeke", "/attack +2"], [3.7, 2, 4, "pc_drex", "/attack +0"]];
     await record("attack.webm", "#shot&seed=9", async (pg, t) => {
       while (plan.length && t >= plan[0][0]) {
         const [, hope, fear, hero, cmd] = plan.shift();
@@ -372,7 +372,7 @@ async function look() {
   if (want("reduced")) {
     ({ p, ctx } = await open("#seed=5", { reduced: true }));
     await type(p, "/roll duality"); await frames(p, 3);
-    await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("guardian"); });
+    await p.evaluate(() => { window.__table.forceRoll(9, 4); window.__table.nextAttacker("pc_zeke"); });
     await type(p, "/attack +2"); await frames(p, 4);
     say("reduced motion: " + JSON.stringify(await p.evaluate(() => ({ dice: window.__table.diceState(), attack: window.__table.attackPhase() }))));
     await shot(p, "reduced-motion.png");

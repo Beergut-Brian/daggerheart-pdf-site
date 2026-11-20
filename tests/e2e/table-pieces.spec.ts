@@ -24,11 +24,15 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
   test.describe(`table pieces, ${name} path`, () => {
     test.setTimeout(300_000);
 
-    test("all eight pieces load and stand in the lineup", async ({ page }) => {
+    test("all eight pieces load and stand on the map; the old stand-in heroes are gone", async ({ page }) => {
       await ready(page, flags);
       const r = (await page.evaluate(`${T}.pieces().pieces.map((p) => ({ id: p.def.id, h: +p.def.height.toFixed(2), z: +p.home.z.toFixed(2), x: +p.home.x.toFixed(2), ph: p.placeholder }))`)) as { id: string; h: number; z: number; x: number; ph: boolean }[];
       expect(r.map((p) => p.id)).toEqual(["pc_zeke", "pc_thessaly", "pc_prim", "pc_naaz", "pc_saveas", "pc_drex", "pc_mellanee", "pc_kerropi"]);
       expect(r.every((p) => !p.ph)).toBe(true);
+      // on the battle map where the party stood, clear of the monsters' ruin: not along the far edge
+      for (const p of r) { expect(p.z).toBeGreaterThan(-2.3); expect(p.z).toBeLessThan(0); }
+      expect(await page.evaluate(`${T}.world.minis.map((m) => m.def.id)`)).toEqual(["skeleton-1", "skeleton-2", "skeleton-3", "golem"]);
+      expect(await page.evaluate(`${T}.attackHeroes()`)).toHaveLength(8);
       // true heights, one scale: Zeke the tallest
       const h = Object.fromEntries(r.map((p) => [p.id, p.h]));
       expect(h.pc_zeke).toBeGreaterThan(h.pc_saveas); expect(h.pc_saveas).toBeGreaterThan(h.pc_naaz);
@@ -59,8 +63,8 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
     test("click switches the attack card to that character; its rows are that character's attacks", async ({ page, isMobile }) => {
       test.skip(!!isMobile, "mouse only; the phone project covers taps");
       await ready(page, flags);
-      expect(await page.evaluate(`${T}.card().character.id`)).toBe("guardian");   // the stand-in until a piece is clicked
-      for (const id of ["pc_thessaly", "pc_zeke"]) {
+      expect(await page.evaluate(`${T}.card().character.id`)).toBe("pc_zeke");   // the first of the party until a piece is clicked
+      for (const id of ["pc_thessaly", "pc_zeke"]) {   // Zeke is the card at the start: switch away, then back
         const p = mid(await anchor(page, id));
         await page.mouse.move(p.x, p.y); await page.mouse.down(); await page.mouse.up(); await frames(page, 3);
         expect(await page.evaluate(`${T}.card().character.id`)).toBe(id);
@@ -106,7 +110,7 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       await page.touchscreen.tap(p.x, p.y); await frames(page);
       await expect(page.locator("#pc-card")).toHaveClass(/on/);
       await expect(page.locator("#pc-card h2")).toHaveText("Prim");
-      expect(await page.evaluate(`${T}.card().character.id`)).toBe("guardian");
+      expect(await page.evaluate(`${T}.card().character.id`)).toBe("pc_zeke");
       const b = (await page.locator("#pc-card .box").boundingBox())!, vp = page.viewportSize()!;
       expect(b.x).toBeGreaterThanOrEqual(0); expect(b.x + b.width).toBeLessThanOrEqual(vp.width);
       await page.touchscreen.tap(p.x, p.y); await frames(page);

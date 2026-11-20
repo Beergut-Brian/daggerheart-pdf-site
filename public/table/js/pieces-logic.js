@@ -1,22 +1,17 @@
 // Pure helpers for the player-character pieces (no three.js, no DOM): unit-tested in tests/unit/pieces.test.ts.
 
 /**
- * Centres for a row of pieces `widths` wide with `gap` between neighbours, the whole row centred on `cx`.
- * @param {number[]} widths @param {number} gap @param {number} cx
+ * Do any two pieces' footprints overlap? Each is a circle (centre and radius, table units); `gap` is the space left between them.
+ * Returns the first pair that is too close, or null.
+ * @param {{ id: string, x: number, z: number, r: number }[]} items @param {number} [gap]
+ * @returns {[string, string] | null}
  */
-export function lineupX(widths, gap, cx) {
-  const total = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, widths.length - 1);
-  let x = cx - total / 2;
-  return widths.map((w) => { const c = x + w / 2; x += w + gap; return c; });
-}
-
-/**
- * Splits `n` pieces into `rows` rows, back row first; a row at the back takes any extra one (8 in 2 rows: 4 and 4).
- * @param {number} n @param {number} rows
- */
-export function rowSizes(n, rows) {
-  const base = Math.floor(n / rows), extra = n % rows;
-  return Array.from({ length: rows }, (_, i) => base + (i < extra ? 1 : 0));
+export function firstOverlap(items, gap = 0) {
+  for (let i = 0; i < items.length; i++) for (let k = i + 1; k < items.length; k++) {
+    const a = items[i], b = items[k];
+    if (Math.hypot(a.x - b.x, a.z - b.z) < a.r + b.r + gap) return [a.id, b.id];
+  }
+  return null;
 }
 
 /**

@@ -81,36 +81,24 @@ export function pickTier() {
   return coarse && small ? 'lite' : 'full';
 }
 
-// The party's attack cards. The note card to the left of the books shows the
-// first character; its rows roll an attack on the monster (see README).
-//   id, name, class   shown on the card
-//   mini              which miniature attacks (an id from MINIS in minis.js)
-//   proficiency       how many damage dice a weapon rolls (d8+2 at Proficiency 2 = 2d8+2)
-//   attacks           { id, name, range: 'Melee' | 'Very Close' | 'Close' | 'Far', trait, mod,
-//                       damage: 'd8+2', type: 'phy' | 'mag',
-//                       style?: 'melee' | 'ranged' | 'magic' (overrides the mini's own attack), bolt?: colour }
-// STAND-INS: every name and number below is a placeholder until Kaden's party arrives.
-export const CHARACTERS = [
-  {
-    id: 'guardian', name: 'Brannoc Vale', class: 'Guardian', mini: 'guardian', proficiency: 1,
-    attacks: [
-      { id: 'longsword', name: 'Longsword', range: 'Melee', trait: 'Agility', mod: 2, damage: 'd8+2', type: 'phy' },
-      { id: 'shield-bash', name: 'Shield Bash', range: 'Melee', trait: 'Strength', mod: 1, damage: 'd4+1', type: 'phy' },
-      { id: 'javelin', name: 'Javelin', range: 'Far', trait: 'Finesse', mod: 1, damage: 'd6+1', type: 'phy', style: 'ranged', bolt: 0xffc46a },
-      { id: 'ember-ward', name: 'Ember Ward', range: 'Close', trait: 'Presence', mod: 0, damage: 'd6+1', type: 'mag', style: 'magic', bolt: 0xff8a4a },
-    ],
-  },
-];
 
-// The eight player-character pieces (models/pc/*.glb, one per entry in party.js), lined up along the GM screen.
-// The files are in metres, true heights (Zeke 2.16, Drex 0.95 with the foam finger). `scale` is table units per
-// metre: the stand-in minis stand 0.55 for a person of about 1.8 m (0.31 a metre), so 0.6 makes the pieces about 2x
-// them (Zeke 1.3, Drex 0.57; the golem is 1.0): the lineup is the farthest thing on the table and has to read there. Same scale on all eight, so the
-// heights stay true to each other. The lineup is one row on the battle map, centred on the GM screen, `z` units
-// from the table's middle, `gap` apart edge to edge; a phone held upright gets two rows (`tall`: x spread, row z).
+// The eight player-character pieces (models/pc/*.glb, one per entry in party.js). They stand on the battle map where the
+// party stood: on the road, three ranks facing the golem a little (`places`: id -> x, z and a yaw toward +x, in table units).
+// The files are in metres, true heights (Zeke 2.16, Drex 0.95 with the foam finger). `scale` is table units per metre, the same
+// for all eight so the heights stay true to each other. The old stand-in heroes stood 0.55 tall for a person of about 1.8 m
+// (0.31 a metre); 0.4 makes the pieces 1.2 to 1.6x that (Zeke 0.86, Naaz and Mellanee 0.74, Drex 0.44; the golem is 1.0), a little
+// larger and still the party's size beside the monsters. Taller ones stand behind, shorter in front, so none hides another.
 export const PIECES = {
   dir: 'models/pc/',
-  scale: 0.6,
-  wide: { cx: 0.3, z: [-3.95], gap: 0.1 },
-  tall: { cx: 0.3, z: [-4.35, -3.3], gap: 0.06 },
+  scale: 0.4,
+  places: {
+    pc_zeke: { x: -0.75, z: -2.0, yaw: 0.45 },
+    pc_saveas: { x: 0.35, z: -2.05, yaw: 0.3 },
+    pc_naaz: { x: 1.4, z: -1.75, yaw: 0.55 },
+    pc_thessaly: { x: -1.3, z: -1.2, yaw: 0.35 },
+    pc_prim: { x: -0.15, z: -1.2, yaw: 0.4 },
+    pc_mellanee: { x: 1.0, z: -0.95, yaw: 0.5 },
+    pc_drex: { x: -0.55, z: -0.4, yaw: 0.3 },
+    pc_kerropi: { x: 0.55, z: -0.3, yaw: 0.4 },
+  },
 };
