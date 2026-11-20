@@ -46,7 +46,7 @@ if (mode === "stills") {
   if (want("party")) {
     let s = await open("shot&seed=1", { dpr: 2 }); await shot(s.p, "party-1440.png"); await s.ctx.close();
     s = await open("shot&seed=1&html=off", { dpr: 2 }); await shot(s.p, "party-painted-1440.png"); await s.ctx.close();
-    s = await open("shot&seed=1&dof=off&cam=0,0.06,0.55,0.15,-1.1", { dpr: 2 }); await shot(s.p, "party-close-1440.png"); await s.ctx.close();
+    s = await open("shot&seed=1&dof=off&cam=-0.5,0.0,0.5,0.9,-0.5", { dpr: 2 }); await shot(s.p, "party-close-1440.png"); await s.ctx.close();
     s = await open("shot&seed=1&tier=lite", { w: 390, h: 844, phone: true }); await shot(s.p, "party-390.png"); await s.ctx.close();
     s = await open("shot&seed=1&tier=lite&html=off", { w: 390, h: 844, phone: true }); await shot(s.p, "party-painted-390.png"); await s.ctx.close();
   }
