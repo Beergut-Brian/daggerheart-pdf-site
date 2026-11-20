@@ -88,9 +88,9 @@ export function pickTier() {
 //   front   Zeke (Guardian) at the point, Saveas (Warrior) and Mellanee (Brawler) either side
 //   middle  Drex (Rogue) out on the near flank, Kerropi (Druid)
 //   back    Naaz (Wizard), Thessaly (Sorcerer), Prim (Bard), each behind a gap in the line ahead
-// `places` are footprint centres, x and z in table units: a frame anchored at (0.3, -1.5) with its front pointing at the golem,
-// then Drex, Naaz and Thessaly nudged so none stands behind the ruin's pillar (a back piece fully hidden could not be hovered).
-// Spacing about 0.9 to 1.2; unit-tested for overlap and for the order front to back.
+// `places` are footprint centres, x and z in table units: a frame anchored at (0.7, -0.9) with its front pointing at the golem (u ahead, v across):
+// front line Zeke (1, 0) at the point, Saveas (.65, -1.05) and Mellanee (.65, 1.05) either side; middle Kerropi (-.15, -.45) and Drex (-.15, 1.45)
+// out on the near flank; back row Naaz (-1, -1.15), Thessaly (-1.05, 0), Prim (-1, 1.1), tight behind. Unit-tested for overlap and the order front to back.
 // The files are in metres, true heights (Zeke 2.16, Drex 0.95 with the foam finger). `scale` is table units per metre, the same
 // for all eight so the heights stay true to each other. The old stand-in heroes stood 0.55 tall for a person of about 1.8 m
 // (0.31 a metre); 0.4 makes the pieces 1.2 to 1.6x that (Zeke 0.86, Naaz and Mellanee 0.74, Drex 0.44; the golem is 1.0).
@@ -98,13 +98,13 @@ export const PIECES = {
   dir: 'models/pc/',
   scale: 0.4,
   places: {
-    pc_zeke: { x: 1.25, z: -1.18, turn: 0.0 },
-    pc_saveas: { x: 1.12, z: -2.23, turn: 0.06 },
-    pc_mellanee: { x: 0.52, z: -0.42, turn: -0.05 },
-    pc_kerropi: { x: -0.05, z: -1.09, turn: 0.05 },
-    pc_drex: { x: -0.2, z: 0.3, turn: -0.06 },
-    pc_naaz: { x: -0.05, z: -2.2, turn: -0.04 },
-    pc_thessaly: { x: 0.45, z: -3.0, turn: 0.07 },
-    pc_prim: { x: -0.81, z: -1.18, turn: 0.03 },
+    pc_zeke: { x: 1.63, z: -0.52, turn: 0.0 },
+    pc_saveas: { x: 1.7, z: -1.63, turn: 0.06 },
+    pc_mellanee: { x: 0.91, z: 0.32, turn: -0.05 },
+    pc_kerropi: { x: 0.73, z: -1.37, turn: 0.05 },
+    pc_drex: { x: 0.01, z: 0.39, turn: -0.06 },
+    pc_naaz: { x: 0.21, z: -2.34, turn: -0.04 },
+    pc_thessaly: { x: -0.27, z: -1.3, turn: 0.07 },
+    pc_prim: { x: -0.64, z: -0.26, turn: 0.03 },
   },
 };
