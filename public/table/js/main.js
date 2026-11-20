@@ -422,7 +422,7 @@ async function boot() {
   const touchy = lite || matchMedia('(pointer: coarse)').matches;
   const piecesOn = !hashFlag(/[#&]pieces=off/);
   pieces = piecesOn ? createPieces({
-    parent: scene, party: PARTY, cfg: PIECES, scale: PIECES.scale, lite,
+    parent: scene, party: PARTY, cfg: PIECES, scale: PIECES.scale, lite, face: { x: attack.target.home.x, z: attack.target.home.z },
     // compile their shaders for the render target the scene is drawn into (as warmUp does), without stalling a frame
     compile: (g) => { renderer.setRenderTarget(usePost ? rtScene : null); const p = renderer.compileAsync(g, camera, scene); renderer.setRenderTarget(null); return p; },
   }) : null;

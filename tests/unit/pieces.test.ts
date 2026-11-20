@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { firstOverlap, nearer, placeHover } from "../../public/table/js/pieces-logic.js";
+import { firstOverlap, nearer, placeHover, swerveAround, yawToward } from "../../public/table/js/pieces-logic.js";
 import { PARTY } from "../../public/table/js/party.js";
 // config.js reads `location` (a browser file): take the layout from its source text instead
 const cfgSrc = fs.readFileSync(path.resolve("public/table/js/config.js"), "utf8");
 const SCALE = +/scale: ([\d.]+),/.exec(cfgSrc.slice(cfgSrc.indexOf("export const PIECES")))![1];
-const PLACES: Record<string, { x: number; z: number; yaw: number }> = Object.fromEntries(
-  [...cfgSrc.matchAll(/(pc_\w+): \{ x: (-?[\d.]+), z: (-?[\d.]+), yaw: (-?[\d.]+) \}/g)].map((m) => [m[1], { x: +m[2], z: +m[3], yaw: +m[4] }]));
+const PLACES: Record<string, { x: number; z: number; turn: number }> = Object.fromEntries(
+  [...cfgSrc.matchAll(/(pc_\w+): \{ x: (-?[\d.]+), z: (-?[\d.]+), turn: (-?[\d.]+) \}/g)].map((m) => [m[1], { x: +m[2], z: +m[3], turn: +m[4] }]));
+const minisSrc = fs.readFileSync(path.resolve("public/table/js/minis.js"), "utf8");
+const gm = /id: 'golem'.*?position: \[(-?[\d.]+), (-?[\d.]+)\], rotation: (-?[\d.]+)/.exec(minisSrc)!;
+const GOLEM = { x: +gm[1], z: +gm[2], rot: +gm[3] };
 const glbBox = (id: string) => {
   const b = fs.readFileSync(path.resolve("public/table/models/pc", id + ".glb")), j = JSON.parse(b.subarray(20, 20 + b.readUInt32LE(12)).toString());
   const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
@@ -41,6 +44,30 @@ describe("placeHover", () => {
       expect(p.left).toBeGreaterThanOrEqual(8); expect(p.left + size.w).toBeLessThanOrEqual(view.w - 8);
       expect(p.top).toBeGreaterThanOrEqual(8); expect(p.top + size.h).toBeLessThanOrEqual(view.h - 8);
     }
+  });
+});
+
+describe("yawToward", () => {
+  it("is 0 facing +z and + toward +x", () => {
+    expect(yawToward({ x: 0, z: 0 }, { x: 0, z: 5 })).toBe(0);
+    expect(yawToward({ x: 0, z: 0 }, { x: 5, z: 0 })).toBeCloseTo(Math.PI / 2);
+    expect(yawToward({ x: 1, z: 1 }, { x: 0, z: 1 })).toBeCloseTo(-Math.PI / 2);
+  });
+});
+
+describe("swerveAround", () => {
+  const from = { x: 0, z: 0 }, to = { x: 4, z: 0 };
+  it("does nothing when the way is clear", () => {
+    expect(swerveAround(from, to, [{ x: 2, z: 1.5, r: 0.3 }])).toEqual({ x: 0, z: 0 });
+    expect(swerveAround(from, to, [{ x: -1, z: 0, r: 0.3 }])).toEqual({ x: 0, z: 0 });   // behind
+  });
+  it("bends away from a piece in the way, enough to clear it at its place on the path", () => {
+    for (const bz of [-0.2, 0, 0.2]) for (const q of [0.3, 0.5, 0.7]) {
+      const b = { x: 4 * q, z: bz, r: 0.3 }, s = swerveAround(from, to, [b], 0.2);
+      const at = Math.abs(s.z * Math.sin(Math.PI * q) - bz);        // the path's sideways offset there, against the blocker's
+      expect(at).toBeGreaterThanOrEqual(b.r + 0.2 - 1e-9);
+    }
+    expect(swerveAround(from, to, [{ x: 2, z: 0.2, r: 0.3 }], 0.2).z).toBeLessThan(0);   // blocker on one side: bend to the other
   });
 });
 
@@ -96,8 +123,31 @@ describe("the party on the map", () => {
     const items = PARTY.map((c) => { const { mn, mx } = glbBox(c.id), p = PLACES[c.id]; return { id: c.id, x: p.x, z: p.z, r: (Math.max(mx[0] - mn[0], mx[2] - mn[2]) / 2) * SCALE }; });
     expect(firstOverlap(items, 0.05)).toBeNull();
   });
-  it("stands on the road area where the old party stood, clear of the skeletons and the golem", () => {
-    for (const p of Object.values(PLACES)) { expect(p.x).toBeGreaterThan(-1.6); expect(p.x).toBeLessThan(2); expect(p.z).toBeGreaterThan(-2.3); expect(p.z).toBeLessThan(0); }
+  it("the golem is at the bottom right of the map, on it, and turned to face the party", () => {
+    // the map is x -4.5..5.1, z -4.7..0.9; the camera looks from +z, so bottom right = large x, large z
+    expect(GOLEM.x).toBeGreaterThan(2.5); expect(GOLEM.x).toBeLessThan(4.6); expect(GOLEM.z).toBeGreaterThan(-1.2); expect(GOLEM.z).toBeLessThan(0.5);
+    const cx = Object.values(PLACES).reduce((a, p) => a + p.x, 0) / 8, cz = Object.values(PLACES).reduce((a, p) => a + p.z, 0) / 8;
+    expect(Math.abs(GOLEM.rot - yawToward(GOLEM, { x: cx, z: cz }))).toBeLessThan(0.2);
+  });
+  it("the party is in the road area, left of the golem and clear of it", () => {
+    for (const p of Object.values(PLACES)) {
+      expect(p.x).toBeGreaterThan(-1.6); expect(p.x).toBeLessThan(GOLEM.x - 1); expect(p.z).toBeGreaterThan(-3.3); expect(p.z).toBeLessThan(0.6);
+      expect(Math.hypot(p.x - GOLEM.x, p.z - GOLEM.z)).toBeGreaterThan(1.5);
+    }
+  });
+  it("front is nearest the golem, by class: Zeke at the point, Saveas and Mellanee beside him, then Drex and Kerropi, then Naaz, Thessaly, Prim", () => {
+    const d = (id: string) => Math.hypot(PLACES[id].x - GOLEM.x, PLACES[id].z - GOLEM.z);
+    const rank = (ids: string[]) => ids.map(d);
+    const front = rank(["pc_saveas", "pc_mellanee"]), middle = rank(["pc_drex", "pc_kerropi"]), back = rank(["pc_naaz", "pc_thessaly", "pc_prim"]);
+    expect(d("pc_zeke")).toBeLessThan(Math.min(...front) - 0.3);                  // clearly the point
+    expect(Math.max(...front)).toBeLessThan(Math.min(...middle));
+    expect(Math.max(...middle)).toBeLessThan(Math.min(...back));
+    // Saveas and Mellanee either side of Zeke: opposite sides of the line from Zeke to the golem
+    const side = (id: string) => Math.sign((GOLEM.x - PLACES.pc_zeke.x) * (PLACES[id].z - PLACES.pc_zeke.z) - (GOLEM.z - PLACES.pc_zeke.z) * (PLACES[id].x - PLACES.pc_zeke.x));
+    expect(side("pc_saveas") * side("pc_mellanee")).toBe(-1);
+  });
+  it("every piece faces the golem to within a few degrees", () => {
+    for (const [id, p] of Object.entries(PLACES)) expect(Math.abs(p.turn), id).toBeLessThanOrEqual(0.08);
   });
   it("true relative heights at one scale: Zeke tallest, Drex or the crouched Kerropi shortest", () => {
     const h = Object.fromEntries(PARTY.map((c) => [c.id, glbBox(c.id).mx[1] * SCALE]));

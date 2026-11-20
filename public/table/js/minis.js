@@ -20,6 +20,6 @@ export const MINIS = [
   { id: 'skeleton-2', name: 'a skeleton', loader: fig('skeletonRaised', 0.165, flag), position: [-2.35, -2.05], rotation: 1.7, scale: 1, base: { r: 0.165, top: flag }, attack: 'melee', role: 'monster' },
   { id: 'skeleton-3', name: 'a skeleton', loader: fig('skeletonRaised', 0.165, flag), position: [-1.05, -3.15], rotation: 2.4, scale: 1, base: { r: 0.165, top: flag }, attack: 'melee', role: 'monster' },
   // the big one
-  { id: 'golem', name: 'the crystal golem', loader: fig('golem', 0.42, 0x3f5f66), position: [2.55, -2.35], rotation: -1.1, scale: 1, base: { r: 0.42, top: 0x3f5f66 }, attack: 'melee', role: 'monster', target: true, height: 1.0,
+  { id: 'golem', name: 'the crystal golem', loader: fig('golem', 0.42, 0x3f5f66), position: [3.0, -0.6], rotation: -1.89, scale: 1, base: { r: 0.42, top: 0x3f5f66 }, attack: 'melee', role: 'monster', target: true, height: 1.0,
     difficulty: 12 },   // STAND-IN Difficulty: what an attack roll must meet or beat
 ];

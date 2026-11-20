@@ -82,23 +82,29 @@ export function pickTier() {
 }
 
 
-// The eight player-character pieces (models/pc/*.glb, one per entry in party.js). They stand on the battle map where the
-// party stood: on the road, three ranks facing the golem a little (`places`: id -> x, z and a yaw toward +x, in table units).
+// The eight player-character pieces (models/pc/*.glb, one per entry in party.js). They stand on the battle map as a party
+// advancing on the golem, which is at the bottom right of the map (`MINIS`, js/minis.js) and turned to face them. Every piece faces
+// the golem (`turn`: a few degrees of its own, radians). Front = nearest the golem, by class:
+//   front   Zeke (Guardian) at the point, Saveas (Warrior) and Mellanee (Brawler) either side
+//   middle  Drex (Rogue) out on the near flank, Kerropi (Druid)
+//   back    Naaz (Wizard), Thessaly (Sorcerer), Prim (Bard), each behind a gap in the line ahead
+// `places` are footprint centres, x and z in table units. They come from a frame anchored at (0.3, -1.5) with its front pointing at the
+// golem: (u ahead, v across) = Zeke (1, 0), Saveas (.55, -.95), Mellanee (.55, .95), Kerropi (-.2, .5), Drex (-.1, 1.95),
+// Naaz (-.9, -.45), Thessaly (-.9, -1.35), Prim (-.95, .65); spacing about 0.9, unit-tested for overlap and for the order.
 // The files are in metres, true heights (Zeke 2.16, Drex 0.95 with the foam finger). `scale` is table units per metre, the same
 // for all eight so the heights stay true to each other. The old stand-in heroes stood 0.55 tall for a person of about 1.8 m
-// (0.31 a metre); 0.4 makes the pieces 1.2 to 1.6x that (Zeke 0.86, Naaz and Mellanee 0.74, Drex 0.44; the golem is 1.0), a little
-// larger and still the party's size beside the monsters. Taller ones stand behind, shorter in front, so none hides another.
+// (0.31 a metre); 0.4 makes the pieces 1.2 to 1.6x that (Zeke 0.86, Naaz and Mellanee 0.74, Drex 0.44; the golem is 1.0).
 export const PIECES = {
   dir: 'models/pc/',
   scale: 0.4,
   places: {
-    pc_zeke: { x: -0.75, z: -2.0, yaw: 0.45 },
-    pc_saveas: { x: 0.35, z: -2.05, yaw: 0.3 },
-    pc_naaz: { x: 1.4, z: -1.75, yaw: 0.55 },
-    pc_thessaly: { x: -1.3, z: -1.2, yaw: 0.35 },
-    pc_prim: { x: -0.15, z: -1.2, yaw: 0.4 },
-    pc_mellanee: { x: 1.0, z: -0.95, yaw: 0.5 },
-    pc_drex: { x: -0.55, z: -0.4, yaw: 0.3 },
-    pc_kerropi: { x: 0.55, z: -0.3, yaw: 0.4 },
+    pc_zeke: { x: 1.25, z: -1.18, turn: 0.0 },
+    pc_saveas: { x: 1.12, z: -2.23, turn: 0.06 },
+    pc_mellanee: { x: 0.52, z: -0.42, turn: -0.05 },
+    pc_kerropi: { x: -0.05, z: -1.09, turn: 0.05 },
+    pc_drex: { x: -0.41, z: 0.32, turn: -0.06 },
+    pc_naaz: { x: -0.41, z: -2.21, turn: -0.04 },
+    pc_thessaly: { x: -0.13, z: -3.07, turn: 0.07 },
+    pc_prim: { x: -0.81, z: -1.18, turn: 0.03 },
   },
 };

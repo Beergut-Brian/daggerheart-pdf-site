@@ -15,6 +15,33 @@ export function firstOverlap(items, gap = 0) {
 }
 
 /**
+ * Yaw (about the vertical, + turns +z toward +x, as three.js `rotation.y`) that makes something at `from` face `to`.
+ * @param {{ x: number, z: number }} from @param {{ x: number, z: number }} to
+ */
+export const yawToward = (from, to) => Math.atan2(to.x - from.x, to.z - from.z);
+
+/**
+ * How far to bend a straight path from `from` to `to` sideways so it clears `blockers` (circles: x, z, r). The bend is a
+ * half sine (zero at both ends, `offset` at the middle), so the offset needed at a blocker a fraction q along the path is
+ * need / sin(pi q). Returns the world offset { x, z } at the middle of the path ({ 0, 0 } when nothing is in the way).
+ * @param {{ x: number, z: number }} from @param {{ x: number, z: number }} to
+ * @param {{ x: number, z: number, r: number }[]} blockers @param {number} [heroR] radius of the one moving @param {number} [margin] @param {number} [maxOff]
+ */
+export function swerveAround(from, to, blockers, heroR = 0.2, margin = 0.08, maxOff = 1.2) {
+  const dx = to.x - from.x, dz = to.z - from.z, len = Math.hypot(dx, dz);
+  if (len < 1e-6) return { x: 0, z: 0 };
+  const ux = dx / len, uz = dz / len, nx = -uz, nz = ux;
+  let best = 0, sign = 1;
+  for (const b of blockers) {
+    const rx = b.x - from.x, rz = b.z - from.z, t = rx * ux + rz * uz, s = rx * nx + rz * nz, R = b.r + heroR + margin;
+    if (t < 0.05 || t > len - 0.05 || Math.abs(s) >= R) continue;
+    const q = t / len, off = Math.min(maxOff, (R - Math.abs(s)) / Math.max(Math.sin(Math.PI * q), 0.35));
+    if (off > best) { best = off; sign = s > 0 ? -1 : 1; }
+  }
+  return { x: nx * sign * best + 0, z: nz * sign * best + 0 };
+}
+
+/**
  * Where the hover card goes: centred on the piece (`x`), above its head (`top`) if it fits, else below its
  * base (`bottom`), always inside the viewport. Client pixels.
  * @param {{ x: number, top: number, bottom: number }} a @param {{ w: number, h: number }} size

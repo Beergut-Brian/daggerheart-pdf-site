@@ -5,6 +5,7 @@
 // Everything runs on the game clock (`clock`, `update(now)`), so proofs can step it frame by frame.
 import * as THREE from '../vendor/three.bundle.js';
 import { rng, starburstTexture } from './textures.js';
+import { swerveAround } from './pieces-logic.js';
 
 // timings, seconds of game clock
 const WIND = 0.25, LUNGE = 0.34, HOLD = 0.08, BACK = 0.5, BOLT_SPEED = 6.5;
@@ -91,7 +92,11 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
     const muzzle = hero.home.clone().setY(0.03 + (hero.def.muzzle ?? 0.42)).addScaledVector(dir, 0.14);
     const boltTo = hit ? contact.clone() : tCentre.clone().addScaledVector(side, 0.75).addScaledVector(dir, 0.6).setY(tCentre.y + 0.15);
     const flight = muzzle.distanceTo(boltTo) / BOLT_SPEED;
-    // a party piece starts on the far edge of the map: a long charge takes a little longer than the stand-ins' short one
+    // a party piece's path bends around the others standing between it and the golem (a half sine, nothing at either end)
+    const hr = (hero.def.base?.r ?? 0.2) * 0.8;
+    const sw = hero.def.pc ? swerveAround(hero.home, target.home, all.filter((o) => o !== hero).map((o) => ({ x: o.home.x, z: o.home.z, r: (o.def.base?.r ?? 0.2) * 0.8 })), hr) : { x: 0, z: 0 };
+    const swerve = new THREE.Vector3(sw.x, 0, sw.z);
+    // a party piece may start far from the golem: a long charge takes a little longer than the stand-ins' short one
     const lunge = hero.def.pc ? LUNGE + Math.max(0, reach - 1.5) * 0.1 : LUNGE;
     const impactAt = calm ? 0 : WIND + (ranged ? 0.05 + flight : lunge);
     const stop = hit && !calm ? HITSTOP : 0;
@@ -101,7 +106,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
         .multiplyScalar(SPARK.speed * (0.55 + r() * 0.8) * (critical ? 1.35 : 1));
     }
     cur = {
-      hero, hit, critical, onImpact, ranged, magic: (style || hero.def.attack) === 'magic', lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
+      hero, hit, critical, onImpact, swerve, ranged, magic: (style || hero.def.attack) === 'magic', lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
       color: new THREE.Color(boltColor ?? hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.3, 1.0)),
     };
     if (calm) impact();
@@ -138,7 +143,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
       let lean = -LEAN.back * Math.sin(Math.PI * clamp01(t / WIND));
       if (!c.ranged) {
         const out = smooth((t - WIND) / c.lunge), back = smooth((t - WIND - c.lunge - HOLD) / BACK), k = out * (1 - back);
-        h.pivot.position.lerpVectors(h.home, c.lungeTo, k);
+        h.pivot.position.lerpVectors(h.home, c.lungeTo, k).addScaledVector(c.swerve, Math.sin(Math.PI * k));
         h.pivot.position.y = h.home.y + Math.sin(Math.PI * clamp01((t - WIND) / c.lunge)) * LEAN.hop;
         lean += LEAN.forward * k;
       } else {
@@ -164,8 +169,8 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
       bolt.scale.setScalar(flying ? orb : 1e-4); trail.scale.setScalar(flying ? orb : 1e-4);
       if (flying) {
         const uu = Math.min(u, c.hit ? 1 : 1.25);
-        bolt.position.lerpVectors(c.muzzle, c.boltTo, uu); bolt.position.y += Math.sin(Math.PI * clamp01(uu)) * 0.18;
-        trail.position.lerpVectors(c.muzzle, c.boltTo, Math.max(0, uu - 0.07)); trail.position.y += Math.sin(Math.PI * clamp01(uu - 0.07)) * 0.18;
+        bolt.position.lerpVectors(c.muzzle, c.boltTo, uu).addScaledVector(c.swerve, Math.sin(Math.PI * clamp01(uu))); bolt.position.y += Math.sin(Math.PI * clamp01(uu)) * 0.18;
+        trail.position.lerpVectors(c.muzzle, c.boltTo, Math.max(0, uu - 0.07)).addScaledVector(c.swerve, Math.sin(Math.PI * clamp01(uu - 0.07))); trail.position.y += Math.sin(Math.PI * clamp01(uu - 0.07)) * 0.18;
         trail.lookAt(bolt.position);
         bolt.material.color.copy(c.color).multiplyScalar(2.6); trail.material.color.copy(c.color).multiplyScalar(1.6);
         const fade = c.hit ? 1 : clamp01((1.25 - uu) / 0.25);

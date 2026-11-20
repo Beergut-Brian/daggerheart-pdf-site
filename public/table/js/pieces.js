@@ -2,10 +2,11 @@
 // Each piece is a `mini` in attack.js's sense ({ def, obj, pivot, home, yaw }), so the party's attacks reuse it.
 // A file that does not load, or has no node of the expected name, becomes a plain disc and one console line.
 import * as THREE from '../vendor/three.bundle.js';
+import { yawToward } from './pieces-logic.js';
 
 const FALLBACK_R = 0.2;   // placeholder disc radius, table units
 
-export function createPieces({ parent, party, cfg, scale, lite = false, y = 0.03, loader = null, compile = null, log = console.warn }) {
+export function createPieces({ parent, party, cfg, scale, face, lite = false, y = 0.03, loader = null, compile = null, log = console.warn }) {
   const pieces = [];
   const ray = new THREE.Raycaster();
   const loadGltf = loader || ((url) => new (THREE.GLTFLoader)().loadAsync(url));
@@ -50,9 +51,9 @@ export function createPieces({ parent, party, cfg, scale, lite = false, y = 0.03
     const got = await Promise.all(party.map(one));
     for (const p of got) {
       // stand the footprint's centre on its place (the origin is the base centre, which is not always the middle of the piece:
-      // Zeke's base carries Brutus), turned toward the golem a little
-      const at = cfg.places[p.def.id] || { x: 0, z: 0, yaw: 0 };
-      p.yaw = at.yaw; p.pivot.rotation.y = at.yaw;
+      // Zeke's base carries Brutus), turned to face the golem (`face`: its x, z) with a few degrees of its own
+      const at = cfg.places[p.def.id] || { x: 0, z: 0, turn: 0 }, yaw = yawToward(at, face) + (at.turn || 0);
+      p.yaw = yaw; p.pivot.rotation.y = yaw;
       p.pivot.updateMatrixWorld(true);
       const turned = new THREE.Box3().setFromObject(p.pivot).getCenter(new THREE.Vector3());
       p.pivot.position.set(at.x - turned.x, y, at.z - turned.z);
