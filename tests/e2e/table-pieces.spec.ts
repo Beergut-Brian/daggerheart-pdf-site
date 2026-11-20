@@ -33,6 +33,11 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       for (const p of r) { expect(p.z).toBeGreaterThan(-2.3); expect(p.z).toBeLessThan(0); }
       expect(await page.evaluate(`${T}.world.minis.map((m) => m.def.id)`)).toEqual(["skeleton-1", "skeleton-2", "skeleton-3", "golem"]);
       expect(await page.evaluate(`${T}.attackHeroes()`)).toHaveLength(8);
+      // the golem is at the bottom right of the map and the party faces it
+      const g = (await page.evaluate(`(() => { const t = ${T}.world.minis.find((m) => m.def.id === "golem"); return { x: t.home.x, z: t.home.z }; })()`)) as { x: number; z: number };
+      expect(g.x).toBeGreaterThan(2.5); expect(g.z).toBeGreaterThan(-1.2);
+      const yaws = (await page.evaluate(`${T}.pieces().pieces.map((p) => ({ id: p.def.id, x: p.home.x, z: p.home.z, yaw: p.pivot.rotation.y }))`)) as { id: string; x: number; z: number; yaw: number }[];
+      for (const p of yaws) expect(Math.abs(p.yaw - Math.atan2(g.x - p.x, g.z - p.z)), `${p.id} faces the golem`).toBeLessThan(0.1 + 0.3);   // the origin is not the footprint centre; a few degrees of its own
       // true heights, one scale: Zeke the tallest
       const h = Object.fromEntries(r.map((p) => [p.id, p.h]));
       expect(h.pc_zeke).toBeGreaterThan(h.pc_saveas); expect(h.pc_saveas).toBeGreaterThan(h.pc_naaz);
@@ -43,7 +48,8 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
     test("hover shows the card with name, class and intro, inside the viewport; leaving clears it", async ({ page, isMobile }) => {
       test.skip(!!isMobile, "mouse only; the phone project covers taps");
       await ready(page, flags);
-      for (const id of ["pc_zeke", "pc_drex", "pc_kerropi"]) {
+      // every piece is reachable from the default camera, the back row included
+      for (const id of ["pc_zeke", "pc_saveas", "pc_mellanee", "pc_drex", "pc_kerropi", "pc_naaz", "pc_thessaly", "pc_prim"]) {
         const p = mid(await anchor(page, id));
         await page.mouse.move(p.x, p.y); await frames(page);
         const card = page.locator("#pc-card");
@@ -106,6 +112,17 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
     test("touch: the first tap shows the card, the second switches the attack card and opens the sheet", async ({ page, isMobile }) => {
       test.skip(!isMobile, "touch only");
       await ready(page, flags + "&tier=lite");
+      // the golem and the party are both in the default view (the phone camera is nudged right and wider for it)
+      const inView = (await page.evaluate(`(() => { const t = ${T}, vp = innerWidth, vh = innerHeight, r = [...t.pieces().pieces.map((p) => p.pivot.position), t.world.minis.find((m) => m.def.id === "golem").pivot.position]; return r.map((v) => { const q = v.clone().project(t.camera); return { x: (q.x * 0.5 + 0.5) * vp, y: (-q.y * 0.5 + 0.5) * vh }; }); })()`)) as { x: number; y: number }[];
+      for (const q of inView) { expect(q.x).toBeGreaterThan(20); expect(q.x).toBeLessThan(370); expect(q.y).toBeGreaterThan(60); expect(q.y).toBeLessThan(780); }
+      // a first tap on any of the eight shows its card
+      for (const id of ["pc_zeke", "pc_saveas", "pc_mellanee", "pc_drex", "pc_kerropi", "pc_naaz", "pc_thessaly"]) {
+        const q = mid(await anchor(page, id));
+        await page.touchscreen.tap(q.x, q.y); await frames(page);
+        const want = (await page.evaluate(`${T}.pieces().byId(${JSON.stringify(id)}).char.name`)) as string;
+        await expect(page.locator("#pc-card h2")).toHaveText(want);
+      }
+      await page.touchscreen.tap(5, 700); await frames(page);   // empty wood: clears
       const p = mid(await anchor(page, "pc_prim"));
       await page.touchscreen.tap(p.x, p.y); await frames(page);
       await expect(page.locator("#pc-card")).toHaveClass(/on/);

@@ -91,11 +91,11 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
     const lungeTo = hero.home.clone().addScaledVector(dir, hit ? reach : reach * 0.8).addScaledVector(side, hit ? 0 : 0.5);
     const muzzle = hero.home.clone().setY(0.03 + (hero.def.muzzle ?? 0.42)).addScaledVector(dir, 0.14);
     const boltTo = hit ? contact.clone() : tCentre.clone().addScaledVector(side, 0.75).addScaledVector(dir, 0.6).setY(tCentre.y + 0.15);
-    const flight = muzzle.distanceTo(boltTo) / BOLT_SPEED;
     // a party piece's path bends around the others standing between it and the golem (a half sine, nothing at either end)
     const hr = (hero.def.base?.r ?? 0.2) * 0.8;
-    const sw = hero.def.pc ? swerveAround(hero.home, target.home, all.filter((o) => o !== hero).map((o) => ({ x: o.home.x, z: o.home.z, r: (o.def.base?.r ?? 0.2) * 0.8 })), hr) : { x: 0, z: 0 };
+    const sw = hero.def.pc ? swerveAround(hero.home, ranged ? boltTo : lungeTo, all.filter((o) => o !== hero).map((o) => ({ x: o.home.x, z: o.home.z, r: (o.def.base?.r ?? 0.2) * 0.8 })), hr) : { x: 0, z: 0 };
     const swerve = new THREE.Vector3(sw.x, 0, sw.z);
+    const flight = muzzle.distanceTo(boltTo) / BOLT_SPEED;
     // a party piece may start far from the golem: a long charge takes a little longer than the stand-ins' short one
     const lunge = hero.def.pc ? LUNGE + Math.max(0, reach - 1.5) * 0.1 : LUNGE;
     const impactAt = calm ? 0 : WIND + (ranged ? 0.05 + flight : lunge);

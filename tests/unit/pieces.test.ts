@@ -65,7 +65,7 @@ describe("swerveAround", () => {
     for (const bz of [-0.2, 0, 0.2]) for (const q of [0.3, 0.5, 0.7]) {
       const b = { x: 4 * q, z: bz, r: 0.3 }, s = swerveAround(from, to, [b], 0.2);
       const at = Math.abs(s.z * Math.sin(Math.PI * q) - bz);        // the path's sideways offset there, against the blocker's
-      expect(at).toBeGreaterThanOrEqual(b.r + 0.2 - 1e-9);
+      expect(at).toBeGreaterThanOrEqual(b.r + 0.2 - 0.03);
     }
     expect(swerveAround(from, to, [{ x: 2, z: 0.2, r: 0.3 }], 0.2).z).toBeLessThan(0);   // blocker on one side: bend to the other
   });
@@ -148,6 +148,21 @@ describe("the party on the map", () => {
   });
   it("every piece faces the golem to within a few degrees", () => {
     for (const [id, p] of Object.entries(PLACES)) expect(Math.abs(p.turn), id).toBeLessThanOrEqual(0.08);
+  });
+  it("a charge from any piece to the golem does not pass through another piece (the path bends around them)", () => {
+    const radius = (id: string) => { const { mn, mx } = glbBox(id); return (Math.max(mx[0] - mn[0], mx[2] - mn[2]) / 2) * SCALE * 0.8; };
+    const ids = Object.keys(PLACES);
+    for (const id of ids) {
+      const from = PLACES[id], len = Math.hypot(GOLEM.x - from.x, GOLEM.z - from.z), reach = Math.max(0.3, len - 0.42 - 0.2);
+      const ux = (GOLEM.x - from.x) / len, uz = (GOLEM.z - from.z) / len;
+      const to = { x: from.x + ux * reach, z: from.z + uz * reach };
+      const others = ids.filter((o) => o !== id).map((o) => ({ x: PLACES[o].x, z: PLACES[o].z, r: radius(o) }));
+      const sw = swerveAround(from, to, others, radius(id));
+      for (let k = 0; k <= 1.0001; k += 0.02) {
+        const px = from.x + (to.x - from.x) * k + sw.x * Math.sin(Math.PI * k), pz = from.z + (to.z - from.z) * k + sw.z * Math.sin(Math.PI * k);
+        for (const o of others) expect(Math.hypot(px - o.x, pz - o.z), `${id} at ${k.toFixed(2)} vs piece at ${o.x},${o.z}`).toBeGreaterThanOrEqual(o.r + radius(id) - 0.02);
+      }
+    }
   });
   it("true relative heights at one scale: Zeke tallest, Drex or the crouched Kerropi shortest", () => {
     const h = Object.fromEntries(PARTY.map((c) => [c.id, glbBox(c.id).mx[1] * SCALE]));

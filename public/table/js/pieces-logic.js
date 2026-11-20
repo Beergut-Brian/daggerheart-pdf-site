@@ -22,23 +22,29 @@ export const yawToward = (from, to) => Math.atan2(to.x - from.x, to.z - from.z);
 
 /**
  * How far to bend a straight path from `from` to `to` sideways so it clears `blockers` (circles: x, z, r). The bend is a
- * half sine (zero at both ends, `offset` at the middle), so the offset needed at a blocker a fraction q along the path is
- * need / sin(pi q). Returns the world offset { x, z } at the middle of the path ({ 0, 0 } when nothing is in the way).
+ * half sine (zero at both ends, `offset` at the middle). Tries both sides in small steps and takes the smallest bend whose
+ * sampled path stays outside every blocker (a blocker the path already starts or ends inside is only asked for what it has).
+ * Returns the world offset { x, z } at the middle of the path ({ 0, 0 } when nothing is in the way).
  * @param {{ x: number, z: number }} from @param {{ x: number, z: number }} to
  * @param {{ x: number, z: number, r: number }[]} blockers @param {number} [heroR] radius of the one moving @param {number} [margin] @param {number} [maxOff]
  */
-export function swerveAround(from, to, blockers, heroR = 0.2, margin = 0.08, maxOff = 1.2) {
+export function swerveAround(from, to, blockers, heroR = 0.2, margin = 0.1, maxOff = 1.4) {
   const dx = to.x - from.x, dz = to.z - from.z, len = Math.hypot(dx, dz);
   if (len < 1e-6) return { x: 0, z: 0 };
-  const ux = dx / len, uz = dz / len, nx = -uz, nz = ux;
-  let best = 0, sign = 1;
-  for (const b of blockers) {
-    const rx = b.x - from.x, rz = b.z - from.z, t = rx * ux + rz * uz, s = rx * nx + rz * nz, R = b.r + heroR + margin;
-    if (t < 0.05 || t > len - 0.05 || Math.abs(s) >= R) continue;
-    const q = t / len, off = Math.min(maxOff, (R - Math.abs(s)) / Math.max(Math.sin(Math.PI * q), 0.35));
-    if (off > best) { best = off; sign = s > 0 ? -1 : 1; }
+  const nx = -dz / len, nz = dx / len;
+  const need = blockers.map((b) => ({ ...b, R: Math.min(b.r + heroR + margin, Math.hypot(b.x - from.x, b.z - from.z) - 0.01, Math.hypot(b.x - to.x, b.z - to.z) - 0.01) }));
+  const clear = (off) => {
+    for (let k = 0; k <= 1.0001; k += 0.025) {
+      const w = Math.sin(Math.PI * k), px = from.x + dx * k + nx * off * w, pz = from.z + dz * k + nz * off * w;
+      for (const b of need) if (Math.hypot(px - b.x, pz - b.z) < b.R) return false;
+    }
+    return true;
+  };
+  if (clear(0)) return { x: 0, z: 0 };
+  for (let o = 0.05; o <= maxOff + 1e-9; o += 0.05) {
+    for (const sign of [1, -1]) if (clear(sign * o)) return { x: nx * sign * o + 0, z: nz * sign * o + 0 };
   }
-  return { x: nx * sign * best + 0, z: nz * sign * best + 0 };
+  return { x: 0, z: 0 };   // boxed in: the path stays straight
 }
 
 /**
