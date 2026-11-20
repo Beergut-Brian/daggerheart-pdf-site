@@ -1,6 +1,6 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
-import { BOOKS, CHARACTERS, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
+import { BOOKS, CHARACTERS, PIECES, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
 import { createCard } from './card.js';
 import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, loadScreenArt, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
@@ -9,6 +9,9 @@ import { createPlay } from './play.js';
 import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
+import { PARTY } from './party.js';
+import { createPieces } from './pieces.js';
+import { placeHover, nearer } from './pieces-logic.js';
 import { loadBaked, upgradeBaked, BAKED, BAKED_SMALL, BAKED_FULL } from './textures.js';
 import { createPerf } from './perf.js';
 import { startRatio, decide, createRamp } from './quality.js';
@@ -80,8 +83,9 @@ async function boot() {
 
   if (perf) perf.mark('assets');
   const surfaces = new Surfaces(renderer);
-  const character = CHARACTERS[0] || null, cardState = { hot: -1 };
-  defineSurfaces(surfaces, BOOKS, images, { character, cardState });
+  // the card shows the stand-in character until a party piece is clicked (card.setCharacter); `cardHolder` is what it shows now
+  const character = CHARACTERS[0] || null, cardState = { hot: -1 }, cardHolder = { character };
+  defineSurfaces(surfaces, BOOKS, images, { character: () => cardHolder.character, cardState });
   const log = { rows: [] };
   defineLogSurface(surfaces, log);
   const mode = await surfaces.ready();
@@ -231,7 +235,7 @@ async function boot() {
   function openBook(id) {
     if (state.phase !== 'table') return;
     const book = bookById(id);
-    setHot(null);
+    setHot(null); showPiece(null);
     if (card) { card.leave(); card.closeSheet(false); canvas.classList.remove('is-card'); }
     state.open = book; state.phase = 'opening'; state.t0 = performance.now();
     document.body.classList.add('is-open', 'has-touched');
@@ -283,6 +287,36 @@ async function boot() {
   }
 
   let card = null;     // the attack card (set up with the dice, below)
+  let pieces = null;   // the party's pieces (loaded after the opening, below)
+
+  // ---------------------------------------------------------------- the party's pieces: hover card, click
+  // Mouse: hovering a piece shows its card; a click switches the attack card to that character.
+  // Touch: the first tap shows the card, a second tap on the same piece switches the attack card (and opens the sheet).
+  const pcCard = $('#pc-card'), pcName = pcCard.querySelector('h2'), pcClass = pcCard.querySelector('.cls'), pcIntro = pcCard.querySelector('.intro'), pcTap = pcCard.querySelector('.tap');
+  let pcHot = null;
+  const _pcFocus = new THREE.Vector3();
+  function placePcCard() {
+    if (!pcHot) return;
+    const rect = canvas.getBoundingClientRect(), a = pieces.anchor(pcHot, camera, rect), b = pcCard.firstElementChild.getBoundingClientRect();
+    const pos = placeHover(a, { w: b.width, h: b.height }, { w: innerWidth, h: innerHeight });
+    pcCard.style.transform = `translate(${Math.round(pos.left)}px, ${Math.round(pos.top)}px)`;
+  }
+  function showPiece(p, how = 'mouse') {
+    if (state.phase !== 'table') p = null;
+    if (p === pcHot) { if (p) placePcCard(); return; }
+    pcHot = p;
+    pcCard.classList.toggle('on', !!p);
+    if (!p) return;
+    pcName.textContent = p.char.name; pcClass.textContent = p.char.class; pcIntro.textContent = p.char.intro ?? 'to come';
+    pcTap.hidden = how !== 'touch';
+    placePcCard();
+  }
+  function clickPiece(p, pointerType) {
+    if (pointerType === 'mouse') { showPiece(p); card && card.setCharacter(p.char); return; }
+    if (pcHot !== p) { showPiece(p, 'touch'); return; }
+    showPiece(null);
+    if (card) { card.setCharacter(p.char); card.openSheet(); }
+  }
 
   // ---------------------------------------------------------------- pointer
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -292,7 +326,20 @@ async function boot() {
     ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
     const h = ray.intersectObjects(list, false)[0];
+    pick.distance = h ? h.distance : null;
     return h ? h.object.userData.book : null;
+  }
+  pick.distance = null;
+  // what is under the pointer on the table: a book or a party piece, whichever the ray reaches first (a piece is null until they have loaded)
+  function pickTarget(ev) {
+    const book = pick(ev), bd = book ? pick.distance : null;
+    let pc = null;
+    if (pieces && pieces.ready) {
+      const r = canvas.getBoundingClientRect();
+      ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+      pc = pieces.pick(ndc, camera);
+    }
+    return nearer(pc ? pc.distance : null, bd) === 'piece' ? { book: null, piece: pc.piece } : { book, piece: null };
   }
   // the attack card: where on the note the pointer is (uv), or null
   function noteUv(ev) {
@@ -322,16 +369,18 @@ async function boot() {
       pinch = d; return;
     }
     if (drag && drag.id === e.pointerId) {
-      if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) { drag.moved = true; canvas.classList.add('is-drag'); document.body.classList.add('has-touched'); setHot(null); }
+      if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) { drag.moved = true; canvas.classList.add('is-drag'); document.body.classList.add('has-touched'); setHot(null); showPiece(null); }
       if (drag.moved && state.phase === 'table') {
         rig.user.az = clamp(rig.user.az - (e.clientX - drag.x) * 0.0042, -0.85, 0.85);
         rig.user.el = clamp(rig.user.el + (e.clientY - drag.y) * 0.003, -0.42, 0.42);
       }
       drag.x = e.clientX; drag.y = e.clientY;
     } else if (e.pointerType === 'mouse' && state.phase === 'table') {
-      const id = pick(e);
-      setHot(id, 'mouse');
-      if (card) canvas.classList.toggle('is-card', card.hover(id ? null : noteUv(e)));
+      const t = pickTarget(e);
+      setHot(t.book, 'mouse');
+      showPiece(t.piece);
+      canvas.classList.toggle('is-piece', !!t.piece);
+      if (card) canvas.classList.toggle('is-card', card.hover(t.book || t.piece ? null : noteUv(e)));
     } else if (e.pointerType === 'mouse' && state.phase === 'open') {
       canvas.classList.toggle('is-hot', onOpenBook(e));
     }
@@ -340,14 +389,19 @@ async function boot() {
     pointers.delete(e.pointerId); if (pointers.size < 2) pinch = 0;
     if (drag && drag.id === e.pointerId) {
       const wasClick = !drag.moved; drag = null; canvas.classList.remove('is-drag');
-      if (wasClick && e.type === 'pointerup' && state.phase === 'table') { const id = pick(e); if (id) openBook(id); else if (card) card.click(noteUv(e), e.pointerType); }
+      if (wasClick && e.type === 'pointerup' && state.phase === 'table') {
+        const t = pickTarget(e);
+        if (t.book) openBook(t.book);
+        else if (t.piece) clickPiece(t.piece, e.pointerType);
+        else { showPiece(null); if (card) card.click(noteUv(e), e.pointerType); }
+      }
       // with a book open: the pages are the way in, anywhere else puts it back down
       else if (wasClick && e.type === 'pointerup' && state.phase === 'open') { if (onOpenBook(e)) enter.querySelector('a').click(); else closeBook(); }
     }
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
-  canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && state.hotBy === 'mouse') setHot(null); if (card) { card.leave(); canvas.classList.remove('is-card'); } });
+  canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { if (state.hotBy === 'mouse') setHot(null); showPiece(null); canvas.classList.remove('is-piece'); } if (card) { card.leave(); canvas.classList.remove('is-card'); } });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     if (state.phase === 'table') rig.user.zoom = clamp(rig.user.zoom * Math.exp(e.deltaY * 0.0011), 0.5, 1.2);
@@ -362,10 +416,17 @@ async function boot() {
   // tall phones get bigger dice and a wider throw
   const dice = createDice({ scene, atlas: world.atlas, table: world.tableDice, area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), calm, lite, clock: gameClock, view: () => camera.position,
     scale: () => (canvas.clientHeight / Math.max(1, canvas.clientWidth) > TALL_ASPECT ? TALL_SCALE : 1) });
-  const attack = createAttack({ scene, minis: world.minis, calm, lite, clock: gameClock });
-  play = createPlay({ bar, dice, attack, character, canAct: () => state.phase === 'table' });
+  const attackMinis = world.minis.slice();      // the stand-ins now; the party's pieces join when they have loaded
+  const attack = createAttack({ scene, minis: attackMinis, calm, lite, clock: gameClock });
+  play = createPlay({ bar, dice, attack, character: () => cardHolder.character, canAct: () => state.phase === 'table' });
   const touchy = lite || matchMedia('(pointer: coarse)').matches;
-  card = character ? createCard({ surfaces, character, state: cardState, touchy, onRoll: (id) => play.rollById(id) }) : null;
+  const piecesOn = !hashFlag(/[#&]pieces=off/);
+  pieces = piecesOn ? createPieces({
+    parent: scene, party: PARTY, cfg: PIECES, scale: PIECES.scale, tall, lite,
+    // compile their shaders for the render target the scene is drawn into (as warmUp does), without stalling a frame
+    compile: (g) => { renderer.setRenderTarget(usePost ? rtScene : null); const p = renderer.compileAsync(g, camera, scene); renderer.setRenderTarget(null); return p; },
+  }) : null;
+  card = character ? createCard({ surfaces, holder: cardHolder, state: cardState, touchy, onRoll: (id) => play.rollById(id) }) : null;
 
   // ---------------------------------------------------------------- frame
   const instant = !!hashFlag(/[#&]shot/) || calm;
@@ -557,7 +618,7 @@ async function boot() {
     // focus: on the books, or on whichever one has your attention
     // (and on the dice while they fly and settle)
     const diceAt = state.phase === 'table' ? dice.focus(game.t) : null;
-    const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : diceAt ? diceAt : cardState.hot >= 0 && world.note ? world.note.position : world.focus;
+    const focusOn = state.open ? state.open.openCenter : state.hot ? bookById(state.hot).center : pcHot ? _pcFocus.copy(pcHot.pivot.position).setY(pcHot.def.height * 0.5) : diceAt ? diceAt : cardState.hot >= 0 && world.note ? world.note.position : world.focus;
     const fd = camera.position.distanceTo(focusOn);
 
     gpuTime.begin();
@@ -573,22 +634,35 @@ async function boot() {
     drawScene(dt);
     gpuTime.end();
     bar.update(gameClock()); bar.render(renderer);
-    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); if (progressive) idleThen(() => loadBaked(BAKED_FULL).then(() => { swapFull = true; })); }
+    if (pcHot) placePcCard();   // a piece that is mid-attack takes its card with it
+    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); if (progressive) idleThen(() => loadBaked(BAKED_FULL).then(() => { swapFull = true; })); if (pieces) idleThen(loadPieces); }
     // the full-size wood and mat go in at a moment nothing moves: same picture, more texels, so there is nothing to see but sharpness
     if (swapFull && !world.moving && !world.stirring && state.phase === 'table') { swapFull = false; const n = upgradeBaked(); console.info('[table] full-size wood and mat in: ' + n + ' textures'); if (perf) perf.mark('full-tex'); }
     if (perf) perf.frame(now, scene, settled);
     if (firstFrame) { firstFrame = false; if (!holdLoad) document.body.classList.add('is-ready'); }
+  }
+  // The eight glb files (9.4 MB) are fetched once the opening is over and the table is idle, so the first paint is untouched;
+  // they join the scene together, shaders compiled first, and then take part in attacks.
+  async function loadPieces() {
+    const t0 = performance.now();
+    const r = await pieces.load();
+    attackMinis.push(...pieces.pieces);
+    world.lamp.shadow.needsUpdate = true;
+    window.__piecesReady = true;
+    console.info(`[table] pieces: ${r.loaded} loaded, ${r.failed} placeholder, ${Math.round(performance.now() - t0)} ms`);
+    if (perf) perf.mark('pieces');
   }
   await warmUp();
   renderer.setAnimationLoop(frame);
 
   // handles for testing from the console:  __table.open('core')
   window.__table = { ramp, setRatio: (r) => setRatio(r, performance.now()), area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier, quality, perf,
+    pieces: () => pieces, pieceAt: (id) => { const p = pieces && pieces.byId(id); return p ? pieces.anchor(p, camera, canvas.getBoundingClientRect()) : null; }, showPiece, clickPiece, pcHot: () => pcHot && pcHot.def.id,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels
     cardPoint: (i, part = 'icon') => {
-      const r = cardRows(character.attacks.length)[i], q = part === 'icon' ? cardIcon(r) : r;
+      const r = cardRows(cardHolder.character.attacks.length)[i], q = part === 'icon' ? cardIcon(r) : r;
       const nw = 2.05, nd = 2.05 * (NOTE[1] / NOTE[0]), cr = canvas.getBoundingClientRect();
       const p = new THREE.Vector3(((q.x + q.w / 2) / NOTE[0] - 0.5) * nw, 0.02, ((q.y + q.h / 2) / NOTE[1] - 0.5) * nd).applyMatrix4(world.note.matrixWorld).project(camera);
       return { x: cr.left + (p.x * 0.5 + 0.5) * cr.width, y: cr.top + (-p.y * 0.5 + 0.5) * cr.height };

@@ -11,6 +11,7 @@ import * as THREE from '../vendor/three.bundle.js';
 import { makeCanvas, rng } from './textures.js';
 import { hrefFor, ON_SITE, GM_SCREEN } from './config.js';
 import { panelSlices, panelOffset } from './screen-art.js';
+import { rangeText, traitText, TO_COME } from './dice-logic.js';
 
 const SERIF = 'Cinzel, "Trajan Pro", Georgia, serif';
 const SANS = '"Space Grotesk", ui-sans-serif, system-ui, sans-serif';
@@ -486,8 +487,6 @@ export const D20_HEX = 'M12 1.5L21.5 7L21.5 17L12 22.5L2.5 17L2.5 7Z';
 export const D20_PATH = D20_HEX + ' M12 7L17.6 16L6.4 16Z'
   + ' M12 7L12 1.5 M12 7L2.5 7 M12 7L21.5 7 M6.4 16L2.5 7 M6.4 16L2.5 17 M6.4 16L12 22.5 M17.6 16L21.5 7 M17.6 16L21.5 17 M17.6 16L12 22.5';
 
-const signedMod = (m) => (m < 0 ? String(m) : '+' + m);
-
 export function paintCard(g, W, H, ch, st, { text = true } = {}) {
   paperBg(g, W, H);
   if (!text) return;
@@ -510,13 +509,12 @@ export function paintCard(g, W, H, ch, st, { text = true } = {}) {
     g.fillStyle = PAPER.ink; fitFont(g, a.name, 700, SANS, 21, 196);
     g.fillText(a.name, r.x + CARD.cols.name, mid - 4);
     g.fillStyle = PAPER.dim; g.font = `500 13px ${SANS}`;
-    g.fillText(a.range.toUpperCase(), r.x + CARD.cols.name, mid + 17);
+    g.fillText(rangeText(a).toUpperCase(), r.x + CARD.cols.name, mid + 17);
     g.fillStyle = PAPER.ink; g.font = `600 16px ${SANS}`;
-    g.fillText(`${a.trait} ${signedMod(a.mod)}`, r.x + CARD.cols.trait, mid + 6);
-    g.font = `700 16px ${SANS}`; const dw = g.measureText(a.damage).width;
-    g.fillText(a.damage, r.x + CARD.cols.damage, mid + 6);
-    g.fillStyle = PAPER.red; g.font = `500 14px ${SANS}`;
-    g.fillText(a.type, r.x + CARD.cols.damage + dw + 6, mid + 6);
+    g.fillText(traitText(a), r.x + CARD.cols.trait, mid + 6);
+    g.font = `700 16px ${SANS}`; const dmg = a.damage ?? TO_COME, dw = g.measureText(dmg).width;
+    g.fillText(dmg, r.x + CARD.cols.damage, mid + 6);
+    if (a.damage && a.type) { g.fillStyle = PAPER.red; g.font = `500 14px ${SANS}`; g.fillText(a.type, r.x + CARD.cols.damage + dw + 6, mid + 6); }
     const ic = cardIcon(r), k = (ic.w - 10) / 24;
     g.save(); g.translate(ic.x + 5, ic.y + 5); g.scale(k, k);
     if (hot) { g.fillStyle = PAPER.hot; g.fill(new Path2D(D20_HEX)); }
@@ -612,12 +610,15 @@ export function d20Svg() {
   return svg;
 }
 
+let scratch = null;
 /** One attack row's contents (card and phone sheet). */
 export function attackRowParts(a, place = false) {
   const part = (cls, text, col) => { const e = h('span', cls, text); if (place) e.style.left = col + 'px'; return e; };
-  const dmg = part('ct-d', a.damage + ' ', CARD.cols.damage); dmg.append(h('small', null, a.type));
+  const dmg = part('ct-d', (a.damage ?? TO_COME) + ' ', CARD.cols.damage); if (a.damage && a.type) dmg.append(h('small', null, a.type));
   const icon = part('ct-i', null, CARD.cols.icon); icon.append(d20Svg());
-  return [part('ct-n', a.name, CARD.cols.name), part('ct-r', a.range, CARD.cols.name), part('ct-t', `${a.trait} ${signedMod(a.mod)}`, CARD.cols.trait), dmg, icon];
+  const nameEl = part('ct-n', a.name, CARD.cols.name);
+  if (place) nameEl.style.fontSize = fitFont((scratch ||= makeCanvas(1, 1).getContext('2d')), a.name, 700, SANS, 21, 196) + 'px';   // long names shrink like the painter's
+  return [nameEl, part('ct-r', rangeText(a), CARD.cols.name), part('ct-t', traitText(a), CARD.cols.trait), dmg, icon];
 }
 
 function buildCardEl(el, ch, { bg = true } = {}) {
@@ -993,10 +994,12 @@ export function defineSurfaces(set, books, images, { character = null, cardState
   set.define({ id: 'screen', cls: 'gm', size: SCREEN, paint: paintScreen, build: buildScreenEl,
     plain: (el) => { el.append(h('h1', null, 'Daggerheart Resources')); } });
   if (character) {
-    // the attack card: real buttons in the canvas (keyboard, assistive tech, HTML-in-Canvas)
-    set.define({ id: 'note', focus: true, cls: 'note card', size: NOTE, attrs: { role: 'group', 'aria-label': `${character.name}'s attacks` },
-      paint: (g, W, H, o) => paintCard(g, W, H, character, cardState, o),
-      build: (el) => buildCardEl(el, character), plain: (el) => buildCardEl(el, character, { bg: false }) });
+    // the attack card: real buttons in the canvas (keyboard, assistive tech, HTML-in-Canvas).
+    // `character` is an object, or a function returning the card's current one (it can switch, see card.js setCharacter)
+    const cur = () => (typeof character === 'function' ? character() : character);
+    set.define({ id: 'note', focus: true, cls: 'note card', size: NOTE, attrs: { role: 'group', 'aria-label': `${cur().name}'s attacks` },
+      paint: (g, W, H, o) => paintCard(g, W, H, cur(), cardState, o),
+      build: (el) => buildCardEl(el, cur()), plain: (el) => buildCardEl(el, cur(), { bg: false }) });
   } else {
     set.define({ id: 'note', cls: 'note', size: NOTE, attrs: { 'aria-hidden': 'true' }, paint: paintNote, build: buildNoteEl });
   }

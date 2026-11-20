@@ -101,3 +101,16 @@ export const CHARACTERS = [
     ],
   },
 ];
+
+// The eight player-character pieces (models/pc/*.glb, one per entry in party.js), lined up along the GM screen.
+// The files are in metres, true heights (Zeke 2.16, Drex 0.95 with the foam finger). `scale` is table units per
+// metre: the stand-in minis stand 0.55 for a person of about 1.8 m (0.31 a metre), so 0.6 makes the pieces about 2x
+// them (Zeke 1.3, Drex 0.57; the golem is 1.0): the lineup is the farthest thing on the table and has to read there. Same scale on all eight, so the
+// heights stay true to each other. The lineup is one row on the battle map, centred on the GM screen, `z` units
+// from the table's middle, `gap` apart edge to edge; a phone held upright gets two rows (`tall`: x spread, row z).
+export const PIECES = {
+  dir: 'models/pc/',
+  scale: 0.6,
+  wide: { cx: 0.3, z: [-3.95], gap: 0.1 },
+  tall: { cx: 0.3, z: [-4.35, -3.3], gap: 0.06 },
+};

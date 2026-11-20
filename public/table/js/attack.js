@@ -22,9 +22,12 @@ const smooth = (t) => { t = clamp01(t); return t * t * (3 - 2 * t); };
 const angleTo = (a, b) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a));
 
 export function createAttack({ scene, minis, calm, lite, clock = () => performance.now() }) {
-  const heroes = minis.filter((m) => m.def.role === 'hero');
+  // `minis` can grow after start-up (the party's pieces load later), so the list is read each time; the round-robin
+  // (a plain /attack) stays with the stand-in minis, a party piece attacks when its own card row is rolled
+  const heroList = () => minis.filter((m) => m.def.role === 'hero');
+  const roundRobin = () => minis.filter((m) => m.def.role === 'hero' && !m.def.pc);
   const target = minis.find((m) => m.def.target) || minis.find((m) => m.def.role === 'monster');
-  if (!target || !heroes.length) return null;
+  if (!target || !heroList().length) return null;
   let turn = 0, cur = null, tail = 0;
   const r = rng(77);
 
@@ -69,8 +72,8 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   // style / bolt: a per-attack override of the mini's own attack ('melee' | 'ranged' | 'magic').
   function play({ hit, critical, onImpact, hero: heroId = null, style = null, bolt: boltColor = null }) {
     if (cur) finish();
-    const chosen = heroId ? heroes.findIndex((m) => m.def.id === heroId) : -1;
-    const hero = chosen >= 0 ? heroes[chosen] : heroes[turn++ % heroes.length];
+    const all = heroList(), rr = roundRobin(), chosen = heroId ? all.findIndex((m) => m.def.id === heroId) : -1;
+    const hero = chosen >= 0 ? all[chosen] : rr[turn++ % rr.length];
     const to = v.subVectors(target.home, hero.home).setY(0), dist = to.length(), dir = to.clone().normalize();
     side.set(-dir.z, 0, dir.x).multiplyScalar(turn % 2 ? 1 : -1);
     const yaw0 = hero.pivot.rotation.y, face = angleTo(yaw0, Math.atan2(dir.x, dir.z));
@@ -80,10 +83,12 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
     // where the swing or bolt ends: up to the monster, or wide of it
     const reach = Math.max(0.3, dist - tR - 0.2);
     const lungeTo = hero.home.clone().addScaledVector(dir, hit ? reach : reach * 0.8).addScaledVector(side, hit ? 0 : 0.5);
-    const muzzle = hero.home.clone().setY(0.03 + 0.42).addScaledVector(dir, 0.14);
+    const muzzle = hero.home.clone().setY(0.03 + (hero.def.muzzle ?? 0.42)).addScaledVector(dir, 0.14);
     const boltTo = hit ? contact.clone() : tCentre.clone().addScaledVector(side, 0.75).addScaledVector(dir, 0.6).setY(tCentre.y + 0.15);
     const flight = muzzle.distanceTo(boltTo) / BOLT_SPEED;
-    const impactAt = calm ? 0 : WIND + (ranged ? 0.05 + flight : LUNGE);
+    // a party piece starts on the far edge of the map: a long charge takes a little longer than the stand-ins' short one
+    const lunge = hero.def.pc ? LUNGE + Math.max(0, reach - 1.5) * 0.1 : LUNGE;
+    const impactAt = calm ? 0 : WIND + (ranged ? 0.05 + flight : lunge);
     const stop = hit && !calm ? HITSTOP : 0;
     // sparks fly back toward the hero and up, from the point of contact
     for (const s of sparks) {
@@ -91,7 +96,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
         .multiplyScalar(SPARK.speed * (0.55 + r() * 0.8) * (critical ? 1.35 : 1));
     }
     cur = {
-      hero, hit, critical, onImpact, ranged, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
+      hero, hit, critical, onImpact, ranged, lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
       color: new THREE.Color(boltColor ?? hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.3, 1.0)),
     };
     if (calm) impact();
@@ -127,9 +132,9 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
       h.pivot.rotation.y = c.yaw0 + (c.face - c.yaw0) * turnIn * (1 - turnOut);
       let lean = -LEAN.back * Math.sin(Math.PI * clamp01(t / WIND));
       if (!c.ranged) {
-        const out = smooth((t - WIND) / LUNGE), back = smooth((t - WIND - LUNGE - HOLD) / BACK), k = out * (1 - back);
+        const out = smooth((t - WIND) / c.lunge), back = smooth((t - WIND - c.lunge - HOLD) / BACK), k = out * (1 - back);
         h.pivot.position.lerpVectors(h.home, c.lungeTo, k);
-        h.pivot.position.y = h.home.y + Math.sin(Math.PI * clamp01((t - WIND) / LUNGE)) * LEAN.hop;
+        h.pivot.position.y = h.home.y + Math.sin(Math.PI * clamp01((t - WIND) / c.lunge)) * LEAN.hop;
         lean += LEAN.forward * k;
       } else {
         lean += -0.12 * Math.exp(-14 * Math.max(0, t - WIND)) * (t > WIND ? 1 : 0);
@@ -193,6 +198,6 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   }
 
   const phase = () => (cur ? { hero: cur.hero.def.id, t: (clock() - cur.t0) / 1000, impactAt: cur.impactAt, hitStop: cur.stop, end: cur.end + cur.stop, hit: cur.hit } : null);
-  const pick = (id) => { const i = heroes.findIndex((h) => h.def.id === id); if (i >= 0) turn = i; };
-  return { play, update, phase, pick, get busy() { return !!cur || tail > 0; }, get target() { return target; }, get heroes() { return heroes; } };
+  const pick = (id) => { const i = roundRobin().findIndex((h) => h.def.id === id); if (i >= 0) turn = i; };
+  return { play, update, phase, pick, get busy() { return !!cur || tail > 0; }, get target() { return target; }, get heroes() { return heroList(); } };
 }

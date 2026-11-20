@@ -2,7 +2,12 @@
 // log line, throw the dice and, for attacks, play the miniature's attack.
 import { parseCommand, rollDuality, rollNotation, rollAttack, dualityFrom, formatResult, formatAttack, isHit, seeded, helpLines, HIT_TARGET } from './dice-logic.js';
 
-export function createPlay({ bar, canAct, dice = null, attack = null, character = null }) {
+// character: the card's current character, or a function returning it (the card can switch characters)
+// a party attack names its animation (party.js `anim`); attack.js calls the same three things 'melee', 'ranged' and 'magic'
+const ANIM_STYLE = { lunge: 'melee', bolt: 'ranged', magic: 'magic' };
+
+export function createPlay({ bar, canAct, dice = null, attack = null, character: given = null }) {
+  const character = () => (typeof given === 'function' ? given() : given);
   const seed = /[#&]seed=(\d+)/.exec(location.hash);
   const rng = seed ? seeded(+seed[1]) : Math.random;
   let forced = null;   // proofs: __table.forceRoll(hope, fear)
@@ -19,7 +24,7 @@ export function createPlay({ bar, canAct, dice = null, attack = null, character 
   // A character's attack: Duality + trait vs Difficulty; on a hit the mini strikes and the damage dice follow.
   function attackWith(atk) {
     if (!canAct()) { hint('Put the book down first, then roll.'); return null; }
-    const r = rollAttack(atk, { difficulty: difficulty(), proficiency: character?.proficiency ?? 1, faces: takeForced() }, rng);
+    const r = rollAttack(atk, { difficulty: difficulty(), proficiency: character()?.proficiency ?? 1, faces: takeForced() }, rng);
     const lines = formatAttack(r, atk);
     const damage = () => {
       if (!lines.damage) return;
@@ -28,7 +33,7 @@ export function createPlay({ bar, canAct, dice = null, attack = null, character 
     };
     const settled = () => {
       bar.add(lines.roll);
-      if (attack) attack.play({ hit: r.hit, critical: r.crit, hero: character?.mini, style: atk.style, bolt: atk.bolt, onImpact: damage });
+      if (attack) attack.play({ hit: r.hit, critical: r.crit, hero: character()?.mini, style: atk.style ?? ANIM_STYLE[atk.anim] ?? null, bolt: atk.bolt, onImpact: damage });
       else damage();
     };
     if (dice) dice.throwDice(dualityDice(r.duality), settled); else settled();
@@ -36,9 +41,9 @@ export function createPlay({ bar, canAct, dice = null, attack = null, character 
   }
 
   function run(text) {
-    const c = parseCommand(text, { attacks: character?.attacks ?? [] });
+    const c = parseCommand(text, { attacks: character()?.attacks ?? [] });
     if (c.kind === 'empty') return null;
-    if (c.kind === 'help') { helpLines({ character, difficulty: difficulty() }).forEach(hint); return c; }
+    if (c.kind === 'help') { helpLines({ character: character(), difficulty: difficulty() }).forEach(hint); return c; }
     if (c.kind === 'unknown') { hint(c.hint); return c; }
     if (c.kind === 'named-attack') return attackWith(c.attack);
     if (!canAct()) { hint('Put the book down first, then roll.'); return c; }
@@ -56,7 +61,7 @@ export function createPlay({ bar, canAct, dice = null, attack = null, character 
   }
 
   // the card's rows call this by attack id
-  const rollById = (id) => { const atk = character?.attacks.find((a) => a.id === id); return atk ? attackWith(atk) : null; };
+  const rollById = (id) => { const atk = character()?.attacks.find((a) => a.id === id); return atk ? attackWith(atk) : null; };
 
   return { run, rollById, forceRoll: (hope, fear) => { forced = [hope, fear]; } };
 }

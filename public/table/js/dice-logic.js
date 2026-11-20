@@ -29,7 +29,7 @@ export function helpLines({ character = null, difficulty = HIT_TARGET } = {}) {
   lines.push(`/attack +2: a Duality attack on the golem (Difficulty ${difficulty})`);
   if (character) {
     lines.push(`${character.name}'s attacks (or click the card):`);
-    for (const a of character.attacks) lines.push(`/attack ${a.name.toLowerCase()}: ${a.range}, ${a.trait} ${signedMod(a.mod)}, ${a.damage} ${a.type}`);
+    for (const a of character.attacks) lines.push(`/attack ${a.name.toLowerCase()}: ${rangeText(a)}, ${traitText(a)}, ${damageText(a)}`);
   }
   return lines;
 }
@@ -37,9 +37,15 @@ export function helpLines({ character = null, difficulty = HIT_TARGET } = {}) {
 /** "+2", "+0", "-1" @param {number} m */
 export const signedMod = (m) => (m < 0 ? String(m) : '+' + m);
 
+// A party attack's range, trait, modifier and damage are null until they are written down: the card says "to come".
+export const TO_COME = 'to come';
+export const rangeText = (a) => a.range ?? TO_COME;
+export const traitText = (a) => (a.trait && a.mod != null ? `${a.trait} ${signedMod(a.mod)}` : a.trait ?? (a.mod != null ? signedMod(a.mod) : TO_COME));
+export const damageText = (a) => (a.damage ? (a.type ? `${a.damage} ${a.type}` : a.damage) : TO_COME);
+
 /**
- * @typedef {{ id: string, name: string, range: 'Melee' | 'Very Close' | 'Close' | 'Far', trait: string, mod: number,
- *   damage: string, type: 'phy' | 'mag', style?: 'melee' | 'ranged' | 'magic', bolt?: number }} Attack
+ * @typedef {{ id: string, name: string, range: 'Melee' | 'Very Close' | 'Close' | 'Far' | null, trait: string | null, mod: number | null,
+ *   damage: string | null, type: 'phy' | 'mag' | null, style?: 'melee' | 'ranged' | 'magic', bolt?: number }} Attack
  * @typedef {{ id: string, name: string, class: string, mini: string, proficiency?: number, attacks: Attack[] }} Character
  */
 
@@ -256,11 +262,12 @@ export function parseDamage(text) {
  * @returns {AttackResult}
  */
 export function rollAttack(attack, { difficulty = HIT_TARGET, proficiency = 1, faces = null } = {}, rng = Math.random) {
-  const duality = faces ? dualityFrom(faces[0], faces[1], attack.mod) : rollDuality(attack.mod, rng);
+  const mod = attack.mod ?? 0;   // a party attack whose numbers are "to come" rolls plain Duality
+  const duality = faces ? dualityFrom(faces[0], faces[1], mod) : rollDuality(mod, rng);
   const crit = duality.outcome === 'critical', hit = isHit(duality, difficulty);
   /** @type {AttackResult} */
   const out = { kind: 'attack', duality, difficulty, hit, crit };
-  if (!hit) return out;
+  if (!hit || !attack.damage) return out;   // no damage dice written yet: the hit still plays, no damage line
   const d = parseDamage(attack.damage);
   if (!d.ok) throw new Error(d.hint);
   const count = Math.max(1, Math.round(proficiency)) * d.count;
