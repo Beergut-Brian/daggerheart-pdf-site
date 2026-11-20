@@ -96,6 +96,27 @@ how the mini normally fights. The card fits four or five rows. The rules are pur
 the card's layout (`CARD`, `cardRows`) in `js/surfaces.js` feeds the painter, the live-HTML
 buttons and the raycast hit-test; `js/card.js` handles hover, focus and the phone sheet.
 
+## The party's pieces (models/pc, js/party.js)
+
+Eight glb pieces (Coach's, metres, true heights) stand in a lineup on the battle map along the GM screen (`PIECES` in
+`js/config.js`: scale in table units per metre, row z, gap; a phone held upright gets two rows). They are fetched once the
+opening is over and the table is idle (9.4 MB, shaders compiled before they join the scene), so first paint is unchanged.
+`#pieces=off` skips them. A file that fails to load, or lacks its node, is a plain disc and one `[table] piece ...` console line.
+
+- **Data:** `js/party.js` is generated from the approved character file: `node scripts/build-party.mjs [file.json]`
+  (source copy in `scripts/data/`). Text is never edited by hand. `range`, `trait`, `mod`, `damage`, `type` and `proficiency`
+  are null until written down; the card and `/help` say "to come", an attack rolls plain Duality and a hit rolls no damage.
+  `anim` per attack is `lunge`, `bolt` or `magic` (attack.js), `bolt` its colour; chosen from the attack's animation_idea.
+- **Hover (mouse) / first tap (touch):** a card with name, class, intro (`#pc-card`, placed by `placeHover`, kept in the viewport),
+  and the depth of field focuses on the piece. **Click / second tap:** `card.setCharacter(char)` switches the attack card
+  (and, on touch, opens the sheet). Table phase only. A piece and a book under the pointer: the nearer one wins.
+- **Attacks:** a party attack plays through `js/attack.js` with the piece as the attacker; a piece's charge is a little
+  longer than a stand-in's (it starts at the far edge). Magic adds a ring from the caster's feet and a bigger orb.
+  A plain `/attack +2` still uses the stand-in minis only.
+- **Not shown:** each attack's `description` and `episodes` are in party.js but the card has no place for them.
+- Proofs: `node scripts/table-pieces-proof.mjs ../review/table-pieces stills|videos`; e2e `tests/e2e/table-pieces.spec.ts`.
+- `vendor/three.bundle.js` was rebuilt from three 0.187.0 with `GLTFLoader` added to the same exports (esbuild, minified; +46 KB).
+
 ## Putting your own minis on the table
 
 Every mini is one entry in `MINIS` in `js/minis.js`: where it stands, which way it faces, its

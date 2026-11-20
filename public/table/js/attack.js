@@ -15,6 +15,7 @@ const FLASH = { tint: 0.18, emissive: 0.25, light: 1.8, decay: 16 };   // a shor
 const BURST = { size: 0.62, grow: 0.5, life: 0.2, color: new THREE.Color(4.5, 3.7, 2.5), critColor: new THREE.Color(4.8, 3.8, 1.5) };
 const SPARK = { full: 12, lite: 9, speed: 2.5, life: 0.42, gravity: 5.5, len: 0.09, width: 0.014,
   color: new THREE.Color(3.0, 2.0, 1.0), critColor: new THREE.Color(3.4, 2.6, 0.8) };
+const MAGIC = { ring: 0.9, grow: 0.95, fade: 0.55, orb: 1.6 };   // magic: a ring spreads from the caster's feet, and the bolt is a bigger orb
 const CRYSTAL_DIM = 0.55;                               // the monster's crystal glow, so its silhouette reads
 
 const clamp01 = (t) => Math.max(0, Math.min(1, t));
@@ -54,6 +55,8 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   const bolt = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true }));
   const trail = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6).scale(1, 1, 3.4), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45, depthWrite: false }));
   scene.add(bolt, trail);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.82, 1, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+  ring.renderOrder = 5; scene.add(ring);
   const burst = new THREE.Sprite(new THREE.SpriteMaterial({ map: starburstTexture(), color: BURST.color, transparent: true, blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false }));
   burst.renderOrder = 6; scene.add(burst);
   const sparkMat = new THREE.MeshBasicMaterial({ color: SPARK.color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -62,7 +65,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   // the effects stay in the scene, shrunk to nothing inside the monster, so their shaders compile with
   // the first frame instead of stalling the first attack
   const park = () => {
-    for (const o of [bolt, trail, burst, ...sparks.map((s) => s.m)]) { o.position.copy(tCentre); o.scale.setScalar(1e-4); }
+    for (const o of [bolt, trail, ring, burst, ...sparks.map((s) => s.m)]) { o.position.copy(tCentre); o.scale.setScalar(1e-4); }
   };
   park();
 
@@ -96,7 +99,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
         .multiplyScalar(SPARK.speed * (0.55 + r() * 0.8) * (critical ? 1.35 : 1));
     }
     cur = {
-      hero, hit, critical, onImpact, ranged, lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
+      hero, hit, critical, onImpact, ranged, magic: (style || hero.def.attack) === 'magic', lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
       color: new THREE.Color(boltColor ?? hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.3, 1.0)),
     };
     if (calm) impact();
@@ -113,7 +116,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
     c.hero.pivot.position.copy(c.hero.home); c.hero.pivot.rotation.set(0, c.yaw0, 0);
     target.pivot.position.copy(target.home); target.pivot.rotation.set(0, target.yaw, 0, 'YXZ'); target.pivot.scale.copy(tScale);
     flashMats.forEach((m) => { m.emissive.copy(m.userData.base.c); m.emissiveIntensity = m.userData.base.i; });
-    light.intensity = 0; park();
+    light.intensity = 0; ring.material.opacity = 0; park();
     if (!c.impacted && c.onImpact) c.onImpact();
   }
 
@@ -142,12 +145,21 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
       h.pivot.rotation.x = lean;
     }
 
+    // magic: a ring spreads out from the caster's feet while it winds up
+    if (c.magic && !calm) {
+      const k = clamp01(t / (WIND + 0.3)), rr = (h.def.base?.r ?? 0.2) * MAGIC.ring;
+      ring.position.set(h.pivot.position.x, h.pivot.position.y + 0.012, h.pivot.position.z);
+      ring.scale.setScalar(k > 0 && k < 1 ? rr * (0.3 + MAGIC.grow * k) : 1e-4);
+      ring.material.color.copy(c.color).multiplyScalar(2.2); ring.material.opacity = MAGIC.fade * (1 - k);
+    }
+
     // the bolt
     let li = 0;
     if (c.ranged && !calm) {
       const u = (t - WIND - 0.05) / (c.impactAt - WIND - 0.05);
       const flying = u >= 0 && (c.hit ? u < 1 || raw < c.impactAt + c.stop : u <= 1.25);
-      bolt.scale.setScalar(flying ? 1 : 1e-4); trail.scale.setScalar(flying ? 1 : 1e-4);
+      const orb = c.magic ? MAGIC.orb : 1;
+      bolt.scale.setScalar(flying ? orb : 1e-4); trail.scale.setScalar(flying ? orb : 1e-4);
       if (flying) {
         const uu = Math.min(u, c.hit ? 1 : 1.25);
         bolt.position.lerpVectors(c.muzzle, c.boltTo, uu); bolt.position.y += Math.sin(Math.PI * clamp01(uu)) * 0.18;
