@@ -199,7 +199,7 @@ async function boot() {
     const fr = FRAME[tall ? 'tall' : 'wide'];
     rig.home.dist = Math.max(needW / 2 / (th * aspect), 4.45 / th) * fr.zoom;
     rig.home.el = tall ? 0.98 : lerp(0.92, 0.7, clamp((aspect - 0.6) / 0.75, 0, 1));
-    rig.home.target.x = tall ? 1.4 : 0.05;   // upright phones: a little right and wider, so the golem (bottom right of the map) is whole in view
+    rig.home.target.x = tall ? 1.2 : 0.05;   // upright phones: a little right and wider, so the golem (bottom right of the map) is whole in view
     rig.home.target.z = (tall ? 0.1 : lerp(1.5, 0.75, clamp((aspect - 0.6) / 0.75, 0, 1))) + fr.dz;
     rig.openDist = Math.max(5.7 / 2 / (th * aspect), 3.9 / 2 / th) * 1.04;
     if (usePost) {
