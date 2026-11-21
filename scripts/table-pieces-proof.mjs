@@ -63,6 +63,14 @@ if (mode === "stills") {
     const t = await mid(s.p, "pc_prim"); await s.p.touchscreen.tap(t.x, t.y); await frames(s.p, 4);
     await shot(s.p, "hover-prim-390.png"); await s.ctx.close();
   }
+  if (want("impact")) {
+    const { p, ctx } = await open("shot&seed=3&dof=off", { dpr: 2 });
+    await p.evaluate(() => { const t = window.__table; t.card().setCharacter(t.pieces().byId("pc_naaz").char); t.forceRoll(9, 4); t.rollAttack("ice-spike"); t.step(2050); });
+    await frames(p, 2);
+    const a = await p.evaluate(() => window.__table.attackPhase());
+    await p.evaluate((ms) => window.__table.step(ms), Math.round((a.impactAt - a.t) * 1000) + 120);
+    await frames(p, 40); await shot(p, "impact-naaz-ice-spike-1440.png"); await ctx.close();
+  }
   if (want("card") || want("card-live") || want("card-painted") || want("card-sheet")) {
     for (const [hash, tag] of [["shot&seed=1", "live"], ["shot&seed=1&html=off", "painted"]]) {
       if (only.length && !only.includes("card-" + tag) && !only.includes("card")) continue;
