@@ -109,6 +109,30 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       await expect(page.locator("#log-live")).toContainText("Shield Charge", { timeout: 30_000 });
     });
 
+    test("the camera pushes in during an attack, holds, and eases back; a drag cancels it", async ({ page, isMobile }) => {
+      test.skip(!!isMobile, "mouse drag; the push itself is the same code on the phone");
+      await ready(page, flags);
+      const w = () => page.evaluate(`${T}.pushW()`) as Promise<number>;
+      expect(await w()).toBe(0);
+      await page.evaluate(`${T}.forceRoll(9, 4)`);
+      await page.evaluate(`${T}.rollAttack("shield-charge")`);
+      await page.evaluate(`${T}.step(2200)`); await frames(page, 2);
+      const a = (await page.evaluate(`${T}.attackPhase()`)) as { impactAt: number; t: number };
+      await page.evaluate(`${T}.step(${Math.round((a.impactAt - a.t) * 1000) + 100})`); await frames(page, 2);
+      expect(await w(), "pushed in at the impact").toBeGreaterThan(0.9);
+      await page.evaluate(`${T}.step(3000)`); await frames(page, 4);
+      expect(await w(), "back out after").toBeLessThan(0.05);
+      // a drag during the push cancels it
+      await page.evaluate(`${T}.forceRoll(9, 4)`);
+      await page.evaluate(`${T}.rollAttack("unstoppable")`);
+      await page.evaluate(`${T}.step(2200)`); await frames(page, 2);
+      await page.evaluate(`${T}.step(300)`); await frames(page, 2);
+      const vp = page.viewportSize()!;
+      await page.mouse.move(vp.width / 2, vp.height / 2); await page.mouse.down(); await page.mouse.move(vp.width / 2 + 60, vp.height / 2 + 5, { steps: 4 }); await frames(page, 6);
+      expect(await w(), "a drag cancels the push").toBeLessThan(0.2);
+      await page.mouse.up();
+    });
+
     test("touch: the first tap shows the card, the second switches the attack card and opens the sheet", async ({ page, isMobile }) => {
       test.skip(!isMobile, "touch only");
       await ready(page, flags + "&tier=lite");

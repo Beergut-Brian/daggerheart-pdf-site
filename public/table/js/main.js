@@ -295,6 +295,9 @@ async function boot() {
   // Touch: the first tap shows the card, a second tap on the same piece switches the attack card (and opens the sheet).
   const pcCard = $('#pc-card'), pcName = pcCard.querySelector('h2'), pcClass = pcCard.querySelector('.cls'), pcIntro = pcCard.querySelector('.intro'), pcTap = pcCard.querySelector('.tap');
   let pcHot = null;
+  const push = { w: 0, at: new THREE.Vector3() };   // the camera push during an attack (eased weight 0..1)
+  const PUSH_IN = 0.4, PUSH_PULL = 0.7;            // closer by 40%, 70% of the way to the midpoint
+  let pushCancelled = false;
   const _pcFocus = new THREE.Vector3();
   function placePcCard() {
     if (!pcHot) return;
@@ -370,7 +373,7 @@ async function boot() {
       pinch = d; return;
     }
     if (drag && drag.id === e.pointerId) {
-      if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) { drag.moved = true; canvas.classList.add('is-drag'); document.body.classList.add('has-touched'); setHot(null); showPiece(null); }
+      if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) { drag.moved = true; canvas.classList.add('is-drag'); pushCancelled = true; document.body.classList.add('has-touched'); setHot(null); showPiece(null); }
       if (drag.moved && state.phase === 'table') {
         rig.user.az = clamp(rig.user.az - (e.clientX - drag.x) * 0.0042, -0.85, 0.85);
         rig.user.el = clamp(rig.user.el + (e.clientY - drag.y) * 0.003, -0.42, 0.42);
@@ -562,6 +565,14 @@ async function boot() {
     goal.target.copy(H.target).add(rig.off); goal.az = H.az + U.az + rig.mouse.x * 0.045 * par + Math.sin(time * 0.13) * 0.03;
     goal.el = H.el + U.el - rig.mouse.y * 0.025 * par; goal.dist = H.dist * U.zoom * lerp(1.22, 1, intro);
     goal.el += (1 - intro) * 0.16;
+    // an attack pushes the camera in toward the midpoint of attacker and golem, holds, and eases back; a drag cancels it
+    const af = attack && !calm && state.phase === 'table' ? attack.framing() : null;
+    if (!af) pushCancelled = false;
+    push.w += ((af && !pushCancelled ? af.k : 0) - push.w) * (af && !pushCancelled ? 1 : 1 - Math.exp(-dt * 9));
+    if (push.w > 0.001 && af) {
+      push.at.set(af.x, 0.3, af.z);
+      goal.target.lerp(push.at, PUSH_PULL * push.w); goal.dist *= 1 - PUSH_IN * push.w;
+    }
     if (state.open) {
       const b = state.open;
       goal.target.lerp(b.openCenter, opening);
@@ -658,7 +669,7 @@ async function boot() {
 
   // handles for testing from the console:  __table.open('core')
   window.__table = { ramp, setRatio: (r) => setRatio(r, performance.now()), area: areaBounds(ROLL_AREA[tall ? 'tall' : 'wide']), world, rig, state, surfaces, renderer, camera, open: openBook, close: closeBook, hot: setHot, mode, tier, quality, perf,
-    pieces: () => pieces, attackHeroes: () => attack.heroes.map((h) => h.def.id), pieceAt: (id) => { const p = pieces && pieces.byId(id); return p ? pieces.anchor(p, camera, canvas.getBoundingClientRect()) : null; }, showPiece, clickPiece, pcHot: () => pcHot && pcHot.def.id,
+    pieces: () => pieces, attackHeroes: () => attack.heroes.map((h) => h.def.id), pieceAt: (id) => { const p = pieces && pieces.byId(id); return p ? pieces.anchor(p, camera, canvas.getBoundingClientRect()) : null; }, showPiece, clickPiece, pushW: () => push.w, pcHot: () => pcHot && pcHot.def.id,
     roll: (text) => play.run(text), dice: () => dice.readUp(), diceAt: () => dice.where(), diceState: () => dice.state, attackBusy: () => !!(attack && attack.busy), attackPhase: () => attack && attack.phase(), nextAttacker: (id) => attack && attack.pick(id),
     timeScale: (k) => { game.scale = k; }, card: () => card, rollAttack: (id) => play.rollById(id),
     // proofs: where row i (or its dice icon) of the card is on screen, in client pixels

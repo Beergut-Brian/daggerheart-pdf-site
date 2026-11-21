@@ -12,6 +12,9 @@ test.use({
 });
 type Row = { id: string; mode: string; tw: number; th: number; bw: number; bh: number; corner: number[] | null };
 
+// Focus surfaces (the covers and the attack card) are made at the screen's pixel density, not the canvas's ratio: their element is
+// CSS-zoomed by density / ratio (sharpen pass, `Surfaces._zoom`), so the expected box is the element's box x ratio x zoom. On a phone
+// (density 2, ratio 1.5) this is what the texture is; the old ratio-only box was only equal where density == ratio.
 async function ready(page: Page, flags: string) {
   await page.goto(`/table#shot&post=off&dof=off&${flags}`);
   await page.waitForFunction(() => document.body.classList.contains("is-ready") && "__table" in window, null, { timeout: 120_000 });
@@ -22,7 +25,7 @@ const rows = (page: Page) =>
     const S = ${T}.surfaces, c = S.canvas, k = c.width / c.clientWidth;
     return S.list.map((s) => {
       const px = S.readTexels(s, s.aw - 3, s.ah - 3, 1, 1);
-      return { id: s.id, mode: S.mode, tw: s.aw, th: s.ah, bw: s.el.offsetWidth * k, bh: s.el.offsetHeight * k, corner: px ? Array.from(px) : null };
+      return { id: s.id, mode: S.mode, tw: s.aw, th: s.ah, bw: s.el.offsetWidth * k * (s.focus ? s.zoom : 1), bh: s.el.offsetHeight * k * (s.focus ? s.zoom : 1), corner: px ? Array.from(px) : null };
     });
   })()`) as Promise<Row[]>;
 

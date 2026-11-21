@@ -36,7 +36,8 @@ export function startSurfaceDebug(surfaces) {
     head.textContent = `surfaces: ${surfaces.mode === 'html' ? 'live HTML (' + surfaces.api.call + ')' : 'painted'} · canvas pixel ratio ${k.toFixed(2)} · devicePixelRatio ${devicePixelRatio}`;
     for (const { s, c, cap } of tiles) {
       const t = texture(s);
-      const [cw, ch] = s.size, boxW = (s.el.offsetWidth || cw) * (surfaces.mode === 'html' ? k : s.scale || 1), boxH = (s.el.offsetHeight || ch) * (surfaces.mode === 'html' ? k : s.scale || 1);
+      // focus surfaces are made at the screen's density, not the canvas's ratio: their element is CSS-zoomed by density / ratio (sharpen pass)
+      const z = s.focus ? s.zoom || 1 : 1, [cw, ch] = s.size, boxW = (s.el.offsetWidth || cw) * (surfaces.mode === 'html' ? k * z : s.scale || 1), boxH = (s.el.offsetHeight || ch) * (surfaces.mode === 'html' ? k * z : s.scale || 1);
       const tw = t ? t.w : boxW, th = t ? t.h : boxH;
       // the tile shows the larger of the two rectangles, so either can stick out
       const f = TILE / Math.max(tw, boxW), H = Math.ceil(Math.max(th, boxH) * f);

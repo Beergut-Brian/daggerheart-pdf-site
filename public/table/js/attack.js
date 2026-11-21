@@ -11,12 +11,15 @@ import { swerveAround } from './pieces-logic.js';
 const WIND = 0.25, LUNGE = 0.34, HOLD = 0.08, BACK = 0.5, BOLT_SPEED = 6.5;
 const HITSTOP = 0.075;                                  // a hit freezes the attack (not the page) this long
 const LEAN = { back: 0.3, forward: 0.5, hop: 0.1 };     // the hero's wind-up and lunge lean (radians), hop (units)
-const KNOCK = { push: 0.17, tilt: 0.24, squash: 0.15, spring: 21, decay: 5.5, crit: 1.6 };
+const KNOCK = { push: 0.26, tilt: 0.24, squash: 0.15, spring: 21, decay: 5.5, crit: 1.6 };
 const FLASH = { tint: 0.18, emissive: 0.25, light: 1.8, decay: 16 };   // a short warm tint, not a glow over the whole monster
 const BURST = { size: 0.62, grow: 0.5, life: 0.2, color: new THREE.Color(4.5, 3.7, 2.5), critColor: new THREE.Color(4.8, 3.8, 1.5) };
 const SPARK = { full: 12, lite: 9, speed: 2.5, life: 0.42, gravity: 5.5, len: 0.09, width: 0.014,
   color: new THREE.Color(3.0, 2.0, 1.0), critColor: new THREE.Color(3.4, 2.6, 0.8) };
 const MAGIC = { ring: 0.9, grow: 0.95, fade: 0.55, orb: 1.6 };   // magic: a ring spreads from the caster's feet, and the bolt is a bigger orb
+const TRAIL = { n: 14, step: 0.035, size: 0.05, glow: 0.42 };          // bolt trail: pooled beads behind the bolt, and a soft glow on it
+const SHOCK = { grow: 2.6, life: 0.42, miss: 0.26 };                    // the hit's shockwave ring (times the golem's radius), and the miss puff's size
+const PUSH = { in: 0.38, out: 0.55, dist: 0.4, pull: 0.7 };            // camera push: ease in / out (s), closer by 40%, 70% of the way to the midpoint
 const CRYSTAL_DIM = 0.55;                               // the monster's crystal glow, so its silhouette reads
 
 const clamp01 = (t) => Math.max(0, Math.min(1, t));
@@ -58,6 +61,14 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   scene.add(bolt, trail);
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.82, 1, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
   ring.renderOrder = 5; scene.add(ring);
+  // the hit's shockwave, the bolt's trail beads and glow: made once, parked inside the monster when idle
+  const shock = new THREE.Mesh(new THREE.RingGeometry(0.8, 1, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+  shock.renderOrder = 6; scene.add(shock);
+  const beadMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending });
+  const beadGeo = new THREE.SphereGeometry(1, 8, 6);
+  const beads = Array.from({ length: TRAIL.n }, () => { const m = new THREE.Mesh(beadGeo, beadMat); m.renderOrder = 6; scene.add(m); return m; });
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: starburstTexture(), color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false, opacity: 0.8 }));
+  glow.renderOrder = 6; scene.add(glow);
   const burst = new THREE.Sprite(new THREE.SpriteMaterial({ map: starburstTexture(), color: BURST.color, transparent: true, blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false }));
   burst.renderOrder = 6; scene.add(burst);
   const sparkMat = new THREE.MeshBasicMaterial({ color: SPARK.color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -66,7 +77,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
   // the effects stay in the scene, shrunk to nothing inside the monster, so their shaders compile with
   // the first frame instead of stalling the first attack
   const park = () => {
-    for (const o of [bolt, trail, ring, burst, ...sparks.map((s) => s.m)]) { o.position.copy(tCentre); o.scale.setScalar(1e-4); }
+    for (const o of [bolt, trail, ring, shock, glow, ...beads, burst, ...sparks.map((s) => s.m)]) { o.position.copy(tCentre); o.scale.setScalar(1e-4); }
   };
   park();
 
@@ -106,8 +117,8 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
         .multiplyScalar(SPARK.speed * (0.55 + r() * 0.8) * (critical ? 1.35 : 1));
     }
     cur = {
-      hero, hit, critical, onImpact, swerve, ranged, magic: (style || hero.def.attack) === 'magic', lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
-      color: new THREE.Color(boltColor ?? hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.3, 1.0)),
+      hero, hit, critical, onImpact, swerve, side: side.clone().normalize(), ranged, magic: (style || hero.def.attack) === 'magic', lunge, yaw0, face, dir, lungeTo, muzzle, boltTo, contact, impactAt, stop, t0: clock(), impacted: false, spin: r() * 6.28,
+      coloured: boltColor != null || hero.def.pc, color: new THREE.Color(boltColor ?? hero.def.bolt ?? 0xffc46a), end: impactAt + (calm ? 0.7 : Math.max(ranged ? 0.9 : HOLD + BACK + 0.3, 1.0)),
     };
     if (calm) impact();
     return (cur.end + stop) * 1000;
@@ -123,7 +134,7 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
     c.hero.pivot.position.copy(c.hero.home); c.hero.pivot.rotation.set(0, c.yaw0, 0);
     target.pivot.position.copy(target.home); target.pivot.rotation.set(0, target.yaw, 0, 'YXZ'); target.pivot.scale.copy(tScale);
     flashMats.forEach((m) => { m.emissive.copy(m.userData.base.c); m.emissiveIntensity = m.userData.base.i; });
-    light.intensity = 0; ring.material.opacity = 0; park();
+    light.intensity = 0; ring.material.opacity = 0; shock.material.opacity = 0; park();
     if (!c.impacted && c.onImpact) c.onImpact();
   }
 
@@ -176,7 +187,17 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
         const fade = c.hit ? 1 : clamp01((1.25 - uu) / 0.25);
         bolt.material.opacity = fade; trail.material.opacity = 0.45 * fade;
         light.color.copy(c.color); light.position.copy(bolt.position); li = 2.2 * fade;
-      }
+        // a long bright trail: beads at earlier points of the same path (magic spirals around it), and a soft glow on the head
+        beadMat.color.copy(c.color).multiplyScalar(c.magic ? 2.4 : 2.0); beadMat.opacity = 0.85 * fade;
+        for (let i = 0; i < beads.length; i++) {
+          const ub = Math.max(0, uu - (i + 1) * TRAIL.step), m = beads[i], k2 = 1 - i / beads.length;
+          m.position.lerpVectors(c.muzzle, c.boltTo, ub).addScaledVector(c.swerve, Math.sin(Math.PI * clamp01(ub)));
+          m.position.y += Math.sin(Math.PI * clamp01(ub)) * 0.18;
+          if (c.magic) { const a = i * 0.9 + t * 16, r2 = 0.07 * k2; m.position.x += Math.cos(a) * r2 * c.side.x; m.position.z += Math.cos(a) * r2 * c.side.z; m.position.y += Math.sin(a) * r2; }
+          m.scale.setScalar(ub > 0 || i === 0 ? TRAIL.size * (c.magic ? 0.9 : 1) * (0.25 + 0.75 * k2) : 1e-4);
+        }
+        glow.position.copy(bolt.position); glow.scale.setScalar(TRAIL.glow * (c.magic ? 1.35 : 1)); glow.material.color.copy(c.color).multiplyScalar(1.6); glow.material.opacity = 0.8 * fade;
+      } else { glow.scale.setScalar(1e-4); for (const m of beads) m.scale.setScalar(1e-4); }
     }
 
     // a hit: burst and sparks at the contact point, flash, knock-back with squash and spring
@@ -187,9 +208,15 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
       // starburst: full during the hit-stop, then it grows a little and fades
       const bk = since < c.stop ? 1 : 1 - clamp01((since - c.stop) / BURST.life);
       burst.position.copy(c.contact);
-      burst.scale.setScalar(bk > 0 ? BURST.size * big * (1 + BURST.grow * (1 - bk)) : 1e-4);
+      burst.scale.setScalar(bk > 0 ? BURST.size * big * (c.coloured ? 1.3 : 1) * (1 + BURST.grow * (1 - bk)) : 1e-4);
       burst.material.rotation = c.spin; burst.material.opacity = bk;
       burst.material.color.copy(c.critical ? BURST.critColor : BURST.color);
+      if (c.coloured) burst.material.color.copy(c.color).multiplyScalar(3.2).lerp(c.critical ? BURST.critColor : BURST.color, 0.3);
+      // the shockwave: a ring on the ground round the golem that grows past it and fades, in the attack's colour
+      const sk = clamp01(since / SHOCK.life);
+      shock.position.set(target.home.x, 0.05, target.home.z);
+      shock.scale.setScalar(sk < 1 ? tR * (0.7 + SHOCK.grow * smooth(sk)) * big : 1e-4);
+      shock.material.color.copy(c.coloured ? c.color : warm).multiplyScalar(2.6); shock.material.opacity = 0.9 * (1 - sk);
       // sparks: ballistic from the contact point, streaks along their velocity
       const sl = clamp01(1 - s / SPARK.life);
       sparkMat.color.copy(c.critical ? SPARK.critColor : SPARK.color); sparkMat.opacity = sl;
@@ -213,10 +240,26 @@ export function createAttack({ scene, minis, calm, lite, clock = () => performan
       light.color.setHex(c.critical ? 0xffd27a : 0xffa050); light.position.copy(c.contact).addScaledVector(c.dir, -0.2);
       li = Math.max(li, flash * FLASH.light);
     }
+    // a miss: a small grey-white puff where the blow lands wide, clearly not the hit's burst
+    if (!c.hit && c.impacted && !calm) {
+      const since = raw - c.impactAt, pk = clamp01(since / 0.35), at = c.ranged ? c.boltTo : c.lungeTo;
+      burst.position.set(at.x, c.ranged ? at.y : 0.12, at.z);
+      burst.scale.setScalar(pk < 1 ? TRAIL.size * 5 * SHOCK.miss * (0.6 + pk) : 1e-4);
+      burst.material.rotation = c.spin; burst.material.opacity = 0.7 * (1 - pk); burst.material.color.setRGB(0.9, 0.9, 0.95);
+    }
     light.intensity = li;
   }
 
+  // camera push: how far the camera should be pulled toward the attack (0..1, eased) and the point to frame (the midpoint of attacker and golem)
+  const mid = new THREE.Vector3();
+  function framing() {
+    if (!cur) return null;
+    const t = (clock() - cur.t0) / 1000, total = cur.end + cur.stop;
+    const k = smooth(t / PUSH.in) * (1 - smooth((t - (total - PUSH.out)) / PUSH.out));
+    mid.addVectors(cur.hero.home, target.home).multiplyScalar(0.5);
+    return { k, x: mid.x, z: mid.z };
+  }
   const phase = () => (cur ? { hero: cur.hero.def.id, t: (clock() - cur.t0) / 1000, impactAt: cur.impactAt, hitStop: cur.stop, end: cur.end + cur.stop, hit: cur.hit } : null);
   const pick = (id) => { const i = roundRobin().findIndex((h) => h.def.id === id); if (i >= 0) turn = i; };
-  return { play, update, phase, pick, get busy() { return !!cur || tail > 0; }, get target() { return target; }, get heroes() { return heroList(); } };
+  return { play, update, phase, framing, pick, get busy() { return !!cur || tail > 0; }, get target() { return target; }, get heroes() { return heroList(); } };
 }
