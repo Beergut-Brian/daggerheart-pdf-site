@@ -195,11 +195,11 @@ async function boot() {
     camera.fov = lerp(46, 30, clamp((aspect - 0.7) / 0.8, 0, 1));
     camera.updateProjectionMatrix();
     const th = Math.tan((camera.fov * Math.PI) / 360);
-    const needW = tall ? 6.3 : lerp(9.4, 14.4, clamp((aspect - 0.6) / 0.75, 0, 1));
+    const needW = tall ? 7.6 : lerp(9.4, 14.4, clamp((aspect - 0.6) / 0.75, 0, 1));
     const fr = FRAME[tall ? 'tall' : 'wide'];
     rig.home.dist = Math.max(needW / 2 / (th * aspect), 4.45 / th) * fr.zoom;
     rig.home.el = tall ? 0.98 : lerp(0.92, 0.7, clamp((aspect - 0.6) / 0.75, 0, 1));
-    rig.home.target.x = tall ? 0.45 : 0.05;   // upright phones: a little right and wider, so the golem (bottom right of the map) is whole in view
+    rig.home.target.x = tall ? 1.4 : 0.05;   // upright phones: a little right and wider, so the golem (bottom right of the map) is whole in view
     rig.home.target.z = (tall ? 0.1 : lerp(1.5, 0.75, clamp((aspect - 0.6) / 0.75, 0, 1))) + fr.dz;
     rig.openDist = Math.max(5.7 / 2 / (th * aspect), 3.9 / 2 / th) * 1.04;
     if (usePost) {
