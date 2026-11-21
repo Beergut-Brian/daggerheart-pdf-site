@@ -1,7 +1,7 @@
 // Proof set for the party pieces (software GL, so slow; the stills and clips matter, not wall times).
 //   node scripts/table-pieces-proof.mjs <outDir> stills|videos [clip ...]
 // stills: party 1440 + 390 (live HTML path, and the painted path), a hover card, the attack card after a click (1440 + phone sheet).
-// videos: one attack per animation type (lunge, bolt, magic) on the game clock, frame by frame, as .webm.
+// videos: one attack per animation type (lunge, bolt, magic) from the default camera at 1440, plus a lunge at 390, on the game clock, frame by frame, as .webm.
 import { chromium } from "playwright-core";
 import { spawn } from "node:child_process";
 import http from "node:http";
@@ -83,10 +83,11 @@ if (mode === "stills") {
     ["attack-lunge-zeke-shield-charge", "pc_zeke", "shield-charge"],
     ["attack-bolt-thessaly-feather-blades", "pc_thessaly", "feather-blades"],
     ["attack-magic-naaz-ice-spike", "pc_naaz", "ice-spike"],
+    ["attack-lunge-zeke-shield-charge-390", "pc_zeke", "shield-charge", { w: 390, h: 844, phone: true }],
   ];
-  for (const [name, id, atk] of clips) {
+  for (const [name, id, atk, view] of clips) {
     if (!want(name) && !want(atk)) continue;
-    const { p, ctx } = await open("shot&seed=3&dof=off&cam=0,0.05,0.6,0.7,-1.5");
+    const { p, ctx } = await open("shot&seed=3" + (view ? "&tier=lite" : "&dof=off"), view || {});
     await p.evaluate(([i]) => { const t = window.__table; t.card().setCharacter(t.pieces().byId(i).char); t.forceRoll(9, 4); }, [id]);
     const fps = 12, seconds = 3.1;
     const ff = spawn(FFMPEG, ["-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "pipe:0", "-y", "-an", "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-crf", "30", "-b:v", "0", "-deadline", "good", "-cpu-used", "4", "-row-mt", "1", path.join(out, name + ".webm")], { stdio: ["pipe", "inherit", "inherit"] });
