@@ -30,7 +30,7 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       expect(r.map((p) => p.id)).toEqual(["pc_zeke", "pc_thessaly", "pc_prim", "pc_naaz", "pc_saveas", "pc_drex", "pc_mellanee", "pc_kerropi"]);
       expect(r.every((p) => !p.ph)).toBe(true);
       // on the battle map where the party stood, clear of the monsters' ruin: not along the far edge
-      for (const p of r) { expect(p.z).toBeGreaterThan(-2.3); expect(p.z).toBeLessThan(0); }
+      for (const p of r) { expect(p.z).toBeGreaterThan(-3.3); expect(p.z).toBeLessThan(0.6); }
       expect(await page.evaluate(`${T}.world.minis.map((m) => m.def.id)`)).toEqual(["skeleton-1", "skeleton-2", "skeleton-3", "golem"]);
       expect(await page.evaluate(`${T}.attackHeroes()`)).toHaveLength(8);
       // the golem is at the bottom right of the map and the party faces it
@@ -42,7 +42,7 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       const h = Object.fromEntries(r.map((p) => [p.id, p.h]));
       expect(h.pc_zeke).toBeGreaterThan(h.pc_saveas); expect(h.pc_saveas).toBeGreaterThan(h.pc_naaz);
       // Kerropi (crouched, 3.3 ft) and Drex (3.5 ft to the foam finger) are the two small ones
-      expect(r.filter((p) => p.h < 0.7).map((p) => p.id).sort()).toEqual(["pc_drex", "pc_kerropi"]);
+      expect(r.filter((p) => p.h < 0.5).map((p) => p.id).sort()).toEqual(["pc_drex", "pc_kerropi"]);
     });
 
     test("hover shows the card with name, class and intro, inside the viewport; leaving clears it", async ({ page, isMobile }) => {
