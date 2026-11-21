@@ -137,35 +137,10 @@ function skeleton(b, pose = 0) {
   for (const sx of [-1, 1]) b.part(sph(0.015, 6, 5), { p: [sx * 0.022, 0.44, 0.052], c: dark });
 }
 
-function golem(b) {
-  const rock = (r, p, s, c = 0x6f7684) => b.part(ico(r, 1), { p, s, c, m: 'stone', jit: r * 0.16, v: 0.14 });
-  rock(0.26, [0, 0.52, 0], [1.15, 1, 0.9]);
-  rock(0.2, [0, 0.3, 0], [1, 0.8, 0.85], 0x5c6270);
-  rock(0.13, [0, 0.83, 0.05], [1, 0.9, 1], 0x7c8494);
-  for (const sx of [-1, 1]) {
-    rock(0.17, [sx * 0.33, 0.68, 0], [1, 0.9, 1]);
-    rock(0.12, [sx * 0.43, 0.46, 0.06], [0.9, 1.5, 0.9], 0x5c6270);
-    rock(0.15, [sx * 0.46, 0.22, 0.14], [1, 1.1, 1], 0x7c8494);
-    rock(0.13, [sx * 0.15, 0.14, 0], [1, 1.3, 1.05], 0x5c6270);
-  }
-  // crystals growing through the shoulders, and a lit core
-  const shard = (p, r, h, rot, m = 'crystal') => b.at({ p, r: rot }, () => {
-    b.part(cyl(r * 0.8, r, h, 6), { p: [0, h / 2, 0], c: m === 'crystal' ? 0xbfefff : 0xd9c2ff, m });
-    b.part(cone(r * 0.8, r * 1.6, 6), { p: [0, h + r * 0.8, 0], c: m === 'crystal' ? 0xdff8ff : 0xead9ff, m });
-  });
-  shard([-0.18, 0.72, -0.1], 0.05, 0.26, [-0.4, 0, 0.5]);
-  shard([0.2, 0.74, -0.08], 0.042, 0.2, [-0.3, 0, -0.6], 'crystal2');
-  shard([0.02, 0.76, -0.16], 0.055, 0.3, [-0.7, 0, 0.05]);
-  shard([-0.3, 0.76, 0.02], 0.03, 0.14, [0.1, 0, 0.9], 'crystal2');
-  b.part(oct(0.075), { p: [0, 0.54, 0.2], s: [1, 1.3, 0.6], c: 0x9fe8ff, m: 'glow' });
-  for (const sx of [-1, 1]) b.part(sph(0.022, 6, 5), { p: [sx * 0.05, 0.85, 0.15], c: 0x9fe8ff, m: 'glow' });
-}
-
 // The figures, for js/minis.js. Each builds at the origin, facing +z, on its base.
 export const FIGURES = {
   skeleton: (b) => skeleton(b, 0),
   skeletonRaised: (b) => skeleton(b, 1),
-  golem,
 };
 
 // One mini as its own object: base + figure merged per material, so each mini

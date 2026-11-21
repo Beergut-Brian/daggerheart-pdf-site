@@ -96,11 +96,11 @@ describe("rollDuality", () => {
 
 describe("hits", () => {
   it(`a total of ${HIT_TARGET} or more hits`, () => {
-    expect(HIT_TARGET).toBe(12);
-    expect(isHit(dualityFrom(7, 5, 0))).toBe(true);
-    expect(isHit(dualityFrom(6, 5, 0))).toBe(false);
-    expect(isHit(dualityFrom(6, 5, 1))).toBe(true);
-    expect(isHit(dualityFrom(10, 4, -3))).toBe(false);
+    expect(HIT_TARGET).toBe(18);
+    expect(isHit(dualityFrom(10, 8, 0))).toBe(true);
+    expect(isHit(dualityFrom(9, 8, 0))).toBe(false);
+    expect(isHit(dualityFrom(9, 8, 1))).toBe(true);
+    expect(isHit(dualityFrom(11, 9, -3))).toBe(false);
   });
   it("a critical always hits, even below the target", () => {
     expect(isHit(dualityFrom(1, 1, 0))).toBe(true);
@@ -121,7 +121,7 @@ describe("rollNotation and formatResult", () => {
     expect(formatResult(dualityFrom(9, 4, 2))).toMatchObject({ text: "15 with Hope", tone: "hope", detail: "Hope 9 · Fear 4 + 2" });
     expect(formatResult(dualityFrom(3, 8, 0))).toMatchObject({ text: "11 with Fear", tone: "fear" });
     expect(formatResult(dualityFrom(6, 6, 0))).toMatchObject({ text: "Critical success", tone: "critical" });
-    expect(formatResult(dualityFrom(9, 4, 2), { attack: true })).toMatchObject({ text: "15 with Hope: hit!", hit: true });
+    expect(formatResult(dualityFrom(11, 4, 5), { attack: true })).toMatchObject({ text: "20 with Hope: hit!", hit: true });
     expect(formatResult(dualityFrom(3, 4, 0), { attack: true })).toMatchObject({ text: "7 with Fear: miss", hit: false });
     expect(formatResult(dualityFrom(2, 2, 0), { attack: true })).toMatchObject({ text: "Critical hit!", hit: true, tone: "critical" });
   });

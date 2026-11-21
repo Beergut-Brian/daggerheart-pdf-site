@@ -11,7 +11,7 @@ const { RoundedBoxGeometry, RoomEnvironment } = THREE;
 const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
 const easeOut = (t) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 const clamp01 = (t) => Math.min(1, Math.max(0, t));
-// the crystals' glow and lights, kept low enough that the golem's silhouette reads against them
+// the crystals' glow and lights, kept low enough that the Harvester's silhouette reads against them
 const CRYSTAL = { light: 3.2, light2: 1.8, glow: 0.3, glow2: 0.28, pulse: 0.16 };
 const PICKUP = 1.05;      // how far a book rises when it is picked up
 

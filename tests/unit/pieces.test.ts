@@ -9,14 +9,17 @@ const SCALE = +/scale: ([\d.]+),/.exec(cfgSrc.slice(cfgSrc.indexOf("export const
 const PLACES: Record<string, { x: number; z: number; turn: number }> = Object.fromEntries(
   [...cfgSrc.matchAll(/(pc_\w+): \{ x: (-?[\d.]+), z: (-?[\d.]+), turn: (-?[\d.]+) \}/g)].map((m) => [m[1], { x: +m[2], z: +m[3], turn: +m[4] }]));
 const minisSrc = fs.readFileSync(path.resolve("public/table/js/minis.js"), "utf8");
-const gm = /id: 'golem'.*?position: \[(-?[\d.]+), (-?[\d.]+)\], rotation: (-?[\d.]+)/.exec(minisSrc)!;
-const GOLEM = { x: +gm[1], z: +gm[2], rot: +gm[3] };
+const gm = /id: 'harvester'.*?position: \[(-?[\d.]+), (-?[\d.]+)\], rotation: (-?[\d.]+)/.exec(minisSrc)!;
+const HARV = { x: +gm[1], z: +gm[2], rot: +gm[3] };
 const glbBox = (id: string) => {
   const b = fs.readFileSync(path.resolve("public/table/models/pc", id + ".glb")), j = JSON.parse(b.subarray(20, 20 + b.readUInt32LE(12)).toString());
   const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
   for (const m of j.meshes) for (const p of m.primitives) { const a = j.accessors[p.attributes.POSITION]; a.min.forEach((v: number, i: number) => (mn[i] = Math.min(mn[i], v))); a.max.forEach((v: number, i: number) => (mx[i] = Math.max(mx[i], v))); }
   return { mn, mx };
 };
+import { loadAdversary as loadAdversaryJs } from "../../public/table/js/pieces.js";
+// the JS module is typed from its defaults; the tests pass fakes
+const loadAdversary = loadAdversaryJs as unknown as (o: Record<string, unknown>) => Promise<{ ok: boolean }>;
 import { damageText, formatAttack, helpLines, rangeText, rollAttack, traitText } from "../../public/table/js/dice-logic.js";
 
 describe("firstOverlap", () => {
@@ -123,38 +126,38 @@ describe("the party on the map", () => {
     const items = PARTY.map((c) => { const { mn, mx } = glbBox(c.id), p = PLACES[c.id]; return { id: c.id, x: p.x, z: p.z, r: (Math.max(mx[0] - mn[0], mx[2] - mn[2]) / 2) * SCALE }; });
     expect(firstOverlap(items, 0.05)).toBeNull();
   });
-  it("the golem is at the bottom right of the map, on it, and turned to face the party", () => {
+  it("the Harvester is at the bottom right of the map, on it, and turned to face the party", () => {
     // the map is x -4.5..5.1, z -4.7..0.9; the camera looks from +z, so bottom right = large x, large z
-    expect(GOLEM.x).toBeGreaterThan(2.5); expect(GOLEM.x).toBeLessThan(4.6); expect(GOLEM.z).toBeGreaterThan(-1.2); expect(GOLEM.z).toBeLessThan(0.5);
+    expect(HARV.x).toBeGreaterThan(2.5); expect(HARV.x).toBeLessThan(4.6); expect(HARV.z).toBeGreaterThan(-1.2); expect(HARV.z).toBeLessThan(0.5);
     const cx = Object.values(PLACES).reduce((a, p) => a + p.x, 0) / 8, cz = Object.values(PLACES).reduce((a, p) => a + p.z, 0) / 8;
-    expect(Math.abs(GOLEM.rot - yawToward(GOLEM, { x: cx, z: cz }))).toBeLessThan(0.2);
+    expect(Math.abs(HARV.rot - yawToward(HARV, { x: cx, z: cz }))).toBeLessThan(0.2);
   });
-  it("the party is in the road area, left of the golem and clear of it", () => {
+  it("the party is in the road area, left of the Harvester and clear of it", () => {
     for (const p of Object.values(PLACES)) {
-      expect(p.x).toBeGreaterThan(-1.6); expect(p.x).toBeLessThan(GOLEM.x - 1); expect(p.z).toBeGreaterThan(-3.3); expect(p.z).toBeLessThan(0.6);
-      expect(Math.hypot(p.x - GOLEM.x, p.z - GOLEM.z)).toBeGreaterThan(1.5);
+      expect(p.x).toBeGreaterThan(-1.6); expect(p.x).toBeLessThan(HARV.x - 1); expect(p.z).toBeGreaterThan(-3.3); expect(p.z).toBeLessThan(0.6);
+      expect(Math.hypot(p.x - HARV.x, p.z - HARV.z)).toBeGreaterThan(1.5);
     }
   });
-  it("front is nearest the golem, by class: Zeke at the point, Saveas and Mellanee beside him, then Drex and Kerropi, then Naaz, Thessaly, Prim", () => {
-    const d = (id: string) => Math.hypot(PLACES[id].x - GOLEM.x, PLACES[id].z - GOLEM.z);
+  it("front is nearest the Harvester, by class: Zeke at the point, Saveas and Mellanee beside him, then Drex and Kerropi, then Naaz, Thessaly, Prim", () => {
+    const d = (id: string) => Math.hypot(PLACES[id].x - HARV.x, PLACES[id].z - HARV.z);
     const rank = (ids: string[]) => ids.map(d);
     const front = rank(["pc_saveas", "pc_mellanee"]), middle = rank(["pc_drex", "pc_kerropi"]), back = rank(["pc_naaz", "pc_thessaly", "pc_prim"]);
     expect(d("pc_zeke")).toBeLessThan(Math.min(...front) - 0.3);                  // clearly the point
     expect(Math.max(...front)).toBeLessThan(Math.min(...middle));
     expect(Math.max(...middle)).toBeLessThan(Math.min(...back));
-    // Saveas and Mellanee either side of Zeke: opposite sides of the line from Zeke to the golem
-    const side = (id: string) => Math.sign((GOLEM.x - PLACES.pc_zeke.x) * (PLACES[id].z - PLACES.pc_zeke.z) - (GOLEM.z - PLACES.pc_zeke.z) * (PLACES[id].x - PLACES.pc_zeke.x));
+    // Saveas and Mellanee either side of Zeke: opposite sides of the line from Zeke to the Harvester
+    const side = (id: string) => Math.sign((HARV.x - PLACES.pc_zeke.x) * (PLACES[id].z - PLACES.pc_zeke.z) - (HARV.z - PLACES.pc_zeke.z) * (PLACES[id].x - PLACES.pc_zeke.x));
     expect(side("pc_saveas") * side("pc_mellanee")).toBe(-1);
   });
-  it("every piece faces the golem to within a few degrees", () => {
+  it("every piece faces the Harvester to within a few degrees", () => {
     for (const [id, p] of Object.entries(PLACES)) expect(Math.abs(p.turn), id).toBeLessThanOrEqual(0.08);
   });
-  it("a charge from any piece to the golem does not pass through another piece (the path bends around them)", () => {
+  it("a charge from any piece to the Harvester does not pass through another piece (the path bends around them)", () => {
     const radius = (id: string) => { const { mn, mx } = glbBox(id); return (Math.max(mx[0] - mn[0], mx[2] - mn[2]) / 2) * SCALE * 0.8; };
     const ids = Object.keys(PLACES);
     for (const id of ids) {
-      const from = PLACES[id], len = Math.hypot(GOLEM.x - from.x, GOLEM.z - from.z), reach = Math.max(0.3, len - 0.42 - 0.2);
-      const ux = (GOLEM.x - from.x) / len, uz = (GOLEM.z - from.z) / len;
+      const from = PLACES[id], len = Math.hypot(HARV.x - from.x, HARV.z - from.z), reach = Math.max(0.3, len - 0.183 - 0.2);
+      const ux = (HARV.x - from.x) / len, uz = (HARV.z - from.z) / len;
       const to = { x: from.x + ux * reach, z: from.z + uz * reach };
       const others = ids.filter((o) => o !== id).map((o) => ({ x: PLACES[o].x, z: PLACES[o].z, r: radius(o) }));
       const sw = swerveAround(from, to, others, radius(id));
@@ -183,5 +186,48 @@ describe("a party attack whose numbers are not written yet", () => {
     expect(r.duality.mod).toBe(0); expect(r.hit).toBe(true); expect(r.damage).toBeUndefined();
     const lines = formatAttack(r, atk as never);
     expect(lines.roll.text).toContain("Shield Charge"); expect(lines.damage).toBeNull();
+  });
+});
+
+describe("the Skeletal Harvester", () => {
+  const file = path.resolve("public/table/models/adv/skeletal_harvester.glb");
+  const buf = fs.readFileSync(file), json = JSON.parse(buf.subarray(20, 20 + buf.readUInt32LE(12)).toString());
+  const extras = json.nodes.find((n: { name: string }) => n.name === "SkeletalHarvester").extras;
+  const box = (() => { const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (const m of json.meshes) for (const p of m.primitives) { const a = json.accessors[p.attributes.POSITION]; a.min.forEach((v: number, i: number) => (mn[i] = Math.min(mn[i], v))); a.max.forEach((v: number, i: number) => (mx[i] = Math.max(mx[i], v))); } return { mn, mx }; })();
+  const rec = (src: string, re: RegExp) => +re.exec(src)![1];
+  it("is the file as Coach made it: 2.74 m tall, Difficulty 18 in the extras, base on the floor", () => {
+    expect(box.mx[1]).toBeCloseTo(2.774, 2); expect(box.mn[1]).toBeGreaterThanOrEqual(0);
+    expect(extras.difficulty).toBe(18);
+  });
+  it("the config's Difficulty fallback and the hit target are both 18", () => {
+    expect(rec(minisSrc, /difficulty: (\d+)/)).toBe(18);
+    expect(rec(fs.readFileSync(path.resolve("public/table/js/dice-logic.js"), "utf8"), /HIT_TARGET = (\d+)/)).toBe(18);
+  });
+  it("stands at the party's scale: about 1.10 tall, taller than Zeke, and its footprint clears every piece", () => {
+    const h = box.mx[1] * SCALE, zeke = glbBox("pc_zeke").mx[1] * SCALE;
+    expect(h).toBeGreaterThan(1.05); expect(h).toBeLessThan(1.15); expect(h).toBeGreaterThan(zeke * 1.2);
+    const reach = Math.max(box.mx[0] - box.mn[0], box.mx[2] - box.mn[2]) / 2 * SCALE;
+    const items = [{ id: "harvester", x: HARV.x, z: HARV.z, r: reach }, ...PARTY.map((c) => { const { mn, mx } = glbBox(c.id), p = PLACES[c.id]; return { id: c.id, x: p.x, z: p.z, r: (Math.max(mx[0] - mn[0], mx[2] - mn[2]) / 2) * SCALE }; })];
+    expect(firstOverlap(items, 0.3)).toBeNull();
+  });
+  it("loadAdversary reads Difficulty from the extras and measures the model", async () => {
+    const THREE = (await import("../../public/table/vendor/three.bundle.js")) as unknown as Record<string, any>;   // eslint-disable-line @typescript-eslint/no-explicit-any
+    const node = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.74, 0.6).translate(0, 1.37, 0), new THREE.MeshStandardMaterial());
+    node.name = "SkeletalHarvester"; node.userData = { difficulty: 19 };
+    const scene = new THREE.Group(); scene.add(node);
+    const pivot = new THREE.Group(); const obj = new THREE.Group(); pivot.add(obj); pivot.position.set(3.4, 0.03, 0.2); pivot.rotation.y = -1.92;
+    const mini: any = { def: { id: "harvester", height: 1.1, base: { r: 0.183 }, difficulty: 18 }, obj, pivot };   // eslint-disable-line @typescript-eslint/no-explicit-any
+    const r = await loadAdversary({ mini, url: "x", node: "SkeletalHarvester", scale: 0.4, loader: async () => ({ scene }), log: () => {} });
+    expect(r.ok).toBe(true); expect(mini.def.difficulty).toBe(19);
+    expect(mini.def.height).toBeCloseTo(1.096, 2); expect(mini.def.reach).toBeCloseTo(0.18, 2);   // measured unturned
+    expect(pivot.scale.x).toBe(0.4);
+  });
+  it("a file that fails to load becomes a plain disc, one log line, and keeps the config Difficulty", async () => {
+    const THREE = (await import("../../public/table/vendor/three.bundle.js")) as unknown as Record<string, any>;   // eslint-disable-line @typescript-eslint/no-explicit-any
+    const pivot = new THREE.Group(), obj = new THREE.Group(); pivot.add(obj);
+    const mini: any = { def: { id: "harvester", height: 1.1, base: { r: 0.183 }, difficulty: 18 }, obj, pivot };   // eslint-disable-line @typescript-eslint/no-explicit-any
+    const lines: string[] = [];
+    const r = await loadAdversary({ mini, url: "x", node: "SkeletalHarvester", scale: 0.4, loader: async () => { throw new Error("404"); }, log: (l: string) => lines.push(l) });
+    expect(r.ok).toBe(false); expect(lines).toHaveLength(1); expect(mini.def.difficulty).toBe(18); expect(mini.obj.userData.placeholder).toBe(true); expect(pivot.scale.x).toBe(1);
   });
 });

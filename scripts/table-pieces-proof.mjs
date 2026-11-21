@@ -33,7 +33,7 @@ async function open(hash, { w = 1440, h = 900, phone = false, dpr = 1 } = {}) {
   p.on("pageerror", (e) => console.error("page error:", e.message));
   p.on("console", (m) => { if (m.type() === "error" || m.type() === "warning" || /\[table\] pieces/.test(m.text())) console.log("console:", m.text().slice(0, 160)); });
   await p.goto(`${base}/table/#${hash}`);
-  await p.waitForFunction(() => document.body.classList.contains("is-ready") && window.__table && window.__piecesReady, null, { timeout: 500000 });
+  await p.waitForFunction(() => document.body.classList.contains("is-ready") && window.__table && window.__piecesReady && window.__harvesterReady, null, { timeout: 500000 });
   await p.evaluate(() => window.__table.timeScale(0));
   await frames(p, 6);
   return { p, ctx };

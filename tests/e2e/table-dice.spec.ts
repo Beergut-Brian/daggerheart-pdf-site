@@ -48,13 +48,13 @@ test.describe("table dice", () => {
 
   test("Duality dice are gold and violet d12s; an attack logs a hit or a miss", async ({ page }) => {
     await ready(page, "html=off");
-    await page.evaluate(`${T}.forceRoll(9, 4)`);
+    await page.evaluate(`${T}.forceRoll(12, 4)`);   // 12 + 4 + 2 = 18: exactly the Harvester's Difficulty, so it hits
     await command(page, "/attack +2");
     await settle(page);
     const dice = (await page.evaluate(`${T}.dice()`)) as Die[];
-    expect(dice).toMatchObject([{ type: "d12", style: "hope", rolled: 9, up: 9 }, { type: "d12", style: "fear", rolled: 4, up: 4 }]);
+    expect(dice).toMatchObject([{ type: "d12", style: "hope", rolled: 12, up: 12 }, { type: "d12", style: "fear", rolled: 4, up: 4 }]);
     await page.evaluate(`${T}.step(2800)`);
-    await expect(page.locator("#log-live")).toContainText("15 with Hope: hit!", { timeout: 30_000 });
+    await expect(page.locator("#log-live")).toContainText("18 with Hope: hit!", { timeout: 30_000 });
 
     await page.evaluate(`${T}.forceRoll(2, 4)`);
     await command(page, "/attack");

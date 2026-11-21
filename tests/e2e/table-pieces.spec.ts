@@ -11,7 +11,7 @@ type Anchor = { x: number; top: number; bottom: number };
 async function ready(page: Page, flags: string) {
   await page.goto(`/table#shot&post=off&dof=off&seed=1&${flags}`);
   await page.waitForFunction(() => document.body.classList.contains("is-ready") && "__table" in window, null, { timeout: 120_000 });
-  await page.waitForFunction(() => (window as unknown as { __piecesReady?: boolean }).__piecesReady, null, { timeout: 120_000 });
+  await page.waitForFunction(() => (window as unknown as { __piecesReady?: boolean; __harvesterReady?: boolean }).__piecesReady && (window as unknown as { __harvesterReady?: boolean }).__harvesterReady, null, { timeout: 120_000 });
   await page.evaluate(`${T}.timeScale(0)`);
   // the path asked for is the path running (the live one needs the browser feature, which this file turns on)
   expect(await page.evaluate(() => document.documentElement.dataset.surfaces)).toBe(flags.includes("html=off") ? "painted" : "html");
@@ -31,13 +31,13 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       expect(r.every((p) => !p.ph)).toBe(true);
       // on the battle map where the party stood, clear of the monsters' ruin: not along the far edge
       for (const p of r) { expect(p.z).toBeGreaterThan(-3.3); expect(p.z).toBeLessThan(0.6); }
-      expect(await page.evaluate(`${T}.world.minis.map((m) => m.def.id)`)).toEqual(["skeleton-1", "skeleton-2", "skeleton-3", "golem"]);
+      expect(await page.evaluate(`${T}.world.minis.map((m) => m.def.id)`)).toEqual(["skeleton-1", "skeleton-2", "skeleton-3", "harvester"]);
       expect(await page.evaluate(`${T}.attackHeroes()`)).toHaveLength(8);
-      // the golem is at the bottom right of the map and the party faces it
-      const g = (await page.evaluate(`(() => { const t = ${T}.world.minis.find((m) => m.def.id === "golem"); return { x: t.home.x, z: t.home.z }; })()`)) as { x: number; z: number };
+      // the Harvester is at the bottom right of the map and the party faces it
+      const g = (await page.evaluate(`(() => { const t = ${T}.world.minis.find((m) => m.def.id === "harvester"); return { x: t.home.x, z: t.home.z }; })()`)) as { x: number; z: number };
       expect(g.x).toBeGreaterThan(2.5); expect(g.z).toBeGreaterThan(-1.2);
       const yaws = (await page.evaluate(`${T}.pieces().pieces.map((p) => ({ id: p.def.id, x: p.home.x, z: p.home.z, yaw: p.pivot.rotation.y }))`)) as { id: string; x: number; z: number; yaw: number }[];
-      for (const p of yaws) expect(Math.abs(p.yaw - Math.atan2(g.x - p.x, g.z - p.z)), `${p.id} faces the golem`).toBeLessThan(0.1 + 0.3);   // the origin is not the footprint centre; a few degrees of its own
+      for (const p of yaws) expect(Math.abs(p.yaw - Math.atan2(g.x - p.x, g.z - p.z)), `${p.id} faces the Harvester`).toBeLessThan(0.1 + 0.3);   // the origin is not the footprint centre; a few degrees of its own
       // true heights, one scale: Zeke the tallest
       const h = Object.fromEntries(r.map((p) => [p.id, p.h]));
       expect(h.pc_zeke).toBeGreaterThan(h.pc_saveas); expect(h.pc_saveas).toBeGreaterThan(h.pc_naaz);
@@ -102,7 +102,7 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       expect(a?.hero).toBe("pc_zeke");
       await page.evaluate(`${T}.step(${Math.max(0, Math.round(((a?.impactAt ?? 0.6) - (a?.t ?? 0) - 0.12) * 1000))})`); await frames(page, 2);
       const mid = await pos();
-      expect(Math.hypot(mid.x - mid.home.x, mid.z - mid.home.z), "the piece moved toward the golem").toBeGreaterThan(0.5);
+      expect(Math.hypot(mid.x - mid.home.x, mid.z - mid.home.z), "the piece moved toward the Harvester").toBeGreaterThan(0.5);
       await page.evaluate(`${T}.step(2500)`); await frames(page, 2);
       const end = await pos();
       expect(Math.hypot(end.x - end.home.x, end.z - end.home.z)).toBeLessThan(0.01);
@@ -136,8 +136,8 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
     test("touch: the first tap shows the card, the second switches the attack card and opens the sheet", async ({ page, isMobile }) => {
       test.skip(!isMobile, "touch only");
       await ready(page, flags + "&tier=lite");
-      // the golem and the party are both in the default view (the phone camera is nudged right and wider for it)
-      const inView = (await page.evaluate(`(() => { const t = ${T}, vp = innerWidth, vh = innerHeight, r = [...t.pieces().pieces.map((p) => p.pivot.position), t.world.minis.find((m) => m.def.id === "golem").pivot.position]; return r.map((v) => { const q = v.clone().project(t.camera); return { x: (q.x * 0.5 + 0.5) * vp, y: (-q.y * 0.5 + 0.5) * vh }; }); })()`)) as { x: number; y: number }[];
+      // the Harvester and the party are both in the default view (the phone camera is nudged right and wider for it)
+      const inView = (await page.evaluate(`(() => { const t = ${T}, vp = innerWidth, vh = innerHeight, r = [...t.pieces().pieces.map((p) => p.pivot.position), t.world.minis.find((m) => m.def.id === "harvester").pivot.position]; return r.map((v) => { const q = v.clone().project(t.camera); return { x: (q.x * 0.5 + 0.5) * vp, y: (-q.y * 0.5 + 0.5) * vh }; }); })()`)) as { x: number; y: number }[];
       for (const q of inView) { expect(q.x).toBeGreaterThan(20); expect(q.x).toBeLessThan(370); expect(q.y).toBeGreaterThan(60); expect(q.y).toBeLessThan(780); }
       // a first tap on any of the eight shows its card
       for (const id of ["pc_zeke", "pc_saveas", "pc_mellanee", "pc_drex", "pc_kerropi", "pc_naaz", "pc_thessaly"]) {

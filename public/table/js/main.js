@@ -1,6 +1,6 @@
 // Boot, camera, pointer, the opening sequence and the final image pass.
 import * as THREE from '../vendor/three.bundle.js';
-import { BOOKS, PIECES, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
+import { BOOKS, PIECES, ADVERSARY, ROLL_AREA, hrefFor, HOME_HREF, ON_SITE, SITE, pickTier } from './config.js';
 import { createCard } from './card.js';
 import { Surfaces, defineSurfaces, defineLogSurface, loadCoverImages, loadScreenArt, NOTE, cardRows, cardIcon } from './surfaces.js';
 import { buildWorld } from './world.js';
@@ -10,7 +10,7 @@ import { createDice, TALL_ASPECT, TALL_SCALE } from './dice3d.js';
 import { areaBounds } from './dice-table.js';
 import { createAttack } from './attack.js';
 import { PARTY } from './party.js';
-import { createPieces } from './pieces.js';
+import { createPieces, loadAdversary } from './pieces.js';
 import { placeHover, nearer } from './pieces-logic.js';
 import { loadBaked, upgradeBaked, BAKED, BAKED_SMALL, BAKED_FULL } from './textures.js';
 import { createPerf } from './perf.js';
@@ -199,7 +199,7 @@ async function boot() {
     const fr = FRAME[tall ? 'tall' : 'wide'];
     rig.home.dist = Math.max(needW / 2 / (th * aspect), 4.45 / th) * fr.zoom;
     rig.home.el = tall ? 0.98 : lerp(0.92, 0.7, clamp((aspect - 0.6) / 0.75, 0, 1));
-    rig.home.target.x = tall ? 1.2 : 0.05;   // upright phones: a little right and wider, so the golem (bottom right of the map) is whole in view
+    rig.home.target.x = tall ? 1.2 : 0.05;   // upright phones: a little right and wider, so the Harvester (bottom right of the map) is whole in view
     rig.home.target.z = (tall ? 0.1 : lerp(1.5, 0.75, clamp((aspect - 0.6) / 0.75, 0, 1))) + fr.dz;
     rig.openDist = Math.max(5.7 / 2 / (th * aspect), 3.9 / 2 / th) * 1.04;
     if (usePost) {
@@ -424,11 +424,12 @@ async function boot() {
   const attack = createAttack({ scene, minis: attackMinis, calm, lite, clock: gameClock });
   play = createPlay({ bar, dice, attack, character: () => cardHolder.character, canAct: () => state.phase === 'table' });
   const touchy = lite || matchMedia('(pointer: coarse)').matches;
+  // compile shaders for the render target the scene is drawn into (as warmUp does), without stalling a frame
+  const compile = (g) => { renderer.setRenderTarget(usePost ? rtScene : null); const p = renderer.compileAsync(g, camera, scene); renderer.setRenderTarget(null); return p; };
   const piecesOn = !hashFlag(/[#&]pieces=off/);
   pieces = piecesOn ? createPieces({
     parent: scene, party: PARTY, cfg: PIECES, scale: PIECES.scale, lite, face: { x: attack.target.home.x, z: attack.target.home.z },
-    // compile their shaders for the render target the scene is drawn into (as warmUp does), without stalling a frame
-    compile: (g) => { renderer.setRenderTarget(usePost ? rtScene : null); const p = renderer.compileAsync(g, camera, scene); renderer.setRenderTarget(null); return p; },
+    compile,
   }) : null;
   card = character ? createCard({ surfaces, holder: cardHolder, state: cardState, touchy, onRoll: (id) => play.rollById(id) }) : null;
 
@@ -565,7 +566,7 @@ async function boot() {
     goal.target.copy(H.target).add(rig.off); goal.az = H.az + U.az + rig.mouse.x * 0.045 * par + Math.sin(time * 0.13) * 0.03;
     goal.el = H.el + U.el - rig.mouse.y * 0.025 * par; goal.dist = H.dist * U.zoom * lerp(1.22, 1, intro);
     goal.el += (1 - intro) * 0.16;
-    // an attack pushes the camera in toward the midpoint of attacker and golem, holds, and eases back; a drag cancels it
+    // an attack pushes the camera in toward the midpoint of attacker and target, holds, and eases back; a drag cancels it
     const af = attack && !calm && state.phase === 'table' ? attack.framing() : null;
     if (!af) pushCancelled = false;
     push.w += ((af && !pushCancelled ? af.k : 0) - push.w) * (af && !pushCancelled ? 1 : 1 - Math.exp(-dt * 9));
@@ -647,7 +648,7 @@ async function boot() {
     gpuTime.end();
     bar.update(gameClock()); bar.render(renderer);
     if (pcHot) placePcCard();   // a piece that is mid-attack takes its card with it
-    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); if (progressive) idleThen(() => loadBaked(BAKED_FULL).then(() => { swapFull = true; })); if (pieces) idleThen(loadPieces); }
+    if (!settled && (since >= 3.8 || instant)) { settled = true; dice.setResin('full'); if (progressive) idleThen(() => loadBaked(BAKED_FULL).then(() => { swapFull = true; })); idleThen(loadHarvester); if (pieces) idleThen(loadPieces); }
     // the full-size wood and mat go in at a moment nothing moves: same picture, more texels, so there is nothing to see but sharpness
     if (swapFull && !world.moving && !world.stirring && state.phase === 'table') { swapFull = false; const n = upgradeBaked(); console.info('[table] full-size wood and mat in: ' + n + ' textures'); if (perf) perf.mark('full-tex'); }
     if (perf) perf.frame(now, scene, settled);
@@ -655,6 +656,15 @@ async function boot() {
   }
   // The eight glb files (9.4 MB) are fetched once the opening is over and the table is idle, so the first paint is untouched;
   // they join the scene together, shaders compiled first, and then take part in attacks.
+  // The Skeletal Harvester (2 MB) comes the same way and stands where the target mini is; then the attack re-reads its size.
+  async function loadHarvester() {
+    const t0 = performance.now(), mini = attack.target;
+    const r = await loadAdversary({ mini, url: ADVERSARY.dir + ADVERSARY.file, node: ADVERSARY.node, scale: PIECES.scale, lite, compile });
+    attack.retarget();
+    world.lamp.shadow.needsUpdate = true;
+    window.__harvesterReady = true;
+    console.info(`[table] ${mini.def.name}: ${r.ok ? 'loaded' : 'placeholder'}, Difficulty ${mini.def.difficulty}, ${Math.round(performance.now() - t0)} ms`);
+  }
   async function loadPieces() {
     const t0 = performance.now();
     const r = await pieces.load();

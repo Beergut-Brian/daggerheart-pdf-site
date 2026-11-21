@@ -6,7 +6,7 @@
  * Fallback Difficulty, used only when the target has none. The real number is
  * the `difficulty` on the monster's MINIS entry (js/minis.js).
  */
-export const HIT_TARGET = 12;
+export const HIT_TARGET = 18;
 
 export const DIE_SIDES = [4, 6, 8, 10, 12, 20];
 export const CAPS = { perTerm: 10, total: 20, terms: 10, mod: 99 };
@@ -17,7 +17,7 @@ export const HELP_LINES = [
   '/roll duality (or /r, /roll 2d12): Hope and Fear d12s',
   '/roll 2d12+3: Duality with a modifier',
   '/roll d20, /roll 3d6+2, /roll 1d8+1d6: any d4 to d20',
-  `/attack +2: a Duality attack on the golem (${HIT_TARGET}+ hits)`,
+  `/attack +2: a Duality attack on the Skeletal Harvester (${HIT_TARGET}+ hits)`,
 ];
 
 /**
@@ -26,7 +26,7 @@ export const HELP_LINES = [
  */
 export function helpLines({ character = null, difficulty = HIT_TARGET } = {}) {
   const lines = HELP_LINES.slice(0, 3);
-  lines.push(`/attack +2: a Duality attack on the golem (Difficulty ${difficulty})`);
+  lines.push(`/attack +2: a Duality attack on the Skeletal Harvester (Difficulty ${difficulty})`);
   if (character) {
     lines.push(`${character.name}'s attacks (or click the card):`);
     for (const a of character.attacks) lines.push(`/attack ${a.name.toLowerCase()}: ${rangeText(a)}, ${traitText(a)}, ${damageText(a)}`);

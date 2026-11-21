@@ -67,10 +67,10 @@ describe("rollAttack", () => {
 
 describe("Difficulty", () => {
   it("is the target's, with HIT_TARGET only as the fallback", () => {
-    expect(HIT_TARGET).toBe(12);
+    expect(HIT_TARGET).toBe(18);
     expect(formatResult(dualityFrom(7, 6, 0), { attack: true, difficulty: 14 })).toMatchObject({ hit: false });
     expect(formatResult(dualityFrom(8, 6, 0), { attack: true, difficulty: 14 })).toMatchObject({ hit: true });
-    expect(formatResult(dualityFrom(7, 6, 0), { attack: true }).detail).toContain("(12+)");
+    expect(formatResult(dualityFrom(7, 6, 0), { attack: true }).detail).toContain("(18+)");
   });
 });
 
@@ -100,9 +100,9 @@ describe("/attack <name>", () => {
   });
 
   it("/help lists the character's attacks", () => {
-    const lines = helpLines({ character: { id: "g", name: "Brannoc Vale", class: "Guardian", mini: "guardian", attacks }, difficulty: 12 });
+    const lines = helpLines({ character: { id: "g", name: "Brannoc Vale", class: "Guardian", mini: "guardian", attacks }, difficulty: 18 });
     expect(lines).toContain("/attack longsword: Melee, Agility +2, d8+2 phy");
     expect(lines).toContain("/attack ember ward: Close, Presence +0, d6+1 mag");
-    expect(lines.some((l) => l.includes("Difficulty 12"))).toBe(true);
+    expect(lines.some((l) => l.includes("Difficulty 18"))).toBe(true);
   });
 });

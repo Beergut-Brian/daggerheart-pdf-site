@@ -38,9 +38,9 @@ The bar at the bottom takes chat-style commands (press `/` anywhere to jump to i
   (gold) and one Fear d12 (violet). The higher die names the roll; doubles are a critical success.
 - `/roll d20`, `/roll 3d6+2`, `/roll 1d8+1d6`: any d4, d6, d8, d10, d12 or d20 with modifiers
   (at most 10 of one kind and 20 dice in all). Plain `d20` without the slash rolls too.
-- `/attack +2` or `/roll 2d12+2 attack`: a Duality roll; then one of the party attacks the golem.
-  A total at or above the golem's Difficulty hits (`difficulty` on its entry in `js/minis.js`,
-  stand-in 12; `HIT_TARGET` in `js/dice-logic.js` is only the fallback); matching dice always hit.
+- `/attack +2` or `/roll 2d12+2 attack`: a Duality roll; then one of the party attacks the Skeletal Harvester.
+  A total at or above its Difficulty (18) hits (read from the glb's glTF extras; `difficulty` on its entry in `js/minis.js`
+  and `HIT_TARGET` in `js/dice-logic.js` are the fallbacks); matching dice always hit.
 - `/attack longsword` (any case, any prefix such as `/attack long` or `/attack bash`): the character's
   attack, the same as clicking its row on the card. `/help` lists the attacks.
 - `/help` lists them. Up and Down walk back through what you typed; Escape leaves the bar.
@@ -71,6 +71,11 @@ The dice on the table are the ones that get rolled; no new dice appear for a Dua
 - Tunables at the top of `js/dice3d.js`: `LIFT_MS` and `LIFT` (pick-up), `THROW_MS`,
   `STAGGER_MS`/`JITTER_MS`, `HOLD_MS` (result showing before the tray's dice go back),
   `RETURN_MS`/`RETURN_ARC`, `TAG_IN_MS`/`TAG_OUT_MS`.
+- **The adversary:** the Skeletal Harvester (Coach's `models/adv/skeletal_harvester.glb`, used as it is: metres, faces +z, base centre at the
+  origin, 2.74 m, 3 ft round base) is the one target mini in `js/minis.js` (bottom right of the map, turned to the party's centre). It is
+  fetched at the same idle moment as the party at `PIECES.scale` (about 1.10 units tall), by `loadAdversary` in `js/pieces.js`, which also
+  reads its Difficulty from the node's extras and measures its height and footprint so `attack.retarget()` sizes the effects to it.
+  A failed load is a plain disc and one `[table] ... could not load` line. Twisted One crit rules (19-20, extra die, Hope/Fear) are not implemented.
 - Proofs: `__table.dice()` (last roll: rolled value vs up face), `__table.diceAt()` (every die:
   kind, out or in the tray, phase, position); `node scripts/table-proof.mjs pickup <url>`.
 
@@ -82,10 +87,10 @@ does), `js/dice3d.js` (the table's dice and their rolls), `js/dice-table.js` (wh
 
 The note shows the first character in `PARTY` (`js/party.js`) until another piece is clicked. Each row is one attack;
 click its dice icon (or Tab to it and press Enter/Space) to roll: 2d12 Duality + the trait
-modifier against the monster's Difficulty, the character's mini attacks the golem, and on a hit
+modifier against the monster's Difficulty, the character's mini attacks the Harvester, and on a hit
 the damage dice follow (dice = Proficiency; a Critical Success adds the dice's maximum). On
 phones, tap the card or the **Attacks** chip above the command bar for a flat sheet.
-The golem's `difficulty` is a STAND-IN; the party's own numbers are "to come" (see below).
+The Harvester's Difficulty 18 is Coach's number from the GM card; the party's own numbers are "to come" (see below).
 
 The party is generated into `js/party.js` (see below); a character is `{ id, name, class, mini, proficiency, attacks }`,
 where `mini` is the id of the piece that attacks. To add an attack, add
@@ -99,7 +104,7 @@ buttons and the raycast hit-test; `js/card.js` handles hover, focus and the phon
 ## The party's pieces (models/pc, js/party.js)
 
 Eight glb pieces (Coach's, metres, true heights) stand on the battle map where the party stood, on the road, three ranks turned a little
-toward the golem (`PIECES` in `js/config.js`: scale in table units per metre, `places` id -> x, z, yaw). They replace the old procedural
+toward the Skeletal Harvester (`PIECES` in `js/config.js`: scale in table units per metre, `places` id -> x, z, yaw). They replace the old procedural
 stand-in heroes, which are gone. They are fetched once the
 opening is over and the table is idle (9.4 MB, shaders compiled before they join the scene), so first paint is unchanged.
 `#pieces=off` skips them. A file that fails to load, or lacks its node, is a plain disc and one `[table] piece ...` console line.
@@ -112,8 +117,8 @@ opening is over and the table is idle (9.4 MB, shaders compiled before they join
   and the depth of field focuses on the piece. **Click / second tap:** `card.setCharacter(char)` switches the attack card
   (and, on touch, opens the sheet). Table phase only. A piece and a book under the pointer: the nearer one wins.
 - **Attacks:** a party attack plays through `js/attack.js` with the piece as the attacker; a piece's charge is a little
-  a little longer when it is far from the golem. Magic adds a ring from the caster's feet and a bigger orb.
-  A plain `/attack +2` takes the party in turn. The golem is the target; until the pieces have loaded a card attack still rolls and logs, with nothing to animate.
+  a little longer when it is far from the Harvester. Magic adds a ring from the caster's feet and a bigger orb.
+  A plain `/attack +2` takes the party in turn. The Harvester is the target; until the pieces have loaded a card attack still rolls and logs, with nothing to animate.
 - **Not shown:** each attack's `description` and `episodes` are in party.js but the card has no place for them.
 - Proofs: `node scripts/table-pieces-proof.mjs ../review/table-pieces stills|videos`; e2e `tests/e2e/table-pieces.spec.ts`.
 - `vendor/three.bundle.js` was rebuilt from three 0.187.0 with `GLTFLoader` added to the same exports (esbuild, minified; +46 KB).

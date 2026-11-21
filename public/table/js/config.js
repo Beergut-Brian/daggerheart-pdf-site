@@ -82,18 +82,24 @@ export function pickTier() {
 }
 
 
+// The adversary on the map: Coach's Skeletal Harvester (Tier 2 Solo, Twisted One), the target of every attack. The file is used as it
+// is (metres, Y up, faces +z, base centre at the origin, 2.74 m tall, 3 ft round base) at the same `PIECES.scale` as the party, so it
+// is about 1.10 units tall next to Zeke's 0.86. Where it stands and which way it faces are on its entry in js/minis.js; its Difficulty
+// (18) is read from the node's glTF extras, with `difficulty` there as the fallback.
+export const ADVERSARY = { dir: 'models/adv/', file: 'skeletal_harvester.glb', node: 'SkeletalHarvester' };
+
 // The eight player-character pieces (models/pc/*.glb, one per entry in party.js). They stand on the battle map as a party
-// advancing on the golem, which is at the bottom right of the map (`MINIS`, js/minis.js) and turned to face them. Every piece faces
-// the golem (`turn`: a few degrees of its own, radians). Front = nearest the golem, by class:
+// advancing on the Skeletal Harvester, which is at the bottom right of the map (`MINIS`, js/minis.js) and turned to face them. Every piece faces
+// the Harvester (`turn`: a few degrees of its own, radians). Front = nearest the Harvester, by class:
 //   front   Zeke (Guardian) at the point, Saveas (Warrior) and Mellanee (Brawler) either side
 //   middle  Drex (Rogue) out on the near flank, Kerropi (Druid)
 //   back    Naaz (Wizard), Thessaly (Sorcerer), Prim (Bard), each behind a gap in the line ahead
-// `places` are footprint centres, x and z in table units: a frame anchored at (0.7, -0.9) with its front pointing at the golem (u ahead, v across):
+// `places` are footprint centres, x and z in table units: a frame anchored at (0.7, -0.9) with its front pointing at the Harvester (u ahead, v across):
 // front line Zeke (1, 0) at the point, Saveas (.65, -1.05) and Mellanee (.65, 1.05) either side; middle Kerropi (-.15, -.45) and Drex (-.15, 1.45)
 // out on the near flank; back row Naaz (-1, -1.15), Thessaly (-1.05, 0), Prim (-1, 1.1), tight behind. Unit-tested for overlap and the order front to back.
 // The files are in metres, true heights (Zeke 2.16, Drex 0.95 with the foam finger). `scale` is table units per metre, the same
 // for all eight so the heights stay true to each other. The old stand-in heroes stood 0.55 tall for a person of about 1.8 m
-// (0.31 a metre); 0.4 makes the pieces 1.2 to 1.6x that (Zeke 0.86, Naaz and Mellanee 0.74, Drex 0.44; the golem is 1.0).
+// (0.31 a metre); 0.4 makes the pieces 1.2 to 1.6x that (Zeke 0.86, Naaz and Mellanee 0.74, Drex 0.44; the Harvester is 1.10).
 export const PIECES = {
   dir: 'models/pc/',
   scale: 0.4,

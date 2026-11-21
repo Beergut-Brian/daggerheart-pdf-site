@@ -6,17 +6,63 @@ import { yawToward } from './pieces-logic.js';
 
 const FALLBACK_R = 0.2;   // placeholder disc radius, table units
 
+function placeholderDisc() {
+  const g = new THREE.Group();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(FALLBACK_R, FALLBACK_R, 0.05, 24).translate(0, 0.025, 0), new THREE.MeshStandardMaterial({ color: 0x6b5a46, roughness: 0.8 }));
+  m.castShadow = m.receiveShadow = true; g.add(m); g.userData.placeholder = true;
+  return g;
+}
+
+// The adversary on the map (the Skeletal Harvester): load its glb into the target mini made by world.js and measure it.
+// `mini` is { def, obj, pivot, home }; the file is in metres, base centre at the origin, facing +z, so one scale (`scale`, table units
+// per metre, the same as the party) gives its true size. Its Difficulty comes from the node's glTF extras when there is one;
+// otherwise `def.difficulty` (the config's value) stays. A file that does not load becomes a plain disc and one log line.
+// Returns { ok } and fills in def.height, def.reach, def.base.r so the attack's effects fit what actually stands there.
+export async function loadAdversary({ mini, url, node, scale, lite = false, loader = null, compile = null, log = console.warn }) {
+  const loadGltf = loader || ((u) => new (THREE.GLTFLoader)().loadAsync(u));
+  let obj = null, extras = null;
+  try {
+    const gltf = await loadGltf(url);
+    obj = gltf.scene.getObjectByName(node);
+    if (!obj) log(`[table] ${mini.def.id}: no node "${node}" in the file, using a placeholder disc`);
+    else extras = obj.userData || null;
+  } catch (e) {
+    log(`[table] ${mini.def.id}: could not load (${e && e.message ? e.message : e}), using a placeholder disc`);
+  }
+  const ok = !!obj;
+  if (!obj) obj = placeholderDisc();
+  obj.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = true;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) for (const k of ['map', 'emissiveMap']) if (m[k]) m[k].anisotropy = lite ? 2 : 4;
+  });
+  mini.pivot.remove(mini.obj); mini.obj = obj; mini.pivot.add(obj);
+  mini.pivot.scale.setScalar(ok ? scale : 1);
+  mini.pivot.visible = true;
+  // measure unturned, so the half-width is the model's own and not the turn's
+  const yaw = mini.pivot.rotation.y; mini.pivot.rotation.y = 0; mini.pivot.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(mini.pivot);
+  mini.pivot.rotation.y = yaw; mini.pivot.updateMatrixWorld(true);
+  const def = mini.def;
+  def.height = box.max.y - mini.pivot.position.y;
+  def.reach = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
+  if (ok) {
+    // the 3 ft round base (0.457 m radius, from the spec) sets the radius the blows land on; the claws only widen `reach`
+    def.base = { ...def.base, r: Math.min(def.reach, 0.457 * scale) };
+    if (extras && Number.isFinite(+extras.difficulty)) def.difficulty = +extras.difficulty;
+    def.stats = extras ? { tier: extras.tier, type: extras.type, hp: extras.hp, stress: extras.stress, attack: extras.attack } : null;
+  } else def.base = { ...def.base, r: FALLBACK_R };
+  if (compile) { try { await compile(mini.pivot); } catch (e) { /* the first draw compiles it instead */ } }
+  return { ok };
+}
+
 export function createPieces({ parent, party, cfg, scale, face, lite = false, y = 0.03, loader = null, compile = null, log = console.warn }) {
   const pieces = [];
   const ray = new THREE.Raycaster();
   const loadGltf = loader || ((url) => new (THREE.GLTFLoader)().loadAsync(url));
 
-  function disc(def) {
-    const g = new THREE.Group();
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(FALLBACK_R, FALLBACK_R, 0.05, 24).translate(0, 0.025, 0), new THREE.MeshStandardMaterial({ color: 0x6b5a46, roughness: 0.8 }));
-    m.castShadow = m.receiveShadow = true; g.add(m); g.userData.placeholder = true;
-    return g;
-  }
+  const disc = () => placeholderDisc();
 
   async function one(def) {
     let obj = null;
@@ -51,7 +97,7 @@ export function createPieces({ parent, party, cfg, scale, face, lite = false, y 
     const got = await Promise.all(party.map(one));
     for (const p of got) {
       // stand the footprint's centre on its place (the origin is the base centre, which is not always the middle of the piece:
-      // Zeke's base carries Brutus), turned to face the golem (`face`: its x, z) with a few degrees of its own
+      // Zeke's base carries Brutus), turned to face the Harvester (`face`: its x, z) with a few degrees of its own
       const at = cfg.places[p.def.id] || { x: 0, z: 0, turn: 0 }, yaw = yawToward(at, face) + (at.turn || 0);
       p.yaw = yaw; p.pivot.rotation.y = yaw;
       p.pivot.updateMatrixWorld(true);
