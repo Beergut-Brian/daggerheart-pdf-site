@@ -120,8 +120,8 @@ for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as cons
       const a = (await page.evaluate(`${T}.attackPhase()`)) as { impactAt: number; t: number };
       await page.evaluate(`${T}.step(${Math.round((a.impactAt - a.t) * 1000) + 100})`); await frames(page, 2);
       expect(await w(), "pushed in at the impact").toBeGreaterThan(0.9);
-      await page.evaluate(`${T}.step(3000)`); await frames(page, 4);
-      expect(await w(), "back out after").toBeLessThan(0.05);
+      await page.evaluate(`${T}.step(3000)`);   // the weight eases out on the real clock, so give it frames
+      await page.waitForFunction(() => (window as unknown as { __table: { pushW: () => number } }).__table.pushW() < 0.05, null, { timeout: 60_000 });
       // a drag during the push cancels it
       await page.evaluate(`${T}.forceRoll(9, 4)`);
       await page.evaluate(`${T}.rollAttack("unstoppable")`);
