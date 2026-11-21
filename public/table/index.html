@@ -88,7 +88,7 @@ a { color: inherit; }
 /* ------------------------------------------------------------ the stage */
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; cursor: grab; -webkit-tap-highlight-color: transparent; }
 #gl.is-drag { cursor: grabbing; }
-#gl.is-hot, #gl.is-card { cursor: pointer; }
+#gl.is-hot, #gl.is-card, #gl.is-piece { cursor: pointer; }
 body.is-open #gl { cursor: default; }
 body.is-open #gl.is-hot { cursor: pointer; }
 
@@ -136,6 +136,17 @@ body.is-open #cmd, body.is-leaving #cmd { visibility: hidden; }
 #plate .meta { margin-top: 8px; color: rgba(239, 232, 214, .5); font-size: 12px; font-variant-numeric: tabular-nums; }
 #plate .pill { display: inline-block; margin-top: 11px; padding: 6px 15px; border-radius: 999px; border: 1px solid rgba(231, 199, 124, .6);
   font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+
+/* the small card over a player-character piece: name, class, intro (placed by js/pieces-logic.js placeHover) */
+#pc-card { position: fixed; z-index: 4; left: 0; top: 0; width: max-content; max-width: min(260px, 76vw); pointer-events: none; opacity: 0;
+  transition: opacity .18s ease; will-change: transform, opacity; }
+#pc-card.on { opacity: 1; }
+#pc-card .box { padding: 11px 15px 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+#pc-card h2 { margin: 0; font: 700 16px/1.15 var(--serif); letter-spacing: .02em; color: var(--crit-ink); }
+#pc-card .cls { margin: 2px 0 6px; font: 700 11px/1.2 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+#pc-card .intro { margin: 0; color: var(--dim); font-size: 12.5px; line-height: 1.4; text-wrap: pretty; }
+#pc-card .tap { margin: 8px 0 0; color: rgba(239, 232, 214, .5); font-size: 11.5px; }
 
 /* shown once a book lies open, wherever the page cannot navigate by itself */
 #enter { position: fixed; z-index: 5; left: 50%; bottom: max(38px, env(safe-area-inset-bottom)); transform: translate(-50%, 14px); display: flex; flex-direction: column; align-items: center; gap: 12px;
@@ -321,7 +332,7 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 #surf-debug figcaption.is-off { color: var(--debug-box); }
 
 @media (prefers-reduced-motion: reduce) {
-  .hud, #load, body.is-ready #load, #plate, #enter, #cmd { transition: none; }
+  .hud, #load, body.is-ready #load, #plate, #pc-card, #enter, #cmd { transition: none; }
   .cover.is-hot .cv-sheen, .gm .gm-title span, #load p { animation: none; }
   .spread-right .sp-name .w span, .spread-right :is(.sp-kicker, .sp-rule, .sp-sub, .sp-meta, .sp-go) { opacity: 1; transform: none; filter: none; transition: none; }
 }
@@ -361,6 +372,8 @@ body.has-sheet #attacks-chip, body.has-sheet #hint { opacity: 0; pointer-events:
 </section>
 
 <div id="plate" aria-hidden="true"><div class="box"><h2></h2><p class="sub"></p><p class="meta"></p><span class="pill">Open</span></div></div>
+
+<div id="pc-card" aria-hidden="true"><div class="box"><h2></h2><p class="cls"></p><p class="intro"></p><p class="tap" hidden>Tap again for attacks</p></div></div>
 
 <div id="enter" aria-live="polite">
   <a href="#" target="_blank" rel="noopener"><span></span><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l5-5M4.5 3.5h4v4"/></svg></a>

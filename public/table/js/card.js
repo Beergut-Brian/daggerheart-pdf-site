@@ -7,8 +7,10 @@
 //   Pointer (both): main.js raycasts the note mesh and hands us the UV.
 import { NOTE, cardRowAt, attackRowParts } from './surfaces.js';
 
-export function createCard({ surfaces, character, state, onRoll, touchy = false }) {
-  const s = surfaces.get('note'), el = s.el, n = character.attacks.length;
+// `holder.character` is the character on the card (defineSurfaces reads it too); setCharacter() swaps it.
+export function createCard({ surfaces, holder, state, onRoll, touchy = false }) {
+  const s = surfaces.get('note'), el = s.el;
+  let character = holder.character, n = character.attacks.length;
   const rows = () => [...el.querySelectorAll('button[data-attack]')];
   let by = null;
 
@@ -37,10 +39,12 @@ export function createCard({ surfaces, character, state, onRoll, touchy = false 
   // ---- the phone sheet: plain DOM over the scene
   const sheet = document.querySelector('#sheet'), chip = document.querySelector('#attacks-chip');
   let opener = null;
-  if (sheet) {
+  function fillSheet() {
+    if (!sheet) return;
     sheet.querySelector('.sh-name').textContent = character.name;
     sheet.querySelector('.sh-class').textContent = character.class;
     const list = sheet.querySelector('.sh-rows');
+    list.textContent = '';
     for (const a of character.attacks) {
       const li = document.createElement('li'), b = document.createElement('button');
       b.type = 'button'; b.className = 'sh-row'; b.dataset.attack = a.id;
@@ -49,6 +53,9 @@ export function createCard({ surfaces, character, state, onRoll, touchy = false 
       b.addEventListener('click', () => { closeSheet(false); onRoll(a.id); });
       li.append(b); list.append(li);
     }
+  }
+  fillSheet();
+  if (sheet) {
     sheet.querySelector('.sh-close').addEventListener('click', () => closeSheet());
     sheet.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { e.stopPropagation(); closeSheet(); return; }
@@ -77,8 +84,21 @@ export function createCard({ surfaces, character, state, onRoll, touchy = false 
     opener = null;
   }
 
+  // The card becomes another character's: rows, name, class, the phone sheet. Same character = nothing to do.
+  function setCharacter(next) {
+    if (!next || next === character) return false;
+    character = holder.character = next; n = next.attacks.length;
+    state.hot = -1; by = null;
+    el.setAttribute('aria-label', `${next.name}'s attacks`);
+    if (surfaces.mode === 'html') surfaces.repaint('note');       // rebuilds the element and asks for a new snapshot
+    else { el.textContent = ''; surfaces.get('note').plain(el); surfaces.repaint('note'); }
+    wire(el);
+    fillSheet();
+    return true;
+  }
+
   return {
-    rowAt,
+    rowAt, setCharacter, get character() { return character; },
     // pointer over the canvas: uv on the note (or null). Returns true when a row is under it.
     hover(uv) { const i = rowAt(uv); if (i >= 0 || by === 'mouse') setHot(i, 'mouse'); return i >= 0; },
     leave() { if (by === 'mouse') setHot(-1); },

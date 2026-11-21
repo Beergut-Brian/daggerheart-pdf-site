@@ -96,8 +96,6 @@ const tor = (r, t, a = Math.PI * 2) => new THREE.TorusGeometry(r, t, 6, 20, a);
 
 // ---------------------------------------------------------------- miniatures
 
-const SKIN = [0xe2b48c, 0x8d5a3a, 0xc98f62, 0x6b4a36, 0xf0c9a0];
-
 function miniBase(b, r, top) {
   b.part(cyl(r * 0.96, r * 1.05, 0.05, 22), { p: [0, 0.025, 0], c: 0x0b0b0f });
   b.part(cyl(r * 0.9, r * 0.9, 0.014, 22), { p: [0, 0.055, 0], c: top, m: 'stone' });
@@ -105,40 +103,6 @@ function miniBase(b, r, top) {
     const a = b.r() * 6.28, d = r * (0.45 + b.r() * 0.35);
     b.part(ico(0.016 + b.r() * 0.018), { p: [Math.cos(a) * d, 0.066, Math.sin(a) * d], c: 0x8a8a84, m: 'stone', jit: 0.004, v: 0.2 });
   }
-}
-
-// A stylised humanoid, about 0.5 tall, facing +z. Hooks let each class add
-// its own kit: o.head(b), o.right(b) and o.left(b) run in the head / hand frames.
-function humanoid(b, o) {
-  const pants = o.pants ?? 0x3a2f28, boots = o.boots ?? 0x1e1712, tunic = o.tunic ?? 0x6b2a2a;
-  const skin = o.skin ?? SKIN[0], trim = o.trim ?? 0xc9a45a, bodyMat = o.armor ? 'metal' : 'paint';
-  if (o.robe) {
-    b.part(cyl(0.062, 0.125, 0.25, 12), { p: [0, 0.185, 0], c: o.robe });
-    b.part(cyl(0.126, 0.13, 0.02, 12), { p: [0, 0.07, 0], c: trim });
-  } else {
-    for (const sx of [-1, 1]) {
-      b.part(cyl(0.032, 0.036, 0.15, 8), { p: [sx * 0.045, 0.14, 0], r: [0, 0, sx * -0.06], c: pants, m: o.armor ? 'metal' : 'paint' });
-      b.part(sph(0.04, 8, 6), { p: [sx * 0.05, 0.078, 0.014], s: [1, 0.62, 1.35], c: boots });
-    }
-  }
-  b.part(cyl(0.074, 0.06, 0.16, 12), { p: [0, 0.3, 0], c: o.armor ? o.armor : tunic, m: bodyMat });
-  b.part(cyl(0.064, 0.066, 0.028, 12), { p: [0, 0.222, 0], c: o.belt ?? 0x2a1c12 });
-  b.part(sph(0.016, 6, 5), { p: [0, 0.222, 0.064], c: trim, m: 'metal' });
-  for (const sx of [-1, 1]) {
-    b.part(sph(o.armor ? 0.046 : 0.038, 10, 8), { p: [sx * 0.09, 0.355, 0], c: o.armor ? o.armor : tunic, m: bodyMat });
-    const pose = sx < 0 ? (o.rArm ?? [0.2, 0, -0.25]) : (o.lArm ?? [0.2, 0, 0.25]);
-    b.at({ p: [sx * 0.095, 0.35, 0], r: pose }, () => {
-      b.part(cap(0.024, 0.1), { p: [0, -0.075, 0], c: o.sleeve ?? tunic, m: o.armor ? 'metal' : 'paint' });
-      b.part(sph(0.027, 8, 6), { p: [0, -0.155, 0], c: skin });
-      b.at({ p: [0, -0.155, 0] }, () => { const f = sx < 0 ? o.right : o.left; if (f) f(b); });
-    });
-  }
-  if (o.cloak) {
-    b.part(cyl(0.075, 0.15, 0.31, 10, true, Math.PI * 0.5, Math.PI), { p: [0, 0.225, -0.012], c: o.cloak });
-  }
-  b.part(cyl(0.028, 0.03, 0.03, 8), { p: [0, 0.39, 0], c: skin });
-  b.part(sph(0.06, 14, 12), { p: [0, 0.445, 0], c: skin });
-  b.at({ p: [0, 0.445, 0] }, () => { if (o.head) o.head(b); });
 }
 
 const sword = (len = 0.24, blade = 0xdfe6f2) => (b) => {
@@ -153,71 +117,6 @@ const shield = (c, rim = 0xc9a45a) => (b) => {
   b.part(cyl(0.09, 0.09, 0.01, 14), { p: [0.016, 0, 0.03], r: [0, 0, Math.PI / 2], c: rim, m: 'metal' });
   b.part(sph(0.024, 8, 6), { p: [0.032, 0, 0.03], c: rim, m: 'metal' });
 };
-const staff = (gem = 0x7fe3ff) => (b) => {
-  b.part(cyl(0.011, 0.014, 0.56, 6), { p: [0, 0.1, 0], c: 0x4a3018 });
-  b.part(tor(0.03, 0.009, Math.PI * 1.5), { p: [0, 0.4, 0], r: [0, 0, -Math.PI * 0.25], c: 0x4a3018 });
-  b.part(oct(0.03), { p: [0, 0.4, 0], s: [1, 1.5, 1], c: gem, m: 'glow' });
-};
-const dagger = () => (b) => {
-  b.part(cyl(0.009, 0.009, 0.04, 6), { r: [Math.PI / 2, 0, 0], c: 0x1a1410 });
-  b.part(box(0.022, 0.006, 0.11), { p: [0, 0, 0.075], c: 0xdfe6f2, m: 'metal' });
-};
-const bow = () => (b) => {
-  b.part(tor(0.15, 0.008, Math.PI * 0.9), { p: [0, 0, 0.0], r: [0, Math.PI / 2, Math.PI * 0.55], c: 0x5a3a1c });
-  b.part(cyl(0.002, 0.002, 0.29, 4), { p: [0, 0, -0.022], c: 0xe9e2cf });
-};
-
-const HEROES = {
-  guardian: (b) => humanoid(b, {
-    armor: 0xb9c2d4, skin: SKIN[2], cloak: 0x8f1d2c, rArm: [-1.25, 0, -0.35], lArm: [-0.5, 0, 0.5],
-    right: sword(0.26), left: shield(0x8f1d2c),
-    head: (b) => {
-      b.part(sph(0.066, 12, 8), { p: [0, 0.012, -0.004], s: [1, 0.98, 1.04], c: 0xb9c2d4, m: 'metal' });
-      b.part(box(0.07, 0.022, 0.03), { p: [0, -0.008, 0.052], c: 0x10121a });
-      b.part(cone(0.022, 0.12, 6), { p: [0, 0.1, -0.03], r: [-0.5, 0, 0], c: 0xc8243a });
-    },
-  }),
-  wizard: (b) => humanoid(b, {
-    robe: 0x243f9a, tunic: 0x243f9a, skin: SKIN[4], trim: 0xe7c77c, rArm: [-0.9, 0, -0.5], lArm: [-0.35, 0, 0.6],
-    right: staff(0x7fe3ff),
-    left: (b) => b.part(sph(0.03, 8, 6), { p: [0, -0.02, 0.03], c: 0xffd27a, m: 'glow' }),
-    head: (b) => {
-      b.part(cyl(0.11, 0.115, 0.01, 14), { p: [0, 0.042, 0], r: [0.12, 0, 0], c: 0x1b2e78 });
-      b.part(cone(0.066, 0.2, 12), { p: [0.008, 0.14, -0.012], r: [-0.12, 0, -0.1], c: 0x1b2e78 });
-      b.part(cyl(0.067, 0.067, 0.014, 12), { p: [0, 0.052, 0], c: 0xe7c77c });
-      b.part(cone(0.04, 0.11, 8), { p: [0, -0.07, 0.04], r: [Math.PI + 0.2, 0, 0], c: 0xe8e4dc });
-    },
-  }),
-  ranger: (b) => humanoid(b, {
-    tunic: 0x3f5a2a, pants: 0x4a3a26, skin: SKIN[1], cloak: 0x2c4a2a, rArm: [-1.4, 0, 0.1], lArm: [-1.45, 0, 0.9],
-    left: bow(),
-    head: (b) => {
-      b.part(sph(0.068, 12, 8), { p: [0, 0.008, -0.012], s: [1, 1.02, 1.05], c: 0x2c4a2a });
-      b.part(cone(0.04, 0.09, 8), { p: [0, 0.05, -0.06], r: [-1.2, 0, 0], c: 0x2c4a2a });
-    },
-  }),
-  rogue: (b) => humanoid(b, {
-    tunic: 0x3a2a55, pants: 0x1c1826, boots: 0x0f0c14, skin: SKIN[3], belt: 0x6a1f2f, rArm: [-0.9, 0, -0.9], lArm: [-0.6, 0, 0.9],
-    right: dagger(), left: dagger(),
-    head: (b) => {
-      b.part(sph(0.064, 12, 8, ), { p: [0, 0.012, -0.01], c: 0x15121c });
-      b.part(box(0.1, 0.03, 0.06), { p: [0, -0.02, 0.03], c: 0x6a1f2f });
-    },
-  }),
-  seraph: (b) => humanoid(b, {
-    robe: 0xf1ead6, tunic: 0xf1ead6, skin: SKIN[0], trim: 0xe7c77c, rArm: [-2.4, 0, -0.5], lArm: [-0.3, 0, 0.7],
-    right: (b) => b.part(sph(0.034, 8, 6), { p: [0, -0.03, 0], c: 0xffe9a8, m: 'glow' }),
-    head: (b) => {
-      b.part(sph(0.064, 12, 8), { p: [0, 0.014, -0.014], c: 0xd9b565 });
-      b.part(tor(0.05, 0.007), { p: [0, 0.1, 0], r: [Math.PI / 2, 0, 0], c: 0xffe9a8, m: 'glow' });
-      for (const sx of [-1, 1]) {
-        b.part(sph(0.1, 8, 6), { p: [sx * 0.12, -0.08, -0.08], r: [0, 0, sx * -0.5], s: [0.5, 1.5, 0.14], c: 0xfbf8ee });
-        b.part(sph(0.08, 8, 6), { p: [sx * 0.19, -0.02, -0.09], r: [0, 0, sx * -0.9], s: [0.5, 1.5, 0.12], c: 0xf3ecd8 });
-      }
-    },
-  }),
-};
-
 function skeleton(b, pose = 0) {
   const bone = 0xe6dfc6, dark = 0x28221e;
   for (const sx of [-1, 1]) {
@@ -264,7 +163,6 @@ function golem(b) {
 
 // The figures, for js/minis.js. Each builds at the origin, facing +z, on its base.
 export const FIGURES = {
-  ...HEROES,
   skeleton: (b) => skeleton(b, 0),
   skeletonRaised: (b) => skeleton(b, 1),
   golem,

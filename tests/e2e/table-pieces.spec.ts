@@ -1,0 +1,164 @@
+import { expect, test, type Page } from "@playwright/test";
+
+// The party's eight pieces on /table: hover shows a card, a click switches the attack card, an attack animates.
+// Run on both surface paths (#html=off painted; live HTML-in-Canvas, which needs the feature flag) at 1440 and 390.
+const T = "window.__table";
+const LIVE_ARGS = ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-blink-features=CanvasDrawElement"];
+// the feature flag is on for the whole file; the painted path is picked with #html=off
+test.use({ launchOptions: { executablePath: process.env.CHROMIUM_PATH || "/ms-playwright/chromium-1248/chrome-linux64/chrome", args: LIVE_ARGS } });
+type Anchor = { x: number; top: number; bottom: number };
+
+async function ready(page: Page, flags: string) {
+  await page.goto(`/table#shot&post=off&dof=off&seed=1&${flags}`);
+  await page.waitForFunction(() => document.body.classList.contains("is-ready") && "__table" in window, null, { timeout: 120_000 });
+  await page.waitForFunction(() => (window as unknown as { __piecesReady?: boolean }).__piecesReady, null, { timeout: 120_000 });
+  await page.evaluate(`${T}.timeScale(0)`);
+  // the path asked for is the path running (the live one needs the browser feature, which this file turns on)
+  expect(await page.evaluate(() => document.documentElement.dataset.surfaces)).toBe(flags.includes("html=off") ? "painted" : "html");
+}
+const frames = (page: Page, n = 2) => page.evaluate((k) => new Promise<void>((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+const anchor = (page: Page, id: string) => page.evaluate(`${T}.pieceAt(${JSON.stringify(id)})`) as Promise<Anchor>;
+const mid = (a: Anchor) => ({ x: a.x, y: (a.top + a.bottom) / 2 });
+
+for (const [name, flags] of [["painted", "html=off"], ["live HTML", ""]] as const) {
+  test.describe(`table pieces, ${name} path`, () => {
+    test.setTimeout(300_000);
+
+    test("all eight pieces load and stand on the map; the old stand-in heroes are gone", async ({ page }) => {
+      await ready(page, flags);
+      const r = (await page.evaluate(`${T}.pieces().pieces.map((p) => ({ id: p.def.id, h: +p.def.height.toFixed(2), z: +p.home.z.toFixed(2), x: +p.home.x.toFixed(2), ph: p.placeholder }))`)) as { id: string; h: number; z: number; x: number; ph: boolean }[];
+      expect(r.map((p) => p.id)).toEqual(["pc_zeke", "pc_thessaly", "pc_prim", "pc_naaz", "pc_saveas", "pc_drex", "pc_mellanee", "pc_kerropi"]);
+      expect(r.every((p) => !p.ph)).toBe(true);
+      // on the battle map where the party stood, clear of the monsters' ruin: not along the far edge
+      for (const p of r) { expect(p.z).toBeGreaterThan(-3.3); expect(p.z).toBeLessThan(0.6); }
+      expect(await page.evaluate(`${T}.world.minis.map((m) => m.def.id)`)).toEqual(["skeleton-1", "skeleton-2", "skeleton-3", "golem"]);
+      expect(await page.evaluate(`${T}.attackHeroes()`)).toHaveLength(8);
+      // the golem is at the bottom right of the map and the party faces it
+      const g = (await page.evaluate(`(() => { const t = ${T}.world.minis.find((m) => m.def.id === "golem"); return { x: t.home.x, z: t.home.z }; })()`)) as { x: number; z: number };
+      expect(g.x).toBeGreaterThan(2.5); expect(g.z).toBeGreaterThan(-1.2);
+      const yaws = (await page.evaluate(`${T}.pieces().pieces.map((p) => ({ id: p.def.id, x: p.home.x, z: p.home.z, yaw: p.pivot.rotation.y }))`)) as { id: string; x: number; z: number; yaw: number }[];
+      for (const p of yaws) expect(Math.abs(p.yaw - Math.atan2(g.x - p.x, g.z - p.z)), `${p.id} faces the golem`).toBeLessThan(0.1 + 0.3);   // the origin is not the footprint centre; a few degrees of its own
+      // true heights, one scale: Zeke the tallest
+      const h = Object.fromEntries(r.map((p) => [p.id, p.h]));
+      expect(h.pc_zeke).toBeGreaterThan(h.pc_saveas); expect(h.pc_saveas).toBeGreaterThan(h.pc_naaz);
+      // Kerropi (crouched, 3.3 ft) and Drex (3.5 ft to the foam finger) are the two small ones
+      expect(r.filter((p) => p.h < 0.5).map((p) => p.id).sort()).toEqual(["pc_drex", "pc_kerropi"]);
+    });
+
+    test("hover shows the card with name, class and intro, inside the viewport; leaving clears it", async ({ page, isMobile }) => {
+      test.skip(!!isMobile, "mouse only; the phone project covers taps");
+      await ready(page, flags);
+      // every piece is reachable from the default camera, the back row included
+      for (const id of ["pc_zeke", "pc_saveas", "pc_mellanee", "pc_drex", "pc_kerropi", "pc_naaz", "pc_thessaly", "pc_prim"]) {
+        const p = mid(await anchor(page, id));
+        await page.mouse.move(p.x, p.y); await frames(page);
+        const card = page.locator("#pc-card");
+        await expect(card).toHaveClass(/on/);
+        const want = (await page.evaluate(`${T}.pieces().byId(${JSON.stringify(id)}).char`)) as { name: string; class: string; intro: string };
+        await expect(card.locator("h2")).toHaveText(want.name);
+        await expect(card.locator(".cls")).toHaveText(want.class);
+        await expect(card.locator(".intro")).toHaveText(want.intro);
+        const b = (await card.locator(".box").boundingBox())!, vp = page.viewportSize()!;
+        expect(b.x).toBeGreaterThanOrEqual(0); expect(b.y).toBeGreaterThanOrEqual(0);
+        expect(b.x + b.width).toBeLessThanOrEqual(vp.width); expect(b.y + b.height).toBeLessThanOrEqual(vp.height);
+        await page.mouse.move(20, vp.height / 2); await frames(page);
+        await expect(card).not.toHaveClass(/on/);
+      }
+    });
+
+    test("click switches the attack card to that character; its rows are that character's attacks", async ({ page, isMobile }) => {
+      test.skip(!!isMobile, "mouse only; the phone project covers taps");
+      await ready(page, flags);
+      expect(await page.evaluate(`${T}.card().character.id`)).toBe("pc_zeke");   // the first of the party until a piece is clicked
+      for (const id of ["pc_thessaly", "pc_zeke"]) {   // Zeke is the card at the start: switch away, then back
+        const p = mid(await anchor(page, id));
+        await page.mouse.move(p.x, p.y); await page.mouse.down(); await page.mouse.up(); await frames(page, 3);
+        expect(await page.evaluate(`${T}.card().character.id`)).toBe(id);
+        const want = (await page.evaluate(`${T}.pieces().byId(${JSON.stringify(id)}).char`)) as { name: string; class: string; attacks: { id: string; name: string }[] };
+        const el = page.locator("#surf-note");
+        await expect(el.locator(".ct-name")).toHaveText(want.name);
+        await expect(el.locator(".ct-class")).toHaveText(want.class);
+        await expect(el.locator("button[data-attack]")).toHaveCount(want.attacks.length);
+        expect(await el.locator("button[data-attack]").evaluateAll((bs) => bs.map((b) => (b as HTMLElement).dataset.attack))).toEqual(want.attacks.map((a) => a.id));
+        // numbers that are not written down yet say so
+        await expect(el.locator(".ct-t").first()).toHaveText("to come");
+        await expect(el.locator(".ct-d").first()).toContainText("to come");
+      }
+      // and the card's own rows still roll for the new character: "/attack" by name finds Zeke's attack
+      await page.evaluate(`${T}.forceRoll(9, 4)`);
+      await page.evaluate(`${T}.roll("/attack shield")`);
+      await page.evaluate(`${T}.step(2200)`); await frames(page, 2);
+      expect(await page.evaluate(`${T}.attackPhase()?.hero`)).toBe("pc_zeke");
+    });
+
+    test("an attack from a piece animates it: it leaves its place, and is home again after", async ({ page }) => {
+      await ready(page, flags);
+      const pos = () => page.evaluate(`(() => { const p = ${T}.pieces().byId("pc_zeke"); return { x: p.pivot.position.x, z: p.pivot.position.z, rx: p.pivot.rotation.x, home: { x: p.home.x, z: p.home.z } }; })()`) as Promise<{ x: number; z: number; rx: number; home: { x: number; z: number } }>;
+      await page.evaluate(`${T}.card().setCharacter(${T}.pieces().byId("pc_zeke").char)`);
+      await page.evaluate(`${T}.forceRoll(9, 4)`);
+      await page.evaluate(`${T}.rollAttack("shield-charge")`);          // dice first, then the charge
+      await page.evaluate(`${T}.step(2200)`); await frames(page, 2);
+      const a = (await page.evaluate(`${T}.attackPhase()`)) as { hero: string; impactAt: number; t: number } | null;
+      expect(a?.hero).toBe("pc_zeke");
+      await page.evaluate(`${T}.step(${Math.max(0, Math.round(((a?.impactAt ?? 0.6) - (a?.t ?? 0) - 0.12) * 1000))})`); await frames(page, 2);
+      const mid = await pos();
+      expect(Math.hypot(mid.x - mid.home.x, mid.z - mid.home.z), "the piece moved toward the golem").toBeGreaterThan(0.5);
+      await page.evaluate(`${T}.step(2500)`); await frames(page, 2);
+      const end = await pos();
+      expect(Math.hypot(end.x - end.home.x, end.z - end.home.z)).toBeLessThan(0.01);
+      await expect(page.locator("#log-live")).toContainText("Shield Charge", { timeout: 30_000 });
+    });
+
+    test("the camera pushes in during an attack, holds, and eases back; a drag cancels it", async ({ page, isMobile }) => {
+      test.skip(!!isMobile, "mouse drag; the push itself is the same code on the phone");
+      await ready(page, flags);
+      const w = () => page.evaluate(`${T}.pushW()`) as Promise<number>;
+      expect(await w()).toBe(0);
+      await page.evaluate(`${T}.forceRoll(9, 4)`);
+      await page.evaluate(`${T}.rollAttack("shield-charge")`);
+      await page.evaluate(`${T}.step(2200)`); await frames(page, 2);
+      const a = (await page.evaluate(`${T}.attackPhase()`)) as { impactAt: number; t: number };
+      await page.evaluate(`${T}.step(${Math.round((a.impactAt - a.t) * 1000) + 100})`); await frames(page, 2);
+      expect(await w(), "pushed in at the impact").toBeGreaterThan(0.9);
+      await page.evaluate(`${T}.step(3000)`);   // the weight eases out on the real clock, so give it frames
+      await page.waitForFunction(() => (window as unknown as { __table: { pushW: () => number } }).__table.pushW() < 0.05, null, { timeout: 60_000 });
+      // a drag during the push cancels it
+      await page.evaluate(`${T}.forceRoll(9, 4)`);
+      await page.evaluate(`${T}.rollAttack("unstoppable")`);
+      await page.evaluate(`${T}.step(2200)`); await frames(page, 2);
+      await page.evaluate(`${T}.step(300)`); await frames(page, 2);
+      const vp = page.viewportSize()!;
+      await page.mouse.move(vp.width / 2, vp.height / 2); await page.mouse.down(); await page.mouse.move(vp.width / 2 + 60, vp.height / 2 + 5, { steps: 4 }); await frames(page, 6);
+      expect(await w(), "a drag cancels the push").toBeLessThan(0.2);
+      await page.mouse.up();
+    });
+
+    test("touch: the first tap shows the card, the second switches the attack card and opens the sheet", async ({ page, isMobile }) => {
+      test.skip(!isMobile, "touch only");
+      await ready(page, flags + "&tier=lite");
+      // the golem and the party are both in the default view (the phone camera is nudged right and wider for it)
+      const inView = (await page.evaluate(`(() => { const t = ${T}, vp = innerWidth, vh = innerHeight, r = [...t.pieces().pieces.map((p) => p.pivot.position), t.world.minis.find((m) => m.def.id === "golem").pivot.position]; return r.map((v) => { const q = v.clone().project(t.camera); return { x: (q.x * 0.5 + 0.5) * vp, y: (-q.y * 0.5 + 0.5) * vh }; }); })()`)) as { x: number; y: number }[];
+      for (const q of inView) { expect(q.x).toBeGreaterThan(20); expect(q.x).toBeLessThan(370); expect(q.y).toBeGreaterThan(60); expect(q.y).toBeLessThan(780); }
+      // a first tap on any of the eight shows its card
+      for (const id of ["pc_zeke", "pc_saveas", "pc_mellanee", "pc_drex", "pc_kerropi", "pc_naaz", "pc_thessaly"]) {
+        const q = mid(await anchor(page, id));
+        await page.touchscreen.tap(q.x, q.y); await frames(page);
+        const want = (await page.evaluate(`${T}.pieces().byId(${JSON.stringify(id)}).char.name`)) as string;
+        await expect(page.locator("#pc-card h2")).toHaveText(want);
+      }
+      await page.touchscreen.tap(5, 700); await frames(page);   // empty wood: clears
+      const p = mid(await anchor(page, "pc_prim"));
+      await page.touchscreen.tap(p.x, p.y); await frames(page);
+      await expect(page.locator("#pc-card")).toHaveClass(/on/);
+      await expect(page.locator("#pc-card h2")).toHaveText("Prim");
+      expect(await page.evaluate(`${T}.card().character.id`)).toBe("pc_zeke");
+      const b = (await page.locator("#pc-card .box").boundingBox())!, vp = page.viewportSize()!;
+      expect(b.x).toBeGreaterThanOrEqual(0); expect(b.x + b.width).toBeLessThanOrEqual(vp.width);
+      await page.touchscreen.tap(p.x, p.y); await frames(page);
+      expect(await page.evaluate(`${T}.card().character.id`)).toBe("pc_prim");
+      await expect(page.locator("#sheet")).toBeVisible();
+      await expect(page.locator("#sheet .sh-name")).toHaveText("Prim");
+      await expect(page.locator("#sheet .sh-row")).toHaveCount(3);
+    });
+  });
+}
